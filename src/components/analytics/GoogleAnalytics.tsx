@@ -2,7 +2,7 @@
 
 import Script from "next/script";
 
-const GA_TRACKING_ID = "G-EJ5VG14SEC";
+const GA_TRACKING_ID = "G-MTPSDN78B0";
 
 export const GoogleAnalytics = () => {
   return (

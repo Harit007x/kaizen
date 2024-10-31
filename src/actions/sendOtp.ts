@@ -1,5 +1,6 @@
+import MailTemplate from "@/components/emailTemplates/MailTemplate";
+import { sendMail } from "@/lib/resend";
 import otpGenerator from "otp-generator";
-import nodemailer from "nodemailer";
 
 export async function generateAndSendOtp(email: string) {
   const otp = otpGenerator.generate(6, {
@@ -8,24 +9,17 @@ export async function generateAndSendOtp(email: string) {
     specialChars: false,
   });
 
-  const mailOptions = {
-    from: process.env.SMTP_USER,
-    to: email,
-    subject: "Email Verification",
-    text: `Your OTP is ${otp}`,
-  };
-
-  const transporter = nodemailer.createTransport({
-    host: process.env.SMTP_HOST,
-    port: Number(process.env.SMTP_PORT),
-    auth: {
-      user: process.env.SMTP_USER,
-      pass: process.env.SMTP_PASS,
-    },
-  });
-
   try {
-    await transporter.sendMail(mailOptions);
+    const { data, error } = await sendMail(
+      email,
+      "Email Verification",
+      MailTemplate({ otp: otp })
+    );
+
+    if (error) {
+      return null;
+    }
+
     return otp;
   } catch (error) {
     console.error("Error sending email:", error);

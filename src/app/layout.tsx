@@ -3,6 +3,7 @@ import { siteConfig } from "@/config/siteConfig";
 import { Manrope } from "next/font/google";
 import "./globals.css";
 import Providers from "./Providers";
+import { Toaster } from "@/components/ui/sonner";
 
 // Setup Font
 const manrope = Manrope({ subsets: ["latin"] });
@@ -19,7 +20,10 @@ export default function RootLayout({
     <html lang="en">
       <body className={`${manrope.className}`}>
         <GoogleAnalytics />
-        <Providers>{children}</Providers>
+        <Providers>
+          {children}
+          <Toaster />
+        </Providers>
       </body>
     </html>
   );

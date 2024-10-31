@@ -6,7 +6,9 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "stu": "pnpx prisma studio",
+    "gen": "pnpx prisma generate"
   },
   "dependencies": {
     "@hookform/resolvers": "^3.9.1",
@@ -17,6 +19,7 @@
     "bcrypt": "^5.1.1",
     "class-variance-authority": "^0.7.0",
     "clsx": "^2.1.1",
+    "input-otp": "^1.2.5",
     "lucide-react": "^0.454.0",
     "next": "14.2.6",
     "next-auth": "^4.24.10",
@@ -26,6 +29,7 @@
     "react": "18.3.1",
     "react-dom": "18.3.1",
     "react-hook-form": "^7.53.1",
+    "resend": "4.0.1-alpha.0",
     "sonner": "^1.5.0",
     "tailwind-merge": "^2.5.4",
     "tailwindcss-animate": "^1.0.7",

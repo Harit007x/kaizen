@@ -22,8 +22,13 @@ model User {
   publicId   String?
   createdAt  DateTime @default(now())
   updatedAt  DateTime @updatedAt
+  token      String?
 
-  accounts Account[]
+  accounts    Account[]
+  projects    Project[]
+  comments     Comment[]
+  activityLog ActivityLog[]
+  // Label       Label[]
 }
 
 model Account {
@@ -36,4 +41,92 @@ model Account {
   refreshToken      String?
   createdAt         DateTime @default(now())
   updatedAt         DateTime @updatedAt
+}
+
+model Project {
+  id          String        @id @default(uuid())
+  name        String
+  userId      String?
+  User        User?         @relation(fields: [userId], references: [id])
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+  activityLog ActivityLog[]
+  categories    Category[]
+}
+
+model Category {
+  id                String   @id @default(uuid())
+  title             String
+  tasks             Task[]
+  projectId         String
+  project           Project  @relation(fields: [projectId], references: [id])
+}
+
+model Task {
+  id                String   @id @default(uuid())
+  name              String
+  description       String
+  priority          String
+  isCompleted       Boolean  @default(false)
+  categoryId        String
+  category     Category    @relation(fields: [categoryId], references: [id])
+}
+
+// model Label {
+//   id          String        @id @default(uuid())
+//   name        String
+//   userId      String
+//   User        User          @relation(fields: [userId], references: [id])
+//   Task        Task[]        @relation("TaskLabels")
+//   ActivityLog ActivityLog[]
+//   createdAt   DateTime      @default(now())
+//   updatedAt   DateTime      @updatedAt
+// }
+
+model Comment {
+  id          String        @id @default(uuid())
+  content     String
+  taskId      String
+  userId      String
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+  user        User          @relation(fields: [userId], references: [id])
+  // Task        Task          @relation(fields: [taskId], references: [id])
+  activityLog ActivityLog[]
+}
+
+model ActivityLog {
+  id          String   @id @default(uuid())
+  action      ACTIONS
+  description String?
+  userId      String?
+  taskId      String?
+  labelId     String?
+  projectId   String?
+  commentId   String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  user        User?    @relation(fields: [userId], references: [id])
+  // Task        Task?    @relation(fields: [taskId], references: [id])
+  // Label       Label?   @relation(fields: [labelId], references: [id])
+  project     Project? @relation(fields: [projectId], references: [id])
+  comment     Comment? @relation(fields: [commentId], references: [id])
+}
+
+enum ACTIONS {
+  CREATE_USER
+  UPDATE_USER
+  DELETE_USER
+  CREATE_TASK
+  UPDATE_TASK
+  DELETE_TASK
+  CREATE_LABEL
+  UPDATE_LABEL
+  DELETE_LABEL
+  CREATE_COMMENT
+  UPDATE_COMMENT
+  DELETE_COMMENT
+  CREATE_PROJECT
+  UPDATE_PROJECT
+  DELETE_PROJECT
 }

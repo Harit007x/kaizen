@@ -1,5 +1,5 @@
 'use client'
-import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import React, { FormEvent, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
 import invariant from 'tiny-invariant';
 
@@ -17,6 +17,11 @@ import Board from './pieces/board/board';
 import { BoardContext, BoardContextValue } from './pieces/board/board-context';
 import { Column } from './pieces/board/column';
 import { createRegistry } from './pieces/board/registry';
+import { Input } from '../ui/input';
+import { Button } from '../ui/button';
+import { useRouter } from "next/navigation";
+import { toast } from 'sonner';
+import { UseProjectDetails } from '@/hooks/useProjectDetails';
 
 type Outcome =
 	| {
@@ -451,13 +456,89 @@ export default function BoardExample() {
 		};
 	}, [getColumns, reorderColumn, reorderCard, registry, moveCard, instanceId]);
 
+	const router = useRouter();
+	const [project_name, setProjectName] = useState<string>('');
+	const [categoryName, setCategoryName] = useState<string>('');
+	const [isLoading, setIsLoading] = useState<boolean>(false);
+	async function handleBoardCreate(e: FormEvent<HTMLFormElement>) {
+		e.preventDefault();
+		setIsLoading(true);
+	
+		try {
+			const formData = new FormData();
+			formData.append("project_name", project_name)
+			console.log('formdata =', formData)
+			const res = await fetch("/api/board/create-board", {
+				method: "POST",
+				body: formData,
+			});
+	
+			const data = await res.json();
+			toast.success(data.message)
+		} catch (error) {
+		  console.error(error);
+		  toast.error("Something went wrong");
+		} finally {
+		  setIsLoading(false);
+		}
+	}
+
+	async function handleCategoryCreate(e: FormEvent<HTMLFormElement>) {
+		e.preventDefault();
+		setIsLoading(true);
+	
+		try {
+			const formData = new FormData();
+			formData.append("category_name", categoryName)
+			formData.append("project_id", "ed2933d1-d1ca-4de1-a56b-5548e498cbc6")
+			console.log('formdata =', formData)
+			const res = await fetch("/api/board/create-category", {
+				method: "POST",
+				body: formData,
+			});
+
+			const data = await res.json();
+			toast.success(data.message)
+		} catch (error) {
+		  console.error(error);
+		  toast.error("Something went wrong");
+		} finally {
+		  setIsLoading(false);
+		}
+	}
+	// const [boardData, setBoardData] = useState<any>(null);
+	const { projectData, fetchProjectDetails } = UseProjectDetails()
+	
 	return (
 		<BoardContext.Provider value={contextValue}>
-			<Board>
-				{data.orderedColumnIds.map((columnId) => {
-					return <Column column={data.columnMap[columnId]} key={columnId} />;
-				})}
-			</Board>
+			<div className='flex flex-col bg-red-300'>
+				<form className='flex justify-center' onSubmit={handleBoardCreate}>
+					<Input
+						placeholder='Board'
+						onChange={(e)=>setProjectName(e.target.value)}
+						disabled={isLoading}
+					/>
+					<Button
+						disabled={isLoading}
+					>Create</Button>
+				</form>
+				<form className='flex justify-center' onSubmit={handleCategoryCreate}>
+					<Input
+						placeholder='Category'
+						onChange={(e)=>setCategoryName(e.target.value)}
+						disabled={isLoading}
+					/>
+					<Button
+						disabled={isLoading}
+					>Create</Button>
+				</form>
+				{console.log('whole data structure =', project_name)}
+				<Board>
+					{projectData && projectData.orderedColumnIds.map((columnId) => {
+						return <Column fetchProjectDetails={fetchProjectDetails} column={projectData?.columnMap[columnId]} key={columnId} />;
+					})}
+				</Board>
+			</div>
 		</BoardContext.Provider>
 	);
 }

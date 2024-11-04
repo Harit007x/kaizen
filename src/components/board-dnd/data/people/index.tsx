@@ -133,6 +133,7 @@ export function getPeople({ amount }: { amount: number }): Person[] {
 }
 
 export type ColumnType = {
+	categoryId: string
 	title: string;
 	columnId: string;
 	items: Person[];

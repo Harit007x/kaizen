@@ -1,10 +1,10 @@
 'use client'
-import React, { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import React, { FormEvent, memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
 import { createPortal } from 'react-dom';
 import invariant from 'tiny-invariant';
 
-import { IconButton } from '@atlaskit/button/new';
+import Button, { IconButton } from '@atlaskit/button/new';
 import DropdownMenu, {
 	type CustomTriggerProps,
 	DropdownItem,
@@ -40,6 +40,8 @@ import { type ColumnType } from '../../data/people';
 import { useBoardContext } from './board-context';
 import { Card } from './card';
 import { ColumnContext, type ColumnContextProps, useColumnContext } from './column-context';
+import { Input } from '@/components/ui/input';
+import { toast } from 'sonner';
 
 const columnStyles = xcss({
 	width: '250px',
@@ -138,7 +140,8 @@ const isDraggingStyles = xcss({
 	opacity: 0.4,
 });
 
-export const Column = memo(function Column({ column }: { column: ColumnType }) {
+export const Column = memo(function Column({ column, fetchProjectDetails }: { column: ColumnType, fetchProjectDetails: any }) {
+	console.log('col = ', column)
 	const columnId = column.columnId;
 	const columnRef = useRef<HTMLDivElement | null>(null);
 	const columnInnerRef = useRef<HTMLDivElement | null>(null);
@@ -272,6 +275,36 @@ export const Column = memo(function Column({ column }: { column: ColumnType }) {
 		return { columnId, getCardIndex, getNumCards };
 	}, [columnId, getCardIndex, getNumCards]);
 
+	const [taskName, setTaskName] = useState<string>('');
+	const [taskDescription, setTaskDescription] = useState<string>('');
+	const [isLoading, setIsLoading] = useState<boolean>(false);
+
+	async function handleTaskCreate(e: FormEvent<HTMLFormElement>) {
+		e.preventDefault();
+		setIsLoading(true);
+	
+		try {
+			const formData = new FormData();
+			formData.append("task_name", taskName);
+			formData.append("task_description", taskDescription);
+			formData.append("category_id", column.categoryId);
+			console.log('formdata =', formData)
+			const res = await fetch("/api/board/create-task", {
+				method: "POST",
+				body: formData,
+			});
+
+			const data = await res.json();
+			fetchProjectDetails()
+			toast.success(data.message);
+		} catch (error) {
+		  console.error(error);
+		  toast.error("Something went wrong");
+		} finally {
+		  setIsLoading(false);
+		}
+	}
+
 	return (
 		<ColumnContext.Provider value={contextValue}>
 			<Flex
@@ -298,6 +331,22 @@ export const Column = memo(function Column({ column }: { column: ColumnType }) {
 							</Heading>
 							<ActionMenu />
 						</Inline>
+						<form className='flex justify-center' onSubmit={handleTaskCreate}>
+							<Input
+								placeholder='Name'
+								onChange={(e)=>setTaskName(e.target.value)}
+								disabled={isLoading}
+							/>
+							<Input
+								placeholder='Description'
+								onChange={(e)=>setTaskDescription(e.target.value)}
+								disabled={isLoading}
+							/>
+							<Button
+								type='submit'
+								// disabled={isLoading}
+							>Create</Button>
+						</form>
 						<Box xcss={scrollContainerStyles} ref={scrollableRef}>
 							<Stack xcss={cardListStyles} space="space.100">
 								{column.items.map((item) => (

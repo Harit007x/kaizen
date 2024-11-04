@@ -7,9 +7,11 @@ export default function Home() {
   const router = useRouter();
 
   return (
-    <div className="bg-red-300">
+    <div>
       <Button onClick={() => router.push('/sign-in')}>Sign In</Button>
       <Button onClick={() => router.push('/sign-up')}>Sign Up</Button>
+      <Button onClick={() => router.push('/inbox')}>Inbox</Button>
+      <br/>
       <Button 
           onClick={() => signOut({ callbackUrl: "/sign-in" })}
       >Logout</Button>

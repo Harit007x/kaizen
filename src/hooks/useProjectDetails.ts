@@ -1,7 +1,14 @@
 import React, { useEffect, useState } from 'react'
 
 export const UseProjectDetails = () => {
-  const [projectData, setProjectData] = useState<any>();
+  const [projectData, setProjectData] = useState<any>({
+    "id": null,
+    "name": null,
+    "userId": null,
+    "columnMap": null,
+    "orderedColumnIds": [],
+    "lastOperation": null
+  });
   async function fetchProjectDetails(){
     try{
       const res = await fetch("/api/board/get-board-details", {
@@ -24,6 +31,7 @@ export const UseProjectDetails = () => {
 
   return {
     fetchProjectDetails,
+    setProjectData,
     projectData
   }
 }

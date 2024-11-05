@@ -57,29 +57,31 @@ type BoardState = {
 };
 
 export default function BoardExample() {
-	const [data, setData] = useState<BoardState>(() => {
-		const base = getBasicData();
-		return {
-			...base,
-			lastOperation: null,
-		};
-	});
+	// const [data, setData] = useState<BoardState>(() => {
+	// 	const base = getBasicData();
+	// 	return {
+	// 		...base,
+	// 		lastOperation: null,
+	// 	};
+	// });
+	const { projectData, setProjectData, fetchProjectDetails } = UseProjectDetails()
 
-	const stableData = useRef(data);
+
+	const stableData = useRef(projectData);
 	useEffect(() => {
-		stableData.current = data;
-	}, [data]);
+		stableData.current = projectData;
+	}, [projectData]);
 
 	const [registry] = useState(createRegistry);
-
-	const { lastOperation } = data;
+	console.log('projectData= ', projectData)
+	const { lastOperation } = projectData;
 
 	useEffect(() => {
 		if (lastOperation === null) {
 			return;
 		}
 		const { outcome, trigger } = lastOperation;
-
+		console.log('last operation =', lastOperation)
 		if (outcome.type === 'column-reorder') {
 			const { startIndex, finishIndex } = outcome;
 
@@ -100,12 +102,14 @@ export default function BoardExample() {
 
 		if (outcome.type === 'card-reorder') {
 			const { columnId, startIndex, finishIndex } = outcome;
-
+			console.log('outcome =', outcome)
 			const { columnMap } = stableData.current;
+			console.log('column map =', columnMap)
 			const column = columnMap[columnId];
+
 			const item = column.items[finishIndex];
 
-			const entry = registry.getCard(item.userId);
+			const entry = registry.getCard(item.itemId);
 			triggerPostMoveFlash(entry.element);
 
 			if (trigger !== 'keyboard') {
@@ -133,7 +137,7 @@ export default function BoardExample() {
 					? itemIndexInFinishColumn + 1
 					: destinationColumn.items.length;
 
-			const entry = registry.getCard(item.userId);
+			const entry = registry.getCard(item.itemId);
 			triggerPostMoveFlash(entry.element);
 
 			if (trigger !== 'keyboard') {
@@ -175,7 +179,7 @@ export default function BoardExample() {
 			finishIndex: number;
 			trigger?: Trigger;
 		}) => {
-			setData((data) => {
+			setProjectData((data) => {
 				const outcome: Outcome = {
 					type: 'column-reorder',
 					columnId: data.orderedColumnIds[startIndex],
@@ -212,13 +216,16 @@ export default function BoardExample() {
 			finishIndex: number;
 			trigger?: Trigger;
 		}) => {
-			setData((data) => {
+			setProjectData((data) => {
+				console.log("Reorder got called")
 				const sourceColumn = data.columnMap[columnId];
 				const updatedItems = reorder({
 					list: sourceColumn.items,
 					startIndex,
 					finishIndex,
 				});
+
+				console.log('check the reorder =', updatedItems);
 
 				const updatedSourceColumn: ColumnType = {
 					...sourceColumn,
@@ -268,7 +275,7 @@ export default function BoardExample() {
 			if (startColumnId === finishColumnId) {
 				return;
 			}
-			setData((data) => {
+			setProjectData((data) => {
 				const sourceColumn = data.columnMap[startColumnId];
 				const destinationColumn = data.columnMap[finishColumnId];
 				const item: Person = sourceColumn.items[itemIndexInStartColumn];
@@ -282,7 +289,7 @@ export default function BoardExample() {
 					...data.columnMap,
 					[startColumnId]: {
 						...sourceColumn,
-						items: sourceColumn.items.filter((i) => i.userId !== item.userId),
+						items: sourceColumn.items.filter((i) => i.itemId !== item.itemId),
 					},
 					[finishColumnId]: {
 						...destinationColumn,
@@ -320,6 +327,8 @@ export default function BoardExample() {
 				},
 				onDrop(args) {
 					const { location, source } = args;
+					// console.log('check the source =',source)
+					console.log('location =-', location)
 					// didn't drop on anything
 					if (!location.current.dropTargets.length) {
 						return;
@@ -330,14 +339,15 @@ export default function BoardExample() {
 					// 2. move to new position
 
 					if (source.data.type === 'column') {
-						const startIndex: number = data.orderedColumnIds.findIndex(
+						const startIndex: number = projectData.orderedColumnIds.findIndex(
 							(columnId) => columnId === source.data.columnId,
 						);
 
+						console.log('location=', location)
 						const target = location.current.dropTargets[0];
-						const indexOfTarget: number = data.orderedColumnIds.findIndex(
-							(id) => id === target.data.columnId,
-						);
+						console.log('target =', target)
+						const indexOfTarget: number = projectData.orderedColumnIds.findIndex((id) => id === target.data.columnId,);
+						console.log('index of target =', indexOfTarget);
 						const closestEdgeOfTarget: Edge | null = extractClosestEdge(target.data);
 
 						const finishIndex = getReorderDestinationIndex({
@@ -351,30 +361,36 @@ export default function BoardExample() {
 					}
 					// Dragging a card
 					if (source.data.type === 'card') {
+						console.log('check source =', source)
 						const itemId = source.data.itemId;
-						invariant(typeof itemId === 'string');
+						// console.log('item type =', itemId)
+						// invariant(typeof itemId === 'string');
 						// TODO: these lines not needed if item has columnId on it
 						const [, startColumnRecord] = location.initial.dropTargets;
 						const sourceId = startColumnRecord.data.columnId;
-						invariant(typeof sourceId === 'string');
-						const sourceColumn = data.columnMap[sourceId];
-						const itemIndex = sourceColumn.items.findIndex((item) => item.userId === itemId);
+						// invariant(typeof sourceId === 'string');
+						console.log('sourc id =', sourceId)
+						const sourceColumn = projectData.columnMap[sourceId];
+						console.log('source map =', sourceColumn)
+						const itemIndex = sourceColumn.items.findIndex((item) => item.itemId === itemId);
 
 						if (location.current.dropTargets.length === 1) {
 							const [destinationColumnRecord] = location.current.dropTargets;
 							const destinationId = destinationColumnRecord.data.columnId;
 							invariant(typeof destinationId === 'string');
-							const destinationColumn = data.columnMap[destinationId];
+							const destinationColumn = projectData.columnMap[destinationId];
 							invariant(destinationColumn);
 
 							// reordering in same column
 							if (sourceColumn === destinationColumn) {
+								console.log('same same same same')
 								const destinationIndex = getReorderDestinationIndex({
 									startIndex: itemIndex,
 									indexOfTarget: sourceColumn.items.length - 1,
 									closestEdgeOfTarget: null,
 									axis: 'vertical',
 								});
+								console.log('indexes =', itemIndex, destinationIndex)
 								reorderCard({
 									columnId: sourceColumn.columnId,
 									startIndex: itemIndex,
@@ -399,10 +415,10 @@ export default function BoardExample() {
 							const [destinationCardRecord, destinationColumnRecord] = location.current.dropTargets;
 							const destinationColumnId = destinationColumnRecord.data.columnId;
 							invariant(typeof destinationColumnId === 'string');
-							const destinationColumn = data.columnMap[destinationColumnId];
+							const destinationColumn = projectData.columnMap[destinationColumnId];
 
 							const indexOfTarget = destinationColumn.items.findIndex(
-								(item) => item.userId === destinationCardRecord.data.itemId,
+								(item) => item.itemId === destinationCardRecord.data.itemId,
 							);
 							const closestEdgeOfTarget: Edge | null = extractClosestEdge(
 								destinationCardRecord.data,
@@ -442,7 +458,7 @@ export default function BoardExample() {
 				},
 			}),
 		);
-	}, [data, instanceId, moveCard, reorderCard, reorderColumn]);
+	}, [projectData, instanceId, moveCard, reorderCard, reorderColumn]);
 
 	const contextValue: BoardContextValue = useMemo(() => {
 		return {
@@ -507,7 +523,6 @@ export default function BoardExample() {
 		}
 	}
 	// const [boardData, setBoardData] = useState<any>(null);
-	const { projectData, fetchProjectDetails } = UseProjectDetails()
 	
 	return (
 		<BoardContext.Provider value={contextValue}>

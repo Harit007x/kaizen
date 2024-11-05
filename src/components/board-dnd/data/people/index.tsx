@@ -37,10 +37,12 @@ import Tori from './images/processed/Tori';
 import Vania from './images/processed/Vania';
 
 export type Person = {
-	userId: string;
+	itemId: string;
+	id: string;
+	isCompleted: boolean
 	name: string;
-	role: string;
-	avatarUrl: string;
+	description: string;
+	priority: string;
 };
 
 const avatarMap: Record<string, string> = {

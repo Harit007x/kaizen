@@ -141,7 +141,6 @@ const isDraggingStyles = xcss({
 });
 
 export const Column = memo(function Column({ column, fetchProjectDetails }: { column: ColumnType, fetchProjectDetails: any }) {
-	console.log('col = ', column)
 	const columnId = column.columnId;
 	const columnRef = useRef<HTMLDivElement | null>(null);
 	const columnInnerRef = useRef<HTMLDivElement | null>(null);
@@ -264,7 +263,7 @@ export const Column = memo(function Column({ column, fetchProjectDetails }: { co
 	}, [column.items]);
 
 	const getCardIndex = useCallback((userId: string) => {
-		return stableItems.current.findIndex((item) => item.userId === userId);
+		return stableItems.current.findIndex((item) => item.itemId === userId);
 	}, []);
 
 	const getNumCards = useCallback(() => {
@@ -288,7 +287,6 @@ export const Column = memo(function Column({ column, fetchProjectDetails }: { co
 			formData.append("task_name", taskName);
 			formData.append("task_description", taskDescription);
 			formData.append("category_id", column.categoryId);
-			console.log('formdata =', formData)
 			const res = await fetch("/api/board/create-task", {
 				method: "POST",
 				body: formData,
@@ -349,9 +347,11 @@ export const Column = memo(function Column({ column, fetchProjectDetails }: { co
 						</form>
 						<Box xcss={scrollContainerStyles} ref={scrollableRef}>
 							<Stack xcss={cardListStyles} space="space.100">
-								{column.items.map((item) => (
-									<Card item={item} key={item.userId} />
-								))}
+								{column.items.map((item) => {
+									return(
+										<Card item={item} key={item.itemId} />
+									)
+								})}
 							</Stack>
 						</Box>
 					</Stack>

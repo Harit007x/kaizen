@@ -175,18 +175,18 @@ const CardPrimitive = forwardRef<HTMLDivElement, CardPrimitiveProps>(function Ca
 	{ closestEdge, item, state, actionMenuTriggerRef },
 	ref,
 ) {
-	const { avatarUrl, name, role, userId } = item;
+	const { name, itemId } = item;
 
 	return (
 		<Grid
 			ref={ref}
-			testId={`item-${userId}`}
+			testId={`item-${itemId}`}
 			templateColumns="auto 1fr auto"
 			columnGap="space.100"
 			alignItems="center"
 			xcss={[baseStyles, stateStyles[state.type]]}
 		>
-			<Avatar size="large" src={avatarUrl}>
+			<Avatar size="large">
 				{(props) => (
 					// Note: using `div` rather than `Box`.
 					// `CustomAvatarProps` passes through a `className`
@@ -206,7 +206,7 @@ const CardPrimitive = forwardRef<HTMLDivElement, CardPrimitiveProps>(function Ca
 					{name}
 				</Heading>
 				<Box as="small" xcss={noMarginStyles}>
-					{role}
+					{/* {role} */}
 				</Box>
 			</Stack>
 			<Box xcss={buttonColumnStyles}>
@@ -227,7 +227,7 @@ const CardPrimitive = forwardRef<HTMLDivElement, CardPrimitiveProps>(function Ca
 						/>
 					)}
 				>
-					<LazyDropdownItems userId={userId} />
+					<LazyDropdownItems userId={itemId} />
 				</DropdownMenu>
 			</Box>
 
@@ -238,7 +238,7 @@ const CardPrimitive = forwardRef<HTMLDivElement, CardPrimitiveProps>(function Ca
 
 export const Card = memo(function Card({ item }: { item: Person }) {
 	const ref = useRef<HTMLDivElement | null>(null);
-	const { userId } = item;
+	const { itemId } = item;
 	const [closestEdge, setClosestEdge] = useState<Edge | null>(null);
 	const [state, setState] = useState<State>(idleState);
 
@@ -248,13 +248,13 @@ export const Card = memo(function Card({ item }: { item: Person }) {
 		invariant(actionMenuTriggerRef.current);
 		invariant(ref.current);
 		return registerCard({
-			cardId: userId,
+			cardId: itemId,
 			entry: {
 				element: ref.current,
 				actionMenuTrigger: actionMenuTriggerRef.current,
 			},
 		});
-	}, [registerCard, userId]);
+	}, [registerCard, itemId]);
 
 	useEffect(() => {
 		const element = ref.current;
@@ -262,7 +262,7 @@ export const Card = memo(function Card({ item }: { item: Person }) {
 		return combine(
 			draggable({
 				element: element,
-				getInitialData: () => ({ type: 'card', itemId: userId, instanceId }),
+				getInitialData: () => ({ type: 'card', itemId: itemId, instanceId }),
 				onGenerateDragPreview: ({ location, source, nativeSetDragImage }) => {
 					const rect = source.element.getBoundingClientRect();
 
@@ -292,7 +292,7 @@ export const Card = memo(function Card({ item }: { item: Person }) {
 				},
 				getIsSticky: () => true,
 				getData: ({ input, element }) => {
-					const data = { type: 'card', itemId: userId };
+					const data = { type: 'card', itemId: itemId };
 
 					return attachClosestEdge(data, {
 						input,
@@ -301,12 +301,12 @@ export const Card = memo(function Card({ item }: { item: Person }) {
 					});
 				},
 				onDragEnter: (args) => {
-					if (args.source.data.itemId !== userId) {
+					if (args.source.data.itemId !== itemId) {
 						setClosestEdge(extractClosestEdge(args.self.data));
 					}
 				},
 				onDrag: (args) => {
-					if (args.source.data.itemId !== userId) {
+					if (args.source.data.itemId !== itemId) {
 						setClosestEdge(extractClosestEdge(args.self.data));
 					}
 				},
@@ -318,7 +318,7 @@ export const Card = memo(function Card({ item }: { item: Person }) {
 				},
 			}),
 		);
-	}, [instanceId, item, userId]);
+	}, [instanceId, item, itemId]);
 
 	return (
 		<Fragment>

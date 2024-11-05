@@ -36,10 +36,15 @@ export async function GET(request: NextRequest) {
     console.log('got board =', board)
     board?.categories.forEach((category:any) => {
         columnIds.push(category.title.toLowerCase())
+        const items = category.tasks.map((task:any) => ({
+          ...task,
+          itemId: `item-${task.id}`, // Customize itemId logic as needed
+        }));
+
         columnMap[category.title.toLowerCase()] = {
             title: category.title,
             columnId: category.title.toLowerCase(),
-            items: category.tasks,
+            items: items,
             categoryId: category.id
         };
     });
@@ -50,6 +55,7 @@ export async function GET(request: NextRequest) {
         "userId": board?.userId,
         "columnMap": columnMap,
         "orderedColumnIds": columnIds,
+        "lastOperation": null
     }
     
     return NextResponse.json(

@@ -17,6 +17,7 @@ export async function GET(request: NextRequest) {
                 select:{
                     id: true,
                     title: true,
+                    position: true,
                     tasks: {
                       select: {
                         id: true,
@@ -31,37 +32,39 @@ export async function GET(request: NextRequest) {
         },
     });
 
-    const columnMap: any = {}
+    const sortedCategories = board?.categories.sort((a, b) => a.position - b.position);
+
+    const columnMap: any = []
     const columnIds: any = []
     console.log('got board =', board)
-    board?.categories.forEach((category:any) => {
-        columnIds.push(category.title.toLowerCase())
-        const items = category.tasks.map((task:any) => ({
-          ...task,
-          itemId: `item-${task.id}`, // Customize itemId logic as needed
-        }));
+    sortedCategories?.forEach((category:any) => {
+      columnIds.push(category.title.toLowerCase())
+      const items = category.tasks.map((task:any) => ({
+        ...task,
+        itemId: `item-${task.id}`, // Customize itemId logic as needed
+      }));
 
-        columnMap[category.title.toLowerCase()] = {
-            title: category.title,
-            columnId: category.title.toLowerCase(),
-            items: items,
-            categoryId: category.id
-        };
+      columnMap.push({
+          title: category.title,
+          columnId: category.title.toLowerCase(),
+          items: items,
+          id: category.id
+      })
     });
     
     const data = {
-        "id": board?.id,
-        "name": board?.name,
-        "userId": board?.userId,
-        "columnMap": columnMap,
-        "orderedColumnIds": columnIds,
-        "lastOperation": null
+      "id": board?.id,
+      "name": board?.name,
+      "userId": board?.userId,
+      "columnMap": columnMap,
+      "orderedColumnIds": columnIds,
+      "lastOperation": null
     }
     
     return NextResponse.json(
         { 
-            message: "Board created successfully",
-            data: data
+          message: "Board created successfully",
+          data: data
         },
         { status: 200 }
     );

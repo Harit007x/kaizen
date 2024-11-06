@@ -18,11 +18,20 @@ export async function POST(request: NextRequest) {
     if (!session?.user) {
       return NextResponse.json({ message: "Please sign in first to continue" }, { status: 401 });
     }
-    
+
+    const previous_category_count = await prisma.category.count({
+      where:{
+        projectId: project_id,
+      }
+    })
+
+    console.log('total categorie =-', previous_category_count)
+
     const category = await prisma.category.create({
         data:{
             projectId: project_id,
-            title: name.toLowerCase()
+            title: name.toLowerCase(),
+            position: previous_category_count === 0 ? 0 : previous_category_count
         }
     });
 

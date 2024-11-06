@@ -20,13 +20,21 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ message: "Please sign in first to continue" }, { status: 401 });
     }
     console.log('server call =', name, description, category_id)
+    
+    const previous_task_count = await prisma.task.count({
+      where: {
+        categoryId: category_id
+      }
+    })
+
     const category = await prisma.task.create({
         data:{
             categoryId: category_id,
             name: name,
             description: description,
             priority: "",
-            isCompleted: false
+            isCompleted: false,
+            position: previous_task_count + 1
         }
     });
 

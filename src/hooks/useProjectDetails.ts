@@ -1,14 +1,8 @@
 import React, { useEffect, useState } from 'react'
 
 export const UseProjectDetails = () => {
-  const [projectData, setProjectData] = useState<any>({
-    "id": null,
-    "name": null,
-    "userId": null,
-    "columnMap": null,
-    "orderedColumnIds": [],
-    "lastOperation": null
-  });
+  const [data, setData] = useState<any>(null);
+  const [projectId, setProjectId] = useState<string>('');
   async function fetchProjectDetails(){
     try{
       const res = await fetch("/api/board/get-board-details", {
@@ -19,7 +13,9 @@ export const UseProjectDetails = () => {
         }
         return res.json();
       })
-      setProjectData(res.data)
+      setProjectId(res.data.id)
+      console.log('response =', res.data)
+      setData(res.data.columnMap)
     }catch(err){
       console.log('Something went wrong :', err)
     }
@@ -31,7 +27,8 @@ export const UseProjectDetails = () => {
 
   return {
     fetchProjectDetails,
-    setProjectData,
-    projectData
+    setData,
+    data,
+    projectId
   }
 }

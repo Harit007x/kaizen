@@ -60,7 +60,7 @@ model Category {
   tasks             Task[]
   projectId         String
   project           Project  @relation(fields: [projectId], references: [id])
-  position          Int
+  position          Float
 }
 
 model Task {
@@ -71,7 +71,7 @@ model Task {
   isCompleted       Boolean  @default(false)
   categoryId        String
   category          Category    @relation(fields: [categoryId], references: [id])
-  position          Int
+  position          Float
 }
 
 // model Label {

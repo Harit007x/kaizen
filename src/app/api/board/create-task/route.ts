@@ -34,7 +34,7 @@ export async function POST(request: NextRequest) {
             description: description,
             priority: "",
             isCompleted: false,
-            position: previous_task_count + 1
+            position: ((previous_task_count + 1 )* 10)
         }
     });
 

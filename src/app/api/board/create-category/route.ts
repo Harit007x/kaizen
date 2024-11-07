@@ -31,7 +31,7 @@ export async function POST(request: NextRequest) {
         data:{
             projectId: project_id,
             title: name.toLowerCase(),
-            position: previous_category_count === 0 ? 0 : previous_category_count
+            position: ((previous_category_count + 1) * 10)
         }
     });
 

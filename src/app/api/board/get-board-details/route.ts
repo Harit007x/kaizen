@@ -14,11 +14,17 @@ export async function GET(request: NextRequest) {
         where: { userId: session.user.id },
         include: {
             categories:{
+                orderBy: {
+                  position: "asc",
+                },
                 select:{
                     id: true,
                     title: true,
                     position: true,
                     tasks: {
+                      orderBy: {
+                        position: "asc",
+                      },
                       select: {
                         id: true,
                         name: true,
@@ -32,12 +38,10 @@ export async function GET(request: NextRequest) {
         },
     });
 
-    const sortedCategories = board?.categories.sort((a, b) => a.position - b.position);
-
     const columnMap: any = []
     const columnIds: any = []
     console.log('got board =', board)
-    sortedCategories?.forEach((category:any) => {
+    board?.categories?.forEach((category:any) => {
       columnIds.push(category.title.toLowerCase())
       const items = category.tasks.map((task:any) => ({
         ...task,
@@ -57,8 +61,6 @@ export async function GET(request: NextRequest) {
       "name": board?.name,
       "userId": board?.userId,
       "columnMap": columnMap,
-      "orderedColumnIds": columnIds,
-      "lastOperation": null
     }
     
     return NextResponse.json(

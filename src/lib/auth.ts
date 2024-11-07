@@ -105,7 +105,7 @@ export const authOptions: AuthOptions = {
       },
     }),
   ],
-  secret: process.env.SECRET_KEY || "",
+  secret: process.env.NEXTAUTH_SECRET || "",
   callbacks: {
     jwt: async ({ token, user }): Promise<JWT> => {
       const newToken: token = token as token;

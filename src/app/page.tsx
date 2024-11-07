@@ -10,7 +10,7 @@ export default function Home() {
     <div>
       <Button onClick={() => router.push('/sign-in')}>Sign In</Button>
       <Button onClick={() => router.push('/sign-up')}>Sign Up</Button>
-      <Button onClick={() => router.push('/inbox')}>Inbox</Button>
+      <Button onClick={() => router.push('/test')}>Test</Button>
       <br/>
       <Button 
           onClick={() => signOut({ callbackUrl: "/sign-in" })}

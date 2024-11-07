@@ -97,7 +97,7 @@ interface HandleDropProps {
   source: {
     data: {
       type: string;
-      cardId?: number;
+      cardId?: string;
       columnId?: string;
     };
     element: ReactNode;
@@ -125,6 +125,7 @@ interface ReorderCardProps {
   columnId: string;
   startIndex: number;
   finishIndex: number;
+  cardId: string;
 }
 
 interface MoveCardProps {
@@ -142,14 +143,14 @@ interface DropIndicatorProps {
 export default function TestPage() {
   const { projectId, data, setData, fetchProjectDetails } = UseProjectDetails()
   console.log('check the pro id =', data)
-  async function updateCategoryPositions(projectId: string, categories: Object) {
+  async function updateCategoryReorder(projectId: string, source_column_id:string , destination_column_id: string) {
     try {
-      const response = await fetch('/api/board/update-category-mapping', {
+      const response = await fetch('/api/board/update-category-reorder', {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json'
         },
-        body: JSON.stringify({projectId, categories})
+        body: JSON.stringify({projectId, source_column_id, destination_column_id})
       });
   
       if (!response.ok) {
@@ -164,25 +165,54 @@ export default function TestPage() {
     }
   }
 
-  async function updateTaskPositions(projectId: string, tasks: Object) {
+  async function updateTaskReorder(
+    category_id: string,
+    source_column_id: string,
+    destination_column_id: string,
+  ) {
+
+    if (!projectId) {
+      return toast.error("Something went wrong");
+    }
+
     try {
-      const response = await fetch('/api/board/update-task-mapping', {
+      const res = await fetch("/api/board/update-task-reorder", {
+        method: "PUT",
+        body: JSON.stringify({
+          category_id,
+          source_column_id,
+          destination_column_id,
+        }),
+      });
+
+      const data = await res.json();
+      if (!res.ok) {
+        return toast.error(data.message);
+      }
+    } catch (error) {
+      return toast.error("Something went wrong");
+    }
+  }
+
+  async function updateTasksMove(projectId: string, source_column_id:string , destination_column_id: string, task_id: string) {
+    try {
+      const response = await fetch('/api/board/update-tasks-move', {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json'
         },
-        body: JSON.stringify({projectId, tasks})
+        body: JSON.stringify({projectId, source_column_id, destination_column_id, task_id})
       });
   
       if (!response.ok) {
         const errorData = await response.json();
-        console.error('Error updating task positions:', errorData.message);
+        console.error('Error updating tasks positions:', errorData.message);
       } else {
         const data = await response.json();
-        console.log(data.message); // "Category positions updated successfully"
+        console.log(data.message);
       }
     } catch (error) {
-      console.error('Failed to update category positions:', error);
+      console.error('Failed to update tasks positions:', error);
     }
   }
   
@@ -191,18 +221,20 @@ export default function TestPage() {
     ({ sourceIndex, destinationIndex }: ReorderColumnProps) => {
       setData((prevData) => {
         const newData = [...prevData];
+        console.log('before splice data= =', newData);
         const [movedColumn] = newData.splice(sourceIndex, 1);
         newData.splice(destinationIndex, 0, movedColumn);
-        console.log('new data= =', newData);
 
         const categories: any = []
 
         newData.map((category) => {
           categories.push({ 'id': category.id})
         })
-        
-        updateCategoryPositions(projectId, categories)
-        // console.log('update order =', updated_order)
+        console.log('indexes =', sourceIndex)
+        const source_column_id = data[sourceIndex].id;
+        const destination_column_id = data[destinationIndex].id;
+
+        updateCategoryReorder(projectId, source_column_id, destination_column_id)
 
         return newData;
       });
@@ -265,20 +297,24 @@ export default function TestPage() {
         return column;
       });
 
+      console.log('car to move =', cardToMove)
+      updateTasksMove(projectId, sourceColumnId, destinationColumnId, cardToMove.id)
+
+
       setData(newData);
     },
     [data]
   );
 
   const reorderCard = useCallback(
-    ({ columnId, startIndex, finishIndex }: ReorderCardProps) => {
+    ({ columnId, startIndex, finishIndex, cardId }: ReorderCardProps) => {
       // Ensure the startIndex and finishIndex are different; no need to reorder if they’re the same
       if (startIndex === finishIndex) return;
       // Find the source column by ID
       const sourceColumnData = data.find((column) => column.id === columnId);
 
       if (sourceColumnData) {
-        const updatedItems = reorder({
+        const updatedItems:any = reorder({
           list: sourceColumnData.items,
           startIndex,
           finishIndex,
@@ -294,8 +330,14 @@ export default function TestPage() {
         updatedSourceColumn.items.map((task) => {
           tasks.push({id: task.id})
         })
-
-        updateTaskPositions(projectId, tasks)
+        
+        console.log('checking the taakss =', sourceColumnData)
+        const source_column_id = sourceColumnData.items[startIndex].id
+        const destination_column_id = sourceColumnData.items[finishIndex].id
+        console.log('check ids =', source_column_id,
+          destination_column_id)
+        updateTaskReorder(columnId, source_column_id, destination_column_id);
+        // updateTaskPositions(projectId, tasks)
         console.log('update source col =', updatedSourceColumn)
 
         const newData = data.map((column) => {
@@ -355,6 +397,7 @@ export default function TestPage() {
               columnId: sourceColumnId,
               startIndex: indexOfSource!,
               finishIndex: destinationIndex,
+              cardId: draggedCardId,
             });
             return;
           }
@@ -410,6 +453,7 @@ export default function TestPage() {
                 columnId: sourceColumnId,
                 startIndex: indexOfSource!,
                 finishIndex: destinationIndex,
+                cardId: draggedCardId
               });
               return;
             }
@@ -715,7 +759,6 @@ function Card({ id, name }: CardProps) {
       ref={cardRef}
     >
       <h1  className="text-lg font-bold">{name}</h1>
-      <p>{id}</p>
 
       {closestEdge && <DropIndicator edge={closestEdge} gap="10px" />}
     </div>

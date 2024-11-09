@@ -21,10 +21,10 @@ export async function POST(request: NextRequest) {
     const user_id = session.user.id
 
     const project = await prisma.project.create({
-        data:{
-            userId: user_id,
-            name: name
-        }
+      data: {
+        userId: user_id,
+        name: name
+      }
     });
 
     return NextResponse.json(

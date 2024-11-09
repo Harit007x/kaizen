@@ -28,6 +28,9 @@ import { UseProjectDetails } from "@/hooks/useProjectDetails";
 import { toast } from "sonner";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+import { useSession } from "next-auth/react";
+import { checkForPermissionAndTrigger } from "@/lib/Push";
+import { SidebarTrigger } from "@/components/ui/sidebar";
 
 const DATA: ColumnProps[] = [
     {
@@ -140,7 +143,24 @@ interface DropIndicatorProps {
   gap: string;
 }
 
+interface SessionUser {
+  id: string;
+  name: string;
+  email: string;
+  image: string;
+}
 export default function TestPage() {
+
+  const session = useSession();
+  const user = session.data?.user as SessionUser;
+
+  useEffect(() => {
+    if (user) {
+      console.log(user.id);
+      checkForPermissionAndTrigger();
+    }
+  }, [user]);
+
   const { projectId, data, setData, fetchProjectDetails } = UseProjectDetails()
   console.log('check the pro id =', data)
   async function updateCategoryReorder(projectId: string, source_column_id:string , destination_column_id: string) {
@@ -194,18 +214,37 @@ export default function TestPage() {
     }
   }
 
-  async function updateTasksMove(projectId: string, source_column_id:string , destination_column_id: string, task_id: string) {
+  async function updateTasksMove(
+    projectId: string,
+    sourceColumnId:string,
+    destinationColumnId: string,
+    destination_task_id: string,
+    destinationIndex: number,
+    taskId: string,
+    isMovedTop: boolean,
+    isMovedBottom: boolean
+  ) {
     try {
       const response = await fetch('/api/board/update-tasks-move', {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json'
         },
-        body: JSON.stringify({projectId, source_column_id, destination_column_id, task_id})
+        body: JSON.stringify({
+          projectId,
+          sourceColumnId,
+          destinationColumnId,
+          destination_task_id,
+          destinationIndex,
+          taskId,
+          isMovedTop,
+          isMovedBottom
+        })
       });
-  
       if (!response.ok) {
         const errorData = await response.json();
+        fetchProjectDetails()
+        toast.error('Something wend wrong, please try again!')
         console.error('Error updating tasks positions:', errorData.message);
       } else {
         const data = await response.json();
@@ -297,9 +336,12 @@ export default function TestPage() {
         return column;
       });
 
-      console.log('car to move =', cardToMove)
-      updateTasksMove(projectId, sourceColumnId, destinationColumnId, cardToMove.id)
-
+      console.log('chekc the items =', destinationColumnData.items[destinationIndex])
+      const isMovedTop = destinationColumnData.items[destinationIndex] === undefined ? false : true
+      const isMovedBottom = !isMovedTop ? true : false
+      const destination_task_id = isMovedTop != false ? destinationColumnData.items[destinationIndex].id : false
+      console.log('destination index =', destinationIndex)
+      updateTasksMove(projectId, sourceColumnId, destinationColumnId, destination_task_id, destinationIndex, cardToMove.id, isMovedTop, isMovedBottom)
 
       setData(newData);
     },
@@ -531,7 +573,7 @@ export default function TestPage() {
 		try {
 			const formData = new FormData();
 			formData.append("category_name", categoryName)
-			formData.append("project_id", "ed2933d1-d1ca-4de1-a56b-5548e498cbc6")
+			formData.append("project_id", "b0e981a5-7996-4a2b-b467-b81295f79f72")
 			console.log('formdata =', formData)
 			const res = await fetch("/api/board/create-category", {
 				method: "POST",
@@ -547,11 +589,13 @@ export default function TestPage() {
 		} finally {
 		  setIsLoading(false);
 		}
-}
+  }
 
   return (
-    <div className="w-full p-6 select-none bg-gray-950 flex flex-col h-screen gap-10">
+    <div className="w-full overflow-x-scroll p-6 select-none bg-gray-950 flex flex-col h-screen gap-10">
         <div className="w-80 flex flex-col gap-4">
+        <SidebarTrigger/>
+
             <form className='flex justify-center' onSubmit={handleBoardCreate}>
                 <Input
                     placeholder='Board'

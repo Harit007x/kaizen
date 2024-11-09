@@ -11,64 +11,63 @@ export async function GET(request: NextRequest) {
     }
 
     const board = await prisma.project.findFirst({
-        where: { userId: session.user.id },
-        include: {
-            categories:{
-                orderBy: {
-                  position: "asc",
-                },
-                select:{
-                    id: true,
-                    title: true,
-                    position: true,
-                    tasks: {
-                      orderBy: {
-                        position: "asc",
-                      },
-                      select: {
-                        id: true,
-                        name: true,
-                        description: true,
-                        priority: true,
-                        isCompleted: true,
-                      }
-                    }
-                }
+      where: { userId: session.user.id },
+      include: {
+        categories: {
+          orderBy: {
+            position: "asc",
+          },
+          select: {
+            id: true,
+            title: true,
+            position: true,
+            tasks: {
+              orderBy: {
+                position: "asc",
+              },
+              select: {
+                id: true,
+                name: true,
+                description: true,
+                priority: true,
+                isCompleted: true,
+              }
             }
-        },
+          }
+        }
+      },
     });
 
     const columnMap: any = []
     const columnIds: any = []
-    console.log('got board =', board)
-    board?.categories?.forEach((category:any) => {
+    board?.categories?.forEach((category: any) => {
       columnIds.push(category.title.toLowerCase())
-      const items = category.tasks.map((task:any) => ({
+      const items = category.tasks.map((task: any) => ({
         ...task,
         itemId: `item-${task.id}`, // Customize itemId logic as needed
       }));
 
       columnMap.push({
-          title: category.title,
-          columnId: category.title.toLowerCase(),
-          items: items,
-          id: category.id
+        title: category.title,
+        columnId: category.title.toLowerCase(),
+        items: items,
+        id: category.id
       })
     });
-    
+
     const data = {
       "id": board?.id,
       "name": board?.name,
       "userId": board?.userId,
       "columnMap": columnMap,
     }
-    
+
     return NextResponse.json(
-        { 
-          message: "Board created successfully",
-          data: data
-        },
-        { status: 200 }
+      {
+        message: "Board created successfully",
+        data: data
+      },
+      { status: 200 }
     );
   } catch (error) {
     console.error(error);

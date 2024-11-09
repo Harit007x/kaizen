@@ -13,21 +13,25 @@ enum Provider {
 }
 
 model User {
-  id         String   @id @default(uuid())
-  email      String?  @unique
-  password   String?
-  isVerified Boolean  @default(false)
-  name       String?
-  profile    String?
-  publicId   String?
-  createdAt  DateTime @default(now())
-  updatedAt  DateTime @updatedAt
-  token      String?
+  id             String   @id @default(uuid())
+  email          String?  @unique
+  password       String?
+  isVerified     Boolean  @default(false)
+  name           String?
+  profilePicture String?
+  publicId       String?
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+  token          String?
 
-  accounts    Account[]
-  projects    Project[]
-  comments     Comment[]
-  activityLog ActivityLog[]
+  accounts         Account[]
+  projects         Project[]
+  comments         Comment[]
+  activityLog      ActivityLog[]
+  pushSubscription PushSubscription[]
+
+  // userWorkspaces UserWorkspace[]
+
   // Label       Label[]
 }
 
@@ -43,35 +47,58 @@ model Account {
   updatedAt         DateTime @updatedAt
 }
 
+// enum ROLES {
+//   ADMIN
+//   MEMBER
+// }
+
+// model UserWorkspace {
+//   id          String    @id @default(uuid())
+//   userId      String
+//   user        User      @relation(fields: [userId], references: [id])
+//   workspaceId String
+//   workspace   Workspace @relation(fields: [workspaceId], references: [id])
+// }
+
+// model Workspace {
+//   id             String          @id @default(uuid())
+//   title          String
+//   projects       Project[]
+//   userWorkspaces UserWorkspace[]
+// }
+
 model Project {
   id          String        @id @default(uuid())
   name        String
-  userId      String?
-  User        User?         @relation(fields: [userId], references: [id])
+  userId      String
+  user        User          @relation(fields: [userId], references: [id])
   createdAt   DateTime      @default(now())
   updatedAt   DateTime      @updatedAt
   activityLog ActivityLog[]
-  categories    Category[]
+  categories  Category[]
+  // workspaceId String
+  // workspace   Workspace     @relation(fields: [workspaceId], references: [id])
 }
 
 model Category {
-  id                String   @id @default(uuid())
-  title             String
-  tasks             Task[]
-  projectId         String
-  project           Project  @relation(fields: [projectId], references: [id])
-  position          Float
+  id               String  @id @default(uuid())
+  title            String
+  tasks            Task[]
+  projectId        String
+  project          Project @relation(fields: [projectId], references: [id])
+  position         Float
+  reorderThreshold Int     @default(0)
 }
 
 model Task {
-  id                String   @id @default(uuid())
-  name              String
-  description       String
-  priority          String
-  isCompleted       Boolean  @default(false)
-  categoryId        String
-  category          Category    @relation(fields: [categoryId], references: [id])
-  position          Float
+  id          String   @id @default(uuid())
+  name        String
+  description String
+  priority    String
+  isCompleted Boolean  @default(false)
+  categoryId  String
+  category    Category @relation(fields: [categoryId], references: [id])
+  position    Float
 }
 
 // model Label {
@@ -131,4 +158,16 @@ enum ACTIONS {
   CREATE_PROJECT
   UPDATE_PROJECT
   DELETE_PROJECT
+}
+
+model PushSubscription {
+  id             String   @id @default(uuid())
+  endpoint       String
+  expirationTime Int?
+  p256dh         String
+  auth           String
+  userId         String
+  user           User     @relation(fields: [userId], references: [id])
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
 }

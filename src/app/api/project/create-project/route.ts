@@ -7,6 +7,7 @@ export async function POST(request: NextRequest) {
   // Validate Request
   const formData = await request.formData();
   const name = formData.get("project_name") as string;
+  const workspace_id = formData.get("workspace_id") as string;
   if (!name) {
     return NextResponse.json({ message: "Name is required" }, { status: 400 });
   }
@@ -23,6 +24,7 @@ export async function POST(request: NextRequest) {
     const project = await prisma.project.create({
       data: {
         userId: user_id,
+        workspaceId: workspace_id,
         name: name
       }
     });

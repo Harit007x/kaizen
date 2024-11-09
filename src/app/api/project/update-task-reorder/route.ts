@@ -10,8 +10,7 @@ export async function PUT(request: NextRequest) {
       return NextResponse.json({ message: "Please sign in first to continue" }, { status: 401 });
     }
 
-    const { category_id, source_column_id, destination_column_id } = await request.json();
-    console.log("data =- ", category_id, source_column_id, destination_column_id)
+    const { category_id, source_task_id, destination_task_id } = await request.json();
     let new_position: number = 0;
 
     const tasks = await prisma.task.findMany({
@@ -25,31 +24,22 @@ export async function PUT(request: NextRequest) {
 
     let isMovedBelow;
     let isMovedAbove;
-    const source_task = tasks.find((task) => task.id === source_column_id)
-    const destination_task = tasks.find((task) => task.id === destination_column_id)
-
+    const source_task = tasks.find((task) => task.id === source_task_id)
+    const destination_task = tasks.find((task) => task.id === destination_task_id)
+    console.log('destination task =', destination_task)
     if (!source_task || !destination_task) {
       return NextResponse.json({ message: "Invalid request" }, { status: 400 });
     }
-    console.log('tasks =', tasks, destination_task)
     let destination_index = tasks.findIndex((task) => task.position === destination_task.position)
+    console.log('destination index =', destination_index)
     // check if there is anything above the destination item
     if (destination_index === 0) {
       isMovedAbove = false
       new_position = destination_task.position / 2
-    }
-
-    // check if there is anything below the destination item
-    if (destination_index === tasks.length - 1) {
+    } else if (destination_index === tasks.length - 1) {
       isMovedBelow = false
       new_position = ((destination_task.position * 2) + 10) / 2
-    }
-    console.log('check the index =', destination_index, tasks.length - 1)
-    // check if in between
-    isMovedAbove = !isMovedAbove ? isMovedAbove : source_task.position > destination_task.position
-    if (isMovedAbove) {
-
-      // console.log('destination - - - - - - -', destination_category)
+    } else if (source_task.position > destination_task.position) {
       const destination_index = tasks.findIndex((task) => task.position === destination_task.position)
       const itemAboveDestination = tasks[destination_index - 1]
       console.log('wtf nigga -', itemAboveDestination, destination_index)
@@ -60,13 +50,10 @@ export async function PUT(request: NextRequest) {
       // console.log('ism aboe =', itemAboveDestination)
       new_position = (destination_task.position + itemAboveDestination?.position) / 2
       // console.log('source position =', new_position)
-    }
-
-    isMovedBelow = !isMovedBelow ? isMovedBelow : source_task.position < destination_task.position
-    console.log(' temp =', source_task.position, destination_task.position)
-    if (isMovedBelow) {
+    } else if (source_task.position < destination_task.position) {
 
       const destination_index = tasks.findIndex((task) => task.position === destination_task.position)
+      console.log('moved below hot - - - - --- - - - - -', destination_index)
       const itemBelowDestination = tasks[destination_index + 1]
       console.log('wtf wow bigga -', itemBelowDestination, destination_index)
 
@@ -77,9 +64,11 @@ export async function PUT(request: NextRequest) {
 
     }
 
+
     const reorderThresholdHit = await prisma.category.findUnique({ where: { id: category_id } })
     const conflict = tasks.some((task) => task.position === new_position)
-    if (conflict || reorderThresholdHit?.reorderThreshold === 10) {
+
+    if (conflict) {
       console.log('conflicting cases - - - - - - - - -')
       const resetTaskPositions = tasks.map((task, index) => {
         return (
@@ -93,7 +82,6 @@ export async function PUT(request: NextRequest) {
             }
           }))
       })
-
       await prisma.category.update({
         where: {
           id: category_id
@@ -102,8 +90,16 @@ export async function PUT(request: NextRequest) {
       })
 
       await Promise.all(resetTaskPositions)
-      return NextResponse.json({ message: "Something went wrong" }, { status: 400 });
+      return NextResponse.json({ message: "Something went wrong, please try again!" }, { status: 400 });
     }
+    // console.log('tasks -=', tasks)
+    // if (reorderThresholdHit?.reorderThreshold === 10) {
+    //   const destination_task = tasks.splice(destination_index, 1)
+    //   tasks.splice(index, 0, itemToInsert);
+
+    //   // tasks
+    // }
+
     await prisma.task.update({
       where: { id: source_task.id },
       data: { position: new_position }

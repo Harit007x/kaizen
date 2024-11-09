@@ -32,70 +32,6 @@ import { useSession } from "next-auth/react";
 import { checkForPermissionAndTrigger } from "@/lib/Push";
 import { SidebarTrigger } from "@/components/ui/sidebar";
 
-const DATA: ColumnProps[] = [
-    {
-        "title": "todo",
-        "columnId": "todo",
-        "items": [
-            {
-                "id": "d986f564-9df9-47ca-91cc-ce643e2417e5",
-                "name": "wow",
-                "description": "amazing",
-                "priority": "",
-                "isCompleted": false,
-                "itemId": "item-d986f564-9df9-47ca-91cc-ce643e2417e5"
-            }
-        ],
-        "id": "dc146de4-56c1-43f2-8f6b-2cb41afd7536"
-    },
-    {
-        "title": "progress",
-        "columnId": "progress",
-        "items": [
-            {
-                "id": "50831bed-472a-4ce0-ab85-46f783e69573",
-                "name": "holly",
-                "description": "holy",
-                "priority": "",
-                "isCompleted": false,
-                "itemId": "item-50831bed-472a-4ce0-ab85-46f783e69573"
-            }
-        ],
-        "id": "7c73b076-5381-4bfd-a025-bdccab7ee37e"
-    },
-    {
-        "title": "done",
-        "columnId": "done",
-        "items": [
-            {
-                "id": "751c14a2-21a7-449b-91d8-0973c0b4c7ad",
-                "name": "smokes",
-                "description": "bruhhh",
-                "priority": "",
-                "isCompleted": false,
-                "itemId": "item-751c14a2-21a7-449b-91d8-0973c0b4c7ad"
-            },
-            {
-                "id": "367b707f-57b1-4f32-80e7-547fc8917a89",
-                "name": "common",
-                "description": "nigga",
-                "priority": "",
-                "isCompleted": false,
-                "itemId": "item-367b707f-57b1-4f32-80e7-547fc8917a89"
-            },
-            {
-                "id": "37a9cd6b-c8a2-49ff-8423-1e7b2678f289",
-                "name": "worked",
-                "description": "guess so",
-                "priority": "",
-                "isCompleted": false,
-                "itemId": "item-37a9cd6b-c8a2-49ff-8423-1e7b2678f289"
-            }
-        ],
-        "id": "32ec9748-028a-4afd-9c86-23f9730efece"
-    }
-]
-
 interface HandleDropProps {
   source: {
     data: {
@@ -165,7 +101,7 @@ export default function TestPage() {
   console.log('check the pro id =', data)
   async function updateCategoryReorder(projectId: string, source_column_id:string , destination_column_id: string) {
     try {
-      const response = await fetch('/api/board/update-category-reorder', {
+      const response = await fetch('/api/project/update-category-reorder', {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json'
@@ -187,8 +123,8 @@ export default function TestPage() {
 
   async function updateTaskReorder(
     category_id: string,
-    source_column_id: string,
-    destination_column_id: string,
+    source_task_id: string,
+    destination_task_id: string,
   ) {
 
     if (!projectId) {
@@ -196,17 +132,18 @@ export default function TestPage() {
     }
 
     try {
-      const res = await fetch("/api/board/update-task-reorder", {
+      const res = await fetch("/api/project/update-task-reorder", {
         method: "PUT",
         body: JSON.stringify({
           category_id,
-          source_column_id,
-          destination_column_id,
+          source_task_id,
+          destination_task_id,
         }),
       });
 
       const data = await res.json();
       if (!res.ok) {
+        // fetchProjectDetails()
         return toast.error(data.message);
       }
     } catch (error) {
@@ -225,7 +162,7 @@ export default function TestPage() {
     isMovedBottom: boolean
   ) {
     try {
-      const response = await fetch('/api/board/update-tasks-move', {
+      const response = await fetch('/api/project/update-tasks-move', {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json'
@@ -374,11 +311,10 @@ export default function TestPage() {
         })
         
         console.log('checking the taakss =', sourceColumnData)
-        const source_column_id = sourceColumnData.items[startIndex].id
-        const destination_column_id = sourceColumnData.items[finishIndex].id
-        console.log('check ids =', source_column_id,
-          destination_column_id)
-        updateTaskReorder(columnId, source_column_id, destination_column_id);
+        const source_task_id = sourceColumnData.items[startIndex].id
+        const destination_task_id = sourceColumnData.items[finishIndex].id
+        console.log('check ids =', source_task_id, destination_task_id)
+        updateTaskReorder(columnId, source_task_id, destination_task_id);
         // updateTaskPositions(projectId, tasks)
         console.log('update source col =', updatedSourceColumn)
 
@@ -540,6 +476,31 @@ export default function TestPage() {
     });
   }, [handleDrop]);
 
+  const [workspaceTitle, setWorkspaceTitle] = useState<string>('');
+
+  async function handleWorkspaceCreate(e: FormEvent<HTMLFormElement>) {
+		e.preventDefault();
+		setIsLoading(true);
+	
+		try {
+			const formData = new FormData();
+			formData.append("title", workspaceTitle)
+			console.log('formdata =', formData)
+			const res = await fetch("/api/workspace/create-workspace", {
+				method: "POST",
+				body: formData,
+			});
+	
+			const data = await res.json();
+			toast.success(data.message)
+		} catch (error) {
+		  console.error(error);
+		  toast.error("Something went wrong");
+		} finally {
+		  setIsLoading(false);
+		}
+	}
+
   const [project_name, setProjectName] = useState<string>('');
 	const [categoryName, setCategoryName] = useState<string>('');
 	const [isLoading, setIsLoading] = useState<boolean>(false);
@@ -550,8 +511,9 @@ export default function TestPage() {
 		try {
 			const formData = new FormData();
 			formData.append("project_name", project_name)
+      formData.append("workspace_id", 'e3c67c47-ee5c-4fb5-9c26-9917aac480cc')
 			console.log('formdata =', formData)
-			const res = await fetch("/api/board/create-board", {
+			const res = await fetch("/api/project/create-project", {
 				method: "POST",
 				body: formData,
 			});
@@ -575,7 +537,7 @@ export default function TestPage() {
 			formData.append("category_name", categoryName)
 			formData.append("project_id", "b0e981a5-7996-4a2b-b467-b81295f79f72")
 			console.log('formdata =', formData)
-			const res = await fetch("/api/board/create-category", {
+			const res = await fetch("/api/project/create-category", {
 				method: "POST",
 				body: formData,
 			});
@@ -596,6 +558,16 @@ export default function TestPage() {
         <div className="w-80 flex flex-col gap-4">
         <SidebarTrigger/>
 
+            <form className='flex justify-center' onSubmit={handleWorkspaceCreate}>
+                <Input
+                    placeholder='Workspace'
+                    onChange={(e)=>setWorkspaceTitle(e.target.value)}
+                    disabled={isLoading}
+                />
+                <Button
+                    disabled={isLoading}
+                >Create</Button>
+            </form>
             <form className='flex justify-center' onSubmit={handleBoardCreate}>
                 <Input
                     placeholder='Board'
@@ -652,15 +624,19 @@ function Column({ items, title, id, fetchProjectDetails }: any) {
       // Make the column a drop target
       dropTargetForElements({
         element: columnEl,
-        getData: ({ input, element }) => {
+        getData: ({ input, element, source }) => {
           // To attach card data to a drop target
           const data = { type: "column", columnId: id };
 
-          return attachClosestEdge(data, {
-            input,
-            element,
-            allowedEdges: ["left", "right"],
-          });
+          if (source.data.type === "column") {
+            return attachClosestEdge(data, {
+              input,
+              element,
+              allowedEdges: ["left", "right"],
+            });
+          }
+
+          return data;
         },
         onDragStart: () => setIsDraggedOver(true),
         onDragEnter: () => setIsDraggedOver(true),
@@ -684,7 +660,7 @@ function Column({ items, title, id, fetchProjectDetails }: any) {
 			formData.append("task_name", taskName);
 			formData.append("task_description", taskDescription);
 			formData.append("category_id", id);
-			const res = await fetch("/api/board/create-task", {
+			const res = await fetch("/api/project/create-task", {
 				method: "POST",
 				body: formData,
 			});
@@ -756,17 +732,22 @@ function Card({ id, name }: CardProps) {
       // Add dropTargetForElements to make the card a drop target
       dropTargetForElements({
         element: cardEl,
-        getData: ({ input, element }) => {
+        getData: ({ input, element, source }) => {
           // To attach card data to a drop target
           const data = { type: "card", cardId: id };
 
-          return attachClosestEdge(data, {
-            input,
-            element,
-            allowedEdges: ["top", "bottom"],
-          });
+          if (source.data.type === "card") {
+            return attachClosestEdge(data, {
+              input,
+              element,
+              allowedEdges: ["top", "bottom"],
+            });
+          }
+
+          return data;
         },
         getIsSticky: () => true,
+
         onDragEnter: (args) => {
           if (args.source.data.cardId !== id) {
             // Update the closest edge when the draggable item enters the drop zone

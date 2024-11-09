@@ -30,7 +30,7 @@ model User {
   activityLog      ActivityLog[]
   pushSubscription PushSubscription[]
 
-  // userWorkspaces UserWorkspace[]
+  userWorkspaces UserWorkspace[]
 
   // Label       Label[]
 }
@@ -47,25 +47,25 @@ model Account {
   updatedAt         DateTime @updatedAt
 }
 
-// enum ROLES {
-//   ADMIN
-//   MEMBER
-// }
+enum ROLES {
+  ADMIN
+  MEMBER
+}
 
-// model UserWorkspace {
-//   id          String    @id @default(uuid())
-//   userId      String
-//   user        User      @relation(fields: [userId], references: [id])
-//   workspaceId String
-//   workspace   Workspace @relation(fields: [workspaceId], references: [id])
-// }
+model UserWorkspace {
+  id          String    @id @default(uuid())
+  userId      String
+  user        User      @relation(fields: [userId], references: [id])
+  workspaceId String
+  workspace   Workspace @relation(fields: [workspaceId], references: [id])
+}
 
-// model Workspace {
-//   id             String          @id @default(uuid())
-//   title          String
-//   projects       Project[]
-//   userWorkspaces UserWorkspace[]
-// }
+model Workspace {
+  id             String          @id @default(uuid())
+  title          String
+  projects       Project[]
+  userWorkspaces UserWorkspace[]
+}
 
 model Project {
   id          String        @id @default(uuid())
@@ -76,8 +76,8 @@ model Project {
   updatedAt   DateTime      @updatedAt
   activityLog ActivityLog[]
   categories  Category[]
-  // workspaceId String
-  // workspace   Workspace     @relation(fields: [workspaceId], references: [id])
+  workspaceId String
+  workspace   Workspace     @relation(fields: [workspaceId], references: [id])
 }
 
 model Category {

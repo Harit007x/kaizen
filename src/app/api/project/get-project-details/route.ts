@@ -5,13 +5,25 @@ import { NextRequest, NextResponse } from "next/server";
 
 export async function GET(request: NextRequest) {
   try {
+
+
+    const url = new URL(request.url);
+    const workspace_id = url.searchParams.get("workspace_id");
+
+    if (!workspace_id) {
+      return NextResponse.json({ message: "Invalid request" }, { status: 400 });
+    }
+
     const session: any = await getServerSession(authOptions);
     if (!session?.user) {
       return NextResponse.json({ message: "Please sign in first to continue" }, { status: 401 });
     }
 
     const board = await prisma.project.findFirst({
-      where: { userId: session.user.id },
+      where: {
+        userId: session.user.id,
+        workspaceId: workspace_id
+      },
       include: {
         categories: {
           orderBy: {
@@ -64,7 +76,7 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json(
       {
-        message: "Board created successfully",
+        message: "Project details fetched successfully",
         data: data
       },
       { status: 200 }

@@ -1,29 +1,21 @@
 "use client";
 
 import {
-  attachClosestEdge,
   extractClosestEdge,
 } from "@atlaskit/pragmatic-drag-and-drop-hitbox/closest-edge";
 import { getReorderDestinationIndex } from "@atlaskit/pragmatic-drag-and-drop-hitbox/util/get-reorder-destination-index";
 import { combine } from "@atlaskit/pragmatic-drag-and-drop/combine";
 import {
-  draggable,
-  dropTargetForElements,
   monitorForElements,
 } from "@atlaskit/pragmatic-drag-and-drop/element/adapter";
 import { reorder } from "@atlaskit/pragmatic-drag-and-drop/reorder";
 import {
     FormEvent,
   ReactNode,
-  SetStateAction,
   useCallback,
   useEffect,
-  useRef,
   useState,
 } from "react";
-// @ts-ignore
-import { DropIndicator } from "@atlaskit/pragmatic-drag-and-drop-react-drop-indicator/box";
-import invariant from "tiny-invariant";
 import { UseProjectDetails } from "@/hooks/useProjectDetails";
 import { toast } from "sonner";
 import { Input } from "@/components/ui/input";
@@ -31,6 +23,7 @@ import { Button } from "@/components/ui/button";
 import { useSession } from "next-auth/react";
 import { checkForPermissionAndTrigger } from "@/lib/Push";
 import { SidebarTrigger } from "@/components/ui/sidebar";
+import Category from "@/components/others/category";
 
 interface HandleDropProps {
   source: {
@@ -42,17 +35,6 @@ interface HandleDropProps {
     element: ReactNode;
   };
   location: any;
-}
-
-interface CardProps {
-  id: number;
-  name: string;
-}
-
-interface ColumnProps {
-  title: string;
-  cards: CardProps[];
-  id: string;
 }
 
 interface ReorderColumnProps {
@@ -74,11 +56,6 @@ interface MoveCardProps {
   movedCardIndexInDestinationColumn?: number;
 }
 
-interface DropIndicatorProps {
-  edge: "top" | "bottom";
-  gap: string;
-}
-
 interface SessionUser {
   id: string;
   name: string;
@@ -97,8 +74,7 @@ export default function TestPage() {
     }
   }, [user]);
 
-  const { projectId, data, setData, fetchProjectDetails } = UseProjectDetails()
-  console.log('check the pro id =', data)
+  const { projectId, data, setData, fetchProjectDetails } = UseProjectDetails("e3c67c47-ee5c-4fb5-9c26-9917aac480cc");
   async function updateCategoryReorder(projectId: string, source_column_id:string , destination_column_id: string) {
     try {
       const response = await fetch('/api/project/update-category-reorder', {
@@ -197,7 +173,6 @@ export default function TestPage() {
     ({ sourceIndex, destinationIndex }: ReorderColumnProps) => {
       setData((prevData) => {
         const newData = [...prevData];
-        console.log('before splice data= =', newData);
         const [movedColumn] = newData.splice(sourceIndex, 1);
         newData.splice(destinationIndex, 0, movedColumn);
 
@@ -206,7 +181,6 @@ export default function TestPage() {
         newData.map((category) => {
           categories.push({ 'id': category.id})
         })
-        console.log('indexes =', sourceIndex)
         const source_column_id = data[sourceIndex].id;
         const destination_column_id = data[destinationIndex].id;
 
@@ -277,7 +251,6 @@ export default function TestPage() {
       const isMovedTop = destinationColumnData.items[destinationIndex] === undefined ? false : true
       const isMovedBottom = !isMovedTop ? true : false
       const destination_task_id = isMovedTop != false ? destinationColumnData.items[destinationIndex].id : false
-      console.log('destination index =', destinationIndex)
       updateTasksMove(projectId, sourceColumnId, destinationColumnId, destination_task_id, destinationIndex, cardToMove.id, isMovedTop, isMovedBottom)
 
       setData(newData);
@@ -535,7 +508,7 @@ export default function TestPage() {
 		try {
 			const formData = new FormData();
 			formData.append("category_name", categoryName)
-			formData.append("project_id", "b0e981a5-7996-4a2b-b467-b81295f79f72")
+			formData.append("project_id", "b414b846-76cc-4827-b383-558b5b620fcb")
 			console.log('formdata =', formData)
 			const res = await fetch("/api/project/create-category", {
 				method: "POST",
@@ -543,7 +516,7 @@ export default function TestPage() {
 			});
 
 			const data = await res.json();
-            fetchProjectDetails()
+      fetchProjectDetails()
 			toast.success(data.message);
 		} catch (error) {
 		  console.error(error);
@@ -591,201 +564,15 @@ export default function TestPage() {
         </div>
         <div className="flex gap-4">
             {data && Object.values(data).map((column) => (
-                <Column
+                <Category
                     key={column.title}
                     title={column.title}
-                    items={column.items}
+                    tasks={column.items}
                     id={column.id}
                     fetchProjectDetails={fetchProjectDetails}
                 />
             ))}
         </div>
-    </div>
-  );
-}
-
-function Column({ items, title, id, fetchProjectDetails }: any) {
-  const columnRef = useRef<HTMLDivElement>(null);
-  const [isDraggedOver, setIsDraggedOver] = useState(false);
-  const [isReordering, setIsReordering] = useState(false);
-
-  useEffect(() => {
-    const columnEl = columnRef.current;
-    invariant(columnEl);
-
-    return combine(
-      // Make the card draggable
-      draggable({
-        element: columnEl,
-        getInitialData: () => ({ type: "column", columnId: id }),
-        onDragStart: () => setIsReordering(true),
-        onDrop: () => setIsReordering(false),
-      }),
-      // Make the column a drop target
-      dropTargetForElements({
-        element: columnEl,
-        getData: ({ input, element, source }) => {
-          // To attach card data to a drop target
-          const data = { type: "column", columnId: id };
-
-          if (source.data.type === "column") {
-            return attachClosestEdge(data, {
-              input,
-              element,
-              allowedEdges: ["left", "right"],
-            });
-          }
-
-          return data;
-        },
-        onDragStart: () => setIsDraggedOver(true),
-        onDragEnter: () => setIsDraggedOver(true),
-        onDragLeave: () => setIsDraggedOver(false),
-        onDrop: () => setIsDraggedOver(false),
-        getIsSticky: () => true,
-      })
-    );
-  }, [id]);
-
-  const [taskName, setTaskName] = useState<string>('');
-	const [taskDescription, setTaskDescription] = useState<string>('');
-	const [isLoading, setIsLoading] = useState<boolean>(false);
-
-	async function handleTaskCreate(e: FormEvent<HTMLFormElement>) {
-		e.preventDefault();
-		setIsLoading(true);
-	
-		try {
-			const formData = new FormData();
-			formData.append("task_name", taskName);
-			formData.append("task_description", taskDescription);
-			formData.append("category_id", id);
-			const res = await fetch("/api/project/create-task", {
-				method: "POST",
-				body: formData,
-			});
-
-			const data = await res.json();
-			fetchProjectDetails()
-			toast.success(data.message);
-		} catch (error) {
-		  console.error(error);
-		  toast.error("Something went wrong");
-		} finally {
-		  setIsLoading(false);
-		}
-	}
-
-  return (
-    <div
-      className={`min-w-[300px] flex flex-col gap-4 text-white border-[1px] p-4 border-muted-foreground rounded-lg hover:border-border 
-        ${isReordering && "opacity-30"}`}
-      ref={columnRef}
-    >
-        <div>
-            <h1 className="text-lg font-bold mb-1">{title}</h1>
-            <h3 className="text-xs mb-4">{id}</h3>
-        </div>
-
-        <form className='flex flex-col justify-center' onSubmit={handleTaskCreate}>
-            <Input
-                placeholder='Name'
-                onChange={(e)=>setTaskName(e.target.value)}
-                disabled={isLoading}
-            />
-            <Input
-                placeholder='Description'
-                onChange={(e)=>setTaskDescription(e.target.value)}
-                disabled={isLoading}
-            />
-            <Button
-                type='submit'
-                // disabled={isLoading}
-            >Create</Button>
-        </form>
-      <div className="space-y-2 flex-1">
-        {items.map((card: any) => (
-          <Card key={card.id} id={card.id} name={card.name} />
-        ))}
-      </div>
-    </div>
-  );
-}
-
-function Card({ id, name }: CardProps) {
-  const cardRef = useRef<HTMLDivElement | null>(null);
-  const [closestEdge, setClosestEdge] = useState(null);
-  const [isDragging, setIsDragging] = useState(false);
-
-  useEffect(() => {
-    const cardEl = cardRef.current;
-    invariant(cardEl);
-
-    return combine(
-      // Add draggable to make the card draggable
-      draggable({
-        element: cardEl,
-        getInitialData: () => ({ type: "card", cardId: id }),
-        onDragStart: () => setIsDragging(true),
-        onDrop: () => setIsDragging(false),
-      }),
-      // Add dropTargetForElements to make the card a drop target
-      dropTargetForElements({
-        element: cardEl,
-        getData: ({ input, element, source }) => {
-          // To attach card data to a drop target
-          const data = { type: "card", cardId: id };
-
-          if (source.data.type === "card") {
-            return attachClosestEdge(data, {
-              input,
-              element,
-              allowedEdges: ["top", "bottom"],
-            });
-          }
-
-          return data;
-        },
-        getIsSticky: () => true,
-
-        onDragEnter: (args) => {
-          if (args.source.data.cardId !== id) {
-            // Update the closest edge when the draggable item enters the drop zone
-            setClosestEdge(
-              extractClosestEdge(args.self.data) as SetStateAction<null>
-            );
-          }
-        },
-        onDrag: (args) => {
-          // Continuously update the closest edge while dragging over the drop zone
-          if (args.source.data.cardId !== id) {
-            setClosestEdge(
-              extractClosestEdge(args.self.data) as SetStateAction<null>
-            );
-          }
-        },
-        onDragLeave: () => {
-          // Reset the closest edge when the draggable item leaves the drop zone
-          setClosestEdge(null);
-        },
-        onDrop: () => {
-          // Reset the closest edge when the draggable item is dropped
-          setClosestEdge(null);
-        },
-      })
-    );
-  }, [id]);
-
-  return (
-    <div
-      className={`${
-        isDragging && "opacity-30"
-      } rounded-lg shadow-md p-6 relative cursor-pointer bg-gray-900 hover:bg-gray-800 flex gap-4 items-center justify`}
-      ref={cardRef}
-    >
-      <h1  className="text-lg font-bold">{name}</h1>
-
-      {closestEdge && <DropIndicator edge={closestEdge} gap="10px" />}
     </div>
   );
 }

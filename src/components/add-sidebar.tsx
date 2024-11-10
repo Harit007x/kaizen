@@ -15,6 +15,7 @@ import {
   Forward,
   Frame,
   GalleryVerticalEnd,
+  Home,
   LogOut,
   Map,
   MoreHorizontal,
@@ -89,6 +90,14 @@ const data = {
     },
   ],
   navMain: [
+    {
+      title: "Home",
+      url: "#",
+      icon: Home,
+      isActive: false,
+      hasItems: false,
+      href: '/'
+    },
     {
         title: "Inbox",
         url: "#",

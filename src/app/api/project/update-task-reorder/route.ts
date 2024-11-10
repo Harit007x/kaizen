@@ -26,12 +26,10 @@ export async function PUT(request: NextRequest) {
     let isMovedAbove;
     const source_task = tasks.find((task) => task.id === source_task_id)
     const destination_task = tasks.find((task) => task.id === destination_task_id)
-    console.log('destination task =', destination_task)
     if (!source_task || !destination_task) {
       return NextResponse.json({ message: "Invalid request" }, { status: 400 });
     }
     let destination_index = tasks.findIndex((task) => task.position === destination_task.position)
-    console.log('destination index =', destination_index)
     // check if there is anything above the destination item
     if (destination_index === 0) {
       isMovedAbove = false
@@ -53,9 +51,7 @@ export async function PUT(request: NextRequest) {
     } else if (source_task.position < destination_task.position) {
 
       const destination_index = tasks.findIndex((task) => task.position === destination_task.position)
-      console.log('moved below hot - - - - --- - - - - -', destination_index)
       const itemBelowDestination = tasks[destination_index + 1]
-      console.log('wtf wow bigga -', itemBelowDestination, destination_index)
 
       if (!itemBelowDestination) {
         return NextResponse.json({ message: "Invalid position" }, { status: 400 });

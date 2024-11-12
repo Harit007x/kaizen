@@ -1,4 +1,4 @@
-import type { MetadataRoute } from 'next'
+import type { MetadataRoute } from 'next';
 
 const baseUrl = 'https://kaizen.haritpatel.site';
 
@@ -10,5 +10,5 @@ export default function robots(): MetadataRoute.Robots {
       disallow: '/private/',
     },
     sitemap: baseUrl,
-  }
+  };
 }

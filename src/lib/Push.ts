@@ -1,14 +1,12 @@
-import { Dispatch, SetStateAction } from "react";
-import { toast } from "sonner";
+import { Dispatch, SetStateAction } from 'react';
+import { toast } from 'sonner';
 
-const SERVICE_WORKER_FILE_PATH = "/sw.js";
+const SERVICE_WORKER_FILE_PATH = '/sw.js';
 
 // Check if notification is supported
 export function checkNotificationSupported(): boolean {
   return (
-    "serviceWorker" in navigator &&
-    "PushManager" in window &&
-    "showNotification" in ServiceWorkerRegistration.prototype
+    'serviceWorker' in navigator && 'PushManager' in window && 'showNotification' in ServiceWorkerRegistration.prototype
   );
 }
 
@@ -17,18 +15,18 @@ export function checkForPermissionAndTrigger() {
   const state = Notification.permission;
 
   switch (state) {
-    case "denied":
+    case 'denied':
       // console.log('Notification permission denied.');
       break;
 
-    case "granted":
+    case 'granted':
       // console.log('Notification permission granted.');
       registerAndSubscribe();
       break;
 
-    case "default":
+    case 'default':
       Notification.requestPermission().then((permission) => {
-        if (permission === "granted") {
+        if (permission === 'granted') {
           // console.log('Notification permission granted.');
           registerAndSubscribe();
         } else {
@@ -48,7 +46,7 @@ export async function registerAndSubscribe() {
     // Make the worker Subscribe to push
     await subscribe();
   } catch (error) {
-    console.error("Failed to register service-worker: ", error);
+    console.error('Failed to register service-worker: ', error);
   }
 }
 
@@ -69,17 +67,17 @@ async function subscribe() {
       submitSubscription(subscription);
     })
     .catch((e) => {
-      console.error("Failed to subscribe cause of: ", e);
+      console.error('Failed to subscribe cause of: ', e);
     });
 }
 
 // Backend Requests
 async function submitSubscription(subscription: PushSubscription) {
-  const endpointUrl = "/api/web-push/subscription";
+  const endpointUrl = '/api/web-push/subscription';
   const res = await fetch(endpointUrl, {
-    method: "POST",
+    method: 'POST',
     headers: {
-      "Content-Type": "application/json",
+      'Content-Type': 'application/json',
     },
     body: JSON.stringify({ subscription }),
   });

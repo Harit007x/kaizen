@@ -1,10 +1,10 @@
-"use client";
+'use client';
 
-import { Card } from "@/components/ui/card";
-import TaskCard from "./TaskCard";
-import { dropTargetForElements } from "@atlaskit/pragmatic-drag-and-drop/element/adapter";
-import { useEffect, useRef, useState } from "react";
-import invariant from "tiny-invariant";
+import { Card } from '@/components/ui/card';
+import TaskCard from './TaskCard';
+import { dropTargetForElements } from '@atlaskit/pragmatic-drag-and-drop/element/adapter';
+import { useEffect, useRef, useState } from 'react';
+import invariant from 'tiny-invariant';
 
 interface Card {
   id: number;
@@ -31,7 +31,7 @@ export default function Column({ cards, title, id }: ColumnProps) {
       onDragEnter: () => setIsDraggedOver(true),
       onDragLeave: () => setIsDraggedOver(false),
       onDrop: () => setIsDraggedOver(false),
-      getData: () => ({ type: "column", columnId: id }),
+      getData: () => ({ type: 'column', columnId: id }),
       getIsSticky: () => true,
     });
   }, [id]);
@@ -39,7 +39,7 @@ export default function Column({ cards, title, id }: ColumnProps) {
   return (
     <div
       className={`bg-white rounded-lg shadow-md p-4 w-64 
-        ${isDraggedOver &&   ""}`}
+        ${isDraggedOver && ''}`}
       ref={columnRef}
     >
       <h1 className="text-lg font-bold mb-4">{title}</h1>

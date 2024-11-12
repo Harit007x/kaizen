@@ -1,10 +1,7 @@
-'use client'
+'use client';
 
 import { GripVertical } from 'lucide-react';
-import {
-  draggable,
-  dropTargetForElements,
-} from '@atlaskit/pragmatic-drag-and-drop/element/adapter';
+import { draggable, dropTargetForElements } from '@atlaskit/pragmatic-drag-and-drop/element/adapter';
 import { setCustomNativeDragPreview } from '@atlaskit/pragmatic-drag-and-drop/element/set-custom-native-drag-preview';
 import { pointerOutsideOfPreview } from '@atlaskit/pragmatic-drag-and-drop/element/pointer-outside-of-preview';
 import { combine } from '@atlaskit/pragmatic-drag-and-drop/combine';
@@ -117,7 +114,7 @@ export function Task({ task }: { task: TTask }) {
         onDrop() {
           setState(idle);
         },
-      }),
+      })
     );
   }, [task]);
 

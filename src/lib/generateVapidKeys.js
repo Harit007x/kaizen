@@ -1,4 +1,4 @@
-const webPush = require("web-push");
+const webPush = require('web-push');
 
 const vapidKeys = webPush.generateVAPIDKeys();
 

@@ -1,33 +1,31 @@
-import prisma from "@/db";
-import { authOptions } from "@/lib/auth";
-import { getServerSession } from "next-auth";
-import { NextRequest, NextResponse } from "next/server";
+import prisma from '@/db';
+import { authOptions } from '@/lib/auth';
+import { getServerSession } from 'next-auth';
+import { NextRequest, NextResponse } from 'next/server';
 
 export async function GET(request: NextRequest) {
   try {
-
-
     const url = new URL(request.url);
-    const workspace_id = url.searchParams.get("workspace_id");
+    const workspace_id = url.searchParams.get('workspace_id');
 
     if (!workspace_id) {
-      return NextResponse.json({ message: "Invalid request" }, { status: 400 });
+      return NextResponse.json({ message: 'Invalid request' }, { status: 400 });
     }
 
     const session: any = await getServerSession(authOptions);
     if (!session?.user) {
-      return NextResponse.json({ message: "Please sign in first to continue" }, { status: 401 });
+      return NextResponse.json({ message: 'Please sign in first to continue' }, { status: 401 });
     }
 
     const board = await prisma.project.findFirst({
       where: {
         userId: session.user.id,
-        workspaceId: workspace_id
+        workspaceId: workspace_id,
       },
       include: {
         categories: {
           orderBy: {
-            position: "asc",
+            position: 'asc',
           },
           select: {
             id: true,
@@ -35,7 +33,7 @@ export async function GET(request: NextRequest) {
             position: true,
             tasks: {
               orderBy: {
-                position: "asc",
+                position: 'asc',
               },
               select: {
                 id: true,
@@ -43,17 +41,17 @@ export async function GET(request: NextRequest) {
                 description: true,
                 priority: true,
                 isCompleted: true,
-              }
-            }
-          }
-        }
+              },
+            },
+          },
+        },
       },
     });
 
-    const columnMap: any = []
-    const columnIds: any = []
+    const columnMap: any = [];
+    const columnIds: any = [];
     board?.categories?.forEach((category: any) => {
-      columnIds.push(category.title.toLowerCase())
+      columnIds.push(category.title.toLowerCase());
       const items = category.tasks.map((task: any) => ({
         ...task,
         itemId: `item-${task.id}`, // Customize itemId logic as needed
@@ -63,29 +61,26 @@ export async function GET(request: NextRequest) {
         title: category.title,
         columnId: category.title.toLowerCase(),
         items: items,
-        id: category.id
-      })
+        id: category.id,
+      });
     });
 
     const data = {
-      "id": board?.id,
-      "name": board?.name,
-      "userId": board?.userId,
-      "columnMap": columnMap,
-    }
+      id: board?.id,
+      name: board?.name,
+      userId: board?.userId,
+      columnMap: columnMap,
+    };
 
     return NextResponse.json(
       {
-        message: "Project details fetched successfully",
-        data: data
+        message: 'Project details fetched successfully',
+        data: data,
       },
       { status: 200 }
     );
   } catch (error) {
     console.error(error);
-    return NextResponse.json(
-      { message: "Something went wrong" },
-      { status: 500 }
-    );
+    return NextResponse.json({ message: 'Something went wrong' }, { status: 500 });
   }
 }

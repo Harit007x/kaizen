@@ -1,12 +1,12 @@
-"use client";
+'use client';
 
-import Column from "@/components/rocket-dnd/Column";
-import { getReorderDestinationIndex } from "@atlaskit/pragmatic-drag-and-drop-hitbox/util/get-reorder-destination-index";
-import { monitorForElements } from "@atlaskit/pragmatic-drag-and-drop/element/adapter";
-import { reorder } from "@atlaskit/pragmatic-drag-and-drop/reorder";
-import { ReactNode, useCallback, useEffect, useState } from "react";
-import { extractClosestEdge } from "@atlaskit/pragmatic-drag-and-drop-hitbox/closest-edge";
-import { BOARD_COLUMNS } from "./data";
+import Column from '@/components/rocket-dnd/Column';
+import { getReorderDestinationIndex } from '@atlaskit/pragmatic-drag-and-drop-hitbox/util/get-reorder-destination-index';
+import { monitorForElements } from '@atlaskit/pragmatic-drag-and-drop/element/adapter';
+import { reorder } from '@atlaskit/pragmatic-drag-and-drop/reorder';
+import { ReactNode, useCallback, useEffect, useState } from 'react';
+import { extractClosestEdge } from '@atlaskit/pragmatic-drag-and-drop-hitbox/closest-edge';
+import { BOARD_COLUMNS } from './data';
 
 interface HandleDropProps {
   source: {
@@ -54,9 +54,7 @@ export default function Inbox() {
       // Remove the moved card from the source column
       const newSourceColumnData = {
         ...sourceColumnData,
-        cards: sourceColumnData.cards.filter(
-          (card) => card.id !== cardToMove.id
-        ),
+        cards: sourceColumnData.cards.filter((card) => card.id !== cardToMove.id),
       };
 
       // Create a copy of the destination column's cards array
@@ -115,7 +113,7 @@ export default function Inbox() {
         return;
       }
       // Check if the source of the drag is a card to handle card-specific logic
-      if (source.data.type === "card") {
+      if (source.data.type === 'card') {
         // Retrieve the ID of the card being dragged
         const draggedCardId = source.data.cardId;
 
@@ -129,9 +127,7 @@ export default function Inbox() {
         const sourceColumnData = columnData[sourceColumnId];
 
         // Get the index of the card being dragged in the source column
-        const draggedCardIndex = sourceColumnData.cards.findIndex(
-          (card) => card.id === draggedCardId
-        );
+        const draggedCardIndex = sourceColumnData.cards.findIndex((card) => card.id === draggedCardId);
 
         if (location.current.dropTargets.length === 1) {
           const [destinationColumnRecord] = location.current.dropTargets;
@@ -143,7 +139,7 @@ export default function Inbox() {
               startIndex: draggedCardIndex,
               indexOfTarget: sourceColumnData.cards.length - 1,
               closestEdgeOfTarget: null,
-              axis: "vertical",
+              axis: 'vertical',
             });
 
             reorderCard({
@@ -164,8 +160,7 @@ export default function Inbox() {
 
         if (location.current.dropTargets.length === 2) {
           // Destructure and extract the destination card and column data from the drop targets
-          const [destinationCardRecord, destinationColumnRecord] =
-            location.current.dropTargets;
+          const [destinationCardRecord, destinationColumnRecord] = location.current.dropTargets;
 
           // Extract the destination column ID from the destination column data
           const destinationColumnId = destinationColumnRecord.data.columnId;
@@ -179,9 +174,7 @@ export default function Inbox() {
           );
 
           // Determine the closest edge of the target card: top or bottom
-          const closestEdgeOfTarget = extractClosestEdge(
-            destinationCardRecord.data
-          );
+          const closestEdgeOfTarget = extractClosestEdge(destinationCardRecord.data);
 
           // Check if the source and destination columns are the same
           if (sourceColumnId === destinationColumnId) {
@@ -190,7 +183,7 @@ export default function Inbox() {
               startIndex: draggedCardIndex,
               indexOfTarget,
               closestEdgeOfTarget,
-              axis: "vertical",
+              axis: 'vertical',
             });
 
             // Perform the card reordering within the same column
@@ -203,10 +196,7 @@ export default function Inbox() {
             return;
           }
 
-          const destinationIndex =
-            closestEdgeOfTarget === "bottom"
-              ? indexOfTarget + 1
-              : indexOfTarget;
+          const destinationIndex = closestEdgeOfTarget === 'bottom' ? indexOfTarget + 1 : indexOfTarget;
 
           moveCard({
             movedCardIndexInSourceColumn: draggedCardIndex,

@@ -1,34 +1,24 @@
-"use client";
-import { Dispatch, FormEvent, SetStateAction, useState } from "react";
+'use client';
+import { Dispatch, FormEvent, SetStateAction, useState } from 'react';
 
-import { Icons } from "@/components/icons";
-import { Button } from "@/components/ui/button";
-import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormMessage,
-} from "@/components/ui/form";
-import { Input } from "@/components/ui/input";
-import {
-  InputOTP,
-  InputOTPGroup,
-  InputOTPSlot,
-} from "@/components/ui/input-otp";
-import { signUpSchema, verifySchema } from "@/zod/user";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { signIn } from "next-auth/react";
-import Link from "next/link";
-import { useRouter } from "next/navigation";
-import { useForm, UseFormReturn } from "react-hook-form";
-import { toast } from "sonner";
-import * as z from "zod";
+import { Icons } from '@/components/icons';
+import { Button } from '@/components/ui/button';
+import { Form, FormControl, FormField, FormItem, FormMessage } from '@/components/ui/form';
+import { Input } from '@/components/ui/input';
+import { InputOTP, InputOTPGroup, InputOTPSlot } from '@/components/ui/input-otp';
+import { signUpSchema, verifySchema } from '@/zod/user';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { signIn } from 'next-auth/react';
+import Link from 'next/link';
+import { useRouter } from 'next/navigation';
+import { useForm, UseFormReturn } from 'react-hook-form';
+import { toast } from 'sonner';
+import * as z from 'zod';
 
 export default function SignUpPage() {
   const router = useRouter();
 
-  const [otp, setOtp] = useState<string>("");
+  const [otp, setOtp] = useState<string>('');
   const [showOTPPage, setShowOTPPage] = useState<boolean>(false);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [userData, setUserData] = useState<{
@@ -39,18 +29,18 @@ export default function SignUpPage() {
   const form = useForm<z.infer<typeof signUpSchema>>({
     resolver: zodResolver(signUpSchema),
     defaultValues: {
-      email: "",
-      password: "",
+      email: '',
+      password: '',
     },
   });
 
   async function sendOTP(values: z.infer<typeof signUpSchema>) {
     setIsLoading(true);
     try {
-      const res = await fetch("/api/auth/send-otp", {
-        method: "POST",
+      const res = await fetch('/api/auth/send-otp', {
+        method: 'POST',
         headers: {
-          "Content-Type": "application/json",
+          'Content-Type': 'application/json',
         },
         body: JSON.stringify({
           email: values.email,
@@ -78,7 +68,7 @@ export default function SignUpPage() {
     setIsLoading(true);
 
     if (!userData) {
-      return toast.error("Please fill in all fields.");
+      return toast.error('Please fill in all fields.');
     }
 
     const { email, password } = await verifySchema.parseAsync({
@@ -87,7 +77,7 @@ export default function SignUpPage() {
       otp,
     });
     if (!otp) {
-      return toast.error("Please Enter 6 digit OTP");
+      return toast.error('Please Enter 6 digit OTP');
     }
 
     const body = {
@@ -97,14 +87,14 @@ export default function SignUpPage() {
     };
 
     if (!email || !password) {
-      return toast.error("Account details are not saved.");
+      return toast.error('Account details are not saved.');
     }
 
     try {
-      const res = await fetch("/api/auth/sign-up", {
-        method: "POST",
+      const res = await fetch('/api/auth/sign-up', {
+        method: 'POST',
         headers: {
-          "Content-Type": "application/json",
+          'Content-Type': 'application/json',
         },
         body: JSON.stringify(body),
       });
@@ -127,12 +117,7 @@ export default function SignUpPage() {
   return (
     <main className="flex h-screen w-full items-center justify-center bg-gray-100 p-4 sm:p-0">
       {showOTPPage ? (
-        <OTPForm
-          otp={otp}
-          setOtp={setOtp}
-          handleVerifyOTP={handleVerifyOTP}
-          isLoading={isLoading}
-        />
+        <OTPForm otp={otp} setOtp={setOtp} handleVerifyOTP={handleVerifyOTP} isLoading={isLoading} />
       ) : (
         <SignUpForm form={form} isLoading={isLoading} sendOTP={sendOTP} />
       )}
@@ -157,12 +142,8 @@ function SignUpForm({ form, isLoading, sendOTP }: FormProps) {
   return (
     <div className="relative mx-auto flex w-full max-w-md flex-col justify-center space-y-6 rounded-lg bg-white p-6 sm:p-8 shadow-lg">
       <div className="flex flex-col space-y-2 text-center">
-        <h1 className="text-2xl font-bold text-gray-800">
-          Create an Account
-        </h1>
-        <p className="text-sm text-gray-600">
-          Enter your details to create a new account
-        </p>
+        <h1 className="text-2xl font-bold text-gray-800">Create an Account</h1>
+        <p className="text-sm text-gray-600">Enter your details to create a new account</p>
       </div>
       <Form {...form}>
         <form onSubmit={form.handleSubmit(sendOTP)} className="space-y-4">
@@ -174,12 +155,7 @@ function SignUpForm({ form, isLoading, sendOTP }: FormProps) {
               render={({ field }) => (
                 <FormItem>
                   <FormControl>
-                    <Input
-                      type="email"
-                      placeholder="Email"
-                      className="w-full"
-                      {...field}
-                    />
+                    <Input type="email" placeholder="Email" className="w-full" {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -200,9 +176,7 @@ function SignUpForm({ form, isLoading, sendOTP }: FormProps) {
             />
           </div>
           <Button className="w-full" type="submit" disabled={isLoading}>
-            {isLoading && (
-              <Icons.spinner className="mr-2 h-4 w-4 animate-spin" />
-            )}
+            {isLoading && <Icons.spinner className="mr-2 h-4 w-4 animate-spin" />}
             Sign Up
           </Button>
         </form>
@@ -212,12 +186,12 @@ function SignUpForm({ form, isLoading, sendOTP }: FormProps) {
         className="w-full"
         disabled={isLoading}
         onClick={async () => {
-          const res = await signIn("google", { redirect: false });
+          const res = await signIn('google', { redirect: false });
 
           if (!res?.error) {
-            toast.success("Signed In");
+            toast.success('Signed In');
           } else {
-            toast.error("oops something went wrong..!");
+            toast.error('oops something went wrong..!');
           }
         }}
       >
@@ -226,18 +200,18 @@ function SignUpForm({ form, isLoading, sendOTP }: FormProps) {
       </Button>
 
       <div className="text-center text-sm text-gray-500">
-        By signing up, you agree to our{" "}
+        By signing up, you agree to our{' '}
         <Link href="/terms-of-service" className="underline">
           Terms of Service
-        </Link>{" "}
-        and{" "}
+        </Link>{' '}
+        and{' '}
         <Link href="/privacy-policy" className="underline">
           Privacy Policy
         </Link>
       </div>
 
       <p className="text-center text-sm text-gray-500">
-        Already have an account?{" "}
+        Already have an account?{' '}
         <Link href="/sign-in" className="hover:underline text-blue-500">
           Sign In
         </Link>

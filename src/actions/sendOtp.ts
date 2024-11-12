@@ -1,6 +1,6 @@
-import MailTemplate from "@/components/emailTemplates/MailTemplate";
-import { sendMail } from "@/lib/resend";
-import otpGenerator from "otp-generator";
+import MailTemplate from '@/components/emailTemplates/MailTemplate';
+import { sendMail } from '@/lib/resend';
+import otpGenerator from 'otp-generator';
 
 export async function generateAndSendOtp(email: string) {
   const otp = otpGenerator.generate(6, {
@@ -10,11 +10,7 @@ export async function generateAndSendOtp(email: string) {
   });
 
   try {
-    const { data, error } = await sendMail(
-      email,
-      "Email Verification",
-      MailTemplate({ otp: otp })
-    );
+    const { data, error } = await sendMail(email, 'Email Verification', MailTemplate({ otp: otp }));
 
     if (error) {
       return null;
@@ -22,7 +18,7 @@ export async function generateAndSendOtp(email: string) {
 
     return otp;
   } catch (error) {
-    console.error("Error sending email:", error);
+    console.error('Error sending email:', error);
     return null;
   }
 }

@@ -1,4 +1,4 @@
-'use client'
+'use client';
 import { useEffect, useState } from 'react';
 import { getTasks, type TTask } from './task-data';
 import { Task } from './task';
@@ -48,7 +48,7 @@ export function List() {
               indexOfTarget,
               closestEdgeOfTarget,
               axis: 'vertical',
-            }),
+            })
           );
         });
         // Being simple and just querying for the task after the drop.

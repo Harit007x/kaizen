@@ -1,13 +1,13 @@
-import { cloudinary } from "./cloudinary";
+import { cloudinary } from './cloudinary';
 
 export async function uploadToCloudinary(fileUri: string, fileName: string) {
   try {
     const response = await cloudinary.uploader.upload(fileUri, {
       invalidate: true,
-      resource_type: "auto",
+      resource_type: 'auto',
       filename_override: fileName,
       use_filename: true,
-      folder: "kaizen",
+      folder: 'kaizen',
     });
     return response;
   } catch (error) {

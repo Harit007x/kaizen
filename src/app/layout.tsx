@@ -1,21 +1,18 @@
-import { GoogleAnalytics } from "@/components/analytics/GoogleAnalytics";
-import { siteConfig } from "@/config/siteConfig";
-import { Manrope } from "next/font/google";
-import "./globals.css";
-import Providers from "./Providers";
-import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar"
-import localFont from "next/font/local";
-import { Toaster } from "@/components/ui/sonner";
-import SideBar from "@/components/add-sidebar";
+import { siteConfig } from '@/config/siteConfig';
+import './globals.css';
+import Providers from './Providers';
+import localFont from 'next/font/local';
+import { Toaster } from '@/components/ui/sonner';
+import SessionChange from '@/components/others/session-change';
 
 // Setup Font
 const geistSans = localFont({
-  src: "../../public/fonts/GeistVF.woff",
-  variable: "--font-geist-sans",
+  src: '../../public/fonts/GeistVF.woff',
+  variable: '--font-geist-sans',
 });
 const geistMono = localFont({
-  src: "../../public/fonts/GeistMonoVF.woff",
-  variable: "--font-geist-mono",
+  src: '../../public/fonts/GeistMonoVF.woff',
+  variable: '--font-geist-mono',
 });
 
 // Metadata
@@ -30,10 +27,11 @@ export default function RootLayout({
     <html lang="en">
       <body className={`${geistSans.variable} ${geistMono.variable}`}>
         {/* <GoogleAnalytics /> */}
-          <Providers>
-              {children}
-            <Toaster />
-          </Providers>
+        <Providers>
+          <SessionChange />
+          {children}
+          <Toaster />
+        </Providers>
       </body>
     </html>
   );

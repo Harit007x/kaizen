@@ -1,6 +1,6 @@
 // sw = service worker
 
-self.addEventListener('install', event => {
+self.addEventListener('install', (event) => {
   // Place to perform any setup tasks
   event.waitUntil(self.skipWaiting()); // Activate immediately
 });
@@ -41,12 +41,12 @@ self.addEventListener('push', function (event) {
   event.waitUntil(
     self.registration.showNotification(notificationTitle, notificationOptions).then(() => {
       sendDeliveryReportAction();
-    }),
+    })
   );
 });
 
 // Event listener for notification click to open the URL
-self.addEventListener('notificationclick', event => {
+self.addEventListener('notificationclick', (event) => {
   event.notification.close(); // Close the notification on click
 
   const { url } = event.notification.data;
@@ -63,11 +63,11 @@ self.addEventListener('notificationclick', event => {
       } else {
         console.warn('No URL to open on notification click');
       }
-    })(),
+    })()
   );
 });
 
 // Event listener for notification close
-self.addEventListener('notificationclose', event => {
+self.addEventListener('notificationclose', (event) => {
   console.info('Notification closed');
 });

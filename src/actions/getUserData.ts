@@ -1,5 +1,5 @@
-import prisma from "@/db";
-import { Session } from "next-auth";
+import prisma from '@/db';
+import { Session } from 'next-auth';
 
 export async function getUserData(session: Session | null) {
   if (!session?.user) {

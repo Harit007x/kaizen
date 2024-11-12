@@ -77,7 +77,7 @@ export const Icons = {
   settings: Settings,
   billing: CreditCard,
   ellipsis: MoreVertical,
-  add: Plus,
+  plus: Plus,
   warning: AlertTriangle,
   user: User,
   arrowRight: ArrowRight,

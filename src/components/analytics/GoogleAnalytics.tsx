@@ -1,8 +1,8 @@
-"use client";
+'use client';
 
-import Script from "next/script";
+import Script from 'next/script';
 
-const GA_TRACKING_ID = "G-MTPSDN78B0";
+const GA_TRACKING_ID = 'G-MTPSDN78B0';
 
 export const GoogleAnalytics = () => {
   return (
@@ -22,10 +22,10 @@ export const GoogleAnalytics = () => {
           }
 
           //@ts-ignore
-          gtag("js", new Date());
+          gtag('js', new Date());
 
           //@ts-ignore
-          gtag("config", GA_TRACKING_ID);
+          gtag('config', GA_TRACKING_ID);
         }}
       />
     </>

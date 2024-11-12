@@ -1,17 +1,18 @@
-import OnboardingTemplate from "@/components/emailTemplates/OnboardingTemplate";
-import prisma from "@/db";
-import { compare } from "bcrypt";
-import { AuthOptions, Session } from "next-auth";
-import { JWT } from "next-auth/jwt";
-import CredentialsProvider from "next-auth/providers/credentials";
-import Google from "next-auth/providers/google";
-import { sendMail } from "./resend";
+import OnboardingTemplate from '@/components/emailTemplates/OnboardingTemplate';
+import prisma from '@/db';
+import { compare } from 'bcrypt';
+import { AuthOptions, Session } from 'next-auth';
+import { JWT } from 'next-auth/jwt';
+import CredentialsProvider from 'next-auth/providers/credentials';
+import Google from 'next-auth/providers/google';
+import { sendMail } from './resend';
 
 export interface session extends Session {
   user: {
     id: string;
     email: string;
     name: string;
+    profilePicture: string;
   };
 }
 
@@ -20,21 +21,22 @@ interface token extends JWT {
   jwtToken: string;
 }
 
-interface user {
+interface IUser {
   id: string;
   name: string;
   email: string;
   token: string;
+  profilePicture: string;
 }
 
 export const authOptions: AuthOptions = {
   providers: [
     Google({
-      clientId: process.env.GOOGLE_CLIENT_ID || "",
-      clientSecret: process.env.GOOGLE_CLIENT_SECRET || "",
+      clientId: process.env.GOOGLE_CLIENT_ID || '',
+      clientSecret: process.env.GOOGLE_CLIENT_SECRET || '',
       async profile(profile) {
         const { email, name, picture } = profile;
-
+        console.log('check the user create =', email, name, picture);
         const user = await prisma.user.findUnique({
           where: { email },
           include: {
@@ -42,18 +44,15 @@ export const authOptions: AuthOptions = {
           },
         });
 
+        console.log(' user =', user);
+
         if (user) {
-          const hasEmailAccount = user.accounts.some(
-            (account) => account.provider === "EMAIL"
-          );
-          if (hasEmailAccount) {
-            return user;
-          }
+          return user;
         }
 
         const newAccount = await prisma.account.create({
           data: {
-            provider: "GOOGLE",
+            provider: 'GOOGLE',
             providerAccountId: profile.sub,
             refreshToken: profile.refresh_token,
             accessToken: profile.access_token,
@@ -61,23 +60,23 @@ export const authOptions: AuthOptions = {
               create: {
                 email,
                 name,
-                image: picture,
+                profilePicture: picture,
                 isVerified: true,
               },
             },
           },
         });
 
-        await sendMail(email, "Welcome to Kaizen", OnboardingTemplate());
+        await sendMail(email, 'Welcome to Kaizen', OnboardingTemplate());
 
         return newAccount;
       },
     }),
     CredentialsProvider({
-      name: "Credentials",
+      name: 'Credentials',
       credentials: {
-        email: { label: "email", type: "text" },
-        name: { label: "name", type: "text" },
+        email: { label: 'email', type: 'text' },
+        name: { label: 'name', type: 'text' },
       },
       async authorize(credentials: any) {
         const { email, password } = credentials;
@@ -90,9 +89,7 @@ export const authOptions: AuthOptions = {
         });
 
         if (user) {
-          const hasEmailAccount = user.accounts.some(
-            (account) => account.provider === "EMAIL"
-          );
+          const hasEmailAccount = user.accounts.some((account) => account.provider === 'EMAIL');
           if (hasEmailAccount && user.password) {
             const isMatch = await compare(password, user.password);
             if (isMatch) {
@@ -105,33 +102,36 @@ export const authOptions: AuthOptions = {
       },
     }),
   ],
-  secret: process.env.NEXTAUTH_SECRET || "",
+  secret: process.env.NEXTAUTH_SECRET || '',
   callbacks: {
     jwt: async ({ token, user }): Promise<JWT> => {
       const newToken: token = token as token;
-
+      console.log('token =', user);
       if (user) {
         newToken.uid = user.id;
-        newToken.jwtToken = (user as user).token;
+        newToken.jwtToken = (user as IUser).token;
+        newToken.profilePicture = (user as IUser).profilePicture;
       }
       return newToken;
     },
-    session: async ({ session, token }) => {
+    session: async ({ session, token }: any) => {
       const newSession: session = session as session;
+      console.log('sesison from auth =', token);
       if (newSession.user && token.uid) {
         newSession.user.id = token.uid as string;
-        newSession.user.email = session.user?.email ?? "";
+        newSession.user.email = session.user?.email ?? '';
+        newSession.user.profilePicture = token.profilePicture;
       }
       return newSession!;
     },
     redirect: async ({ url, baseUrl }) => {
-      if (url.includes("/sign-in") || url.includes("/sign-up")) {
+      if (url.includes('/sign-in') || url.includes('/sign-up')) {
         return `${baseUrl}/`;
       }
       return baseUrl;
     },
   },
   pages: {
-    signIn: "/sign-in",
+    signIn: '/sign-in',
   },
 };

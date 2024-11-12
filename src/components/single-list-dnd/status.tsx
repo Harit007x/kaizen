@@ -16,9 +16,7 @@ const label: { [Key in TStatus]: string } = {
 export function Status({ status }: { status: TStatus }) {
   return (
     <div className="flex w-[100px] justify-end">
-      <span
-        className={`${bgColor[status]} uppercase p-1 rounded font-semibold flex-shrink-0 text-xs text-slate-900 `}
-      >
+      <span className={`${bgColor[status]} uppercase p-1 rounded font-semibold flex-shrink-0 text-xs text-slate-900 `}>
         {label[status]}
       </span>
     </div>

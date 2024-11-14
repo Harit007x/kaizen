@@ -30,7 +30,7 @@ export async function POST(request: NextRequest) {
     const category = await prisma.category.create({
       data: {
         projectId: project_id,
-        title: name.toLowerCase(),
+        title: name,
         position: (previous_category_count + 1) * 10,
       },
     });

@@ -24,6 +24,16 @@ body {
     --accent-foreground: 240 5.9% 10%;
     --destructive: 0 84.2% 60.2%;
     --destructive-foreground: 0 0% 98%;
+    --blue: 202 100% 50%;
+    --blueBackground: 205 100% 93%;
+    --red : 0 100% 59%;
+    --redBackground : 0 100% 95%;
+    --green: 144 90% 36%;
+    --greenBackground: 142 50% 89%;
+    --purple: 259 100% 71%;
+    --purpleBackground: 259 100% 95%;
+    --orange: 36 100% 50%;
+    --orangeBackground: 36 100% 91%;
     --border: 240 5.9% 90%;
     --input: 240 5.9% 90%;
     --ring: 240 10% 3.9%;
@@ -43,6 +53,11 @@ body {
     --sidebar-ring: 217.2 91.2% 59.8%;
   }
   .dark {
+    --blueBackground: 205 100% 10%;
+    --redBackground : 0 100% 10%;
+    --greenBackground: 142 50% 10%;
+    --purpleBackground: 259 100% 10%;
+    --orangeBackground: 36, 100%, 10%;
     --background: 240 10% 3.9%;
     --foreground: 0 0% 98%;
     --card: 240 10% 3.9%;

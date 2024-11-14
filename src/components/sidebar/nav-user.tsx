@@ -15,8 +15,10 @@ import {
 import { SidebarMenu, SidebarMenuButton, SidebarMenuItem, useSidebar } from '@/components/ui/sidebar';
 import { userStore } from '@/store';
 import { signOut } from 'next-auth/react';
+import { useTheme } from 'next-themes';
 
 export function NavUser() {
+  const { setTheme, theme } = useTheme();
   const { isMobile } = useSidebar();
   const { user } = userStore();
   console.log('check the image', user);
@@ -73,6 +75,10 @@ export function NavUser() {
               </DropdownMenuGroup>
               <DropdownMenuSeparator />
               <DropdownMenuGroup>
+                <DropdownMenuItem onClick={() => setTheme('dark')}>
+                  <BadgeCheck />
+                  {theme === 'dark' ? 'Dark' : 'Light'}
+                </DropdownMenuItem>
                 <DropdownMenuItem>
                   <BadgeCheck />
                   Account

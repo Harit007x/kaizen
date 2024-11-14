@@ -104,24 +104,23 @@ const Category = (props: CategoryProps) => {
   console.log('closet edge data =', closestEdge);
   return (
     <div
-      className={`min-w-[300px] flex text-foreground flex-col border-[1px] p-4 bg-white rounded-lg hover:border-border 
+      className={`min-w-[300px] flex text-foreground flex-col border-[1px] p-4 bg-secondary/80 rounded-md hover:border-border 
             ${isReordering && 'opacity-30'} relative`}
       ref={columnRef}
     >
       <div>
         <div>
-          <h1 className="text-lg font-bold mb-1">{props.title}</h1>
-          <h3 className="text-xs mb-4">{props.id}</h3>
+          <h1 className="text-sm font-bold mb-2">{props.title}</h1>
         </div>
         {closestEdge && 'visible'}
-
+        {/* 
         <form className="flex flex-col justify-center" onSubmit={handleTaskCreate}>
           <Input placeholder="Name" onChange={(e) => setTaskName(e.target.value)} disabled={isLoading} />
           <Input placeholder="Description" onChange={(e) => setTaskDescription(e.target.value)} disabled={isLoading} />
           <Button type="submit" disabled={isLoading}>
             Create
           </Button>
-        </form>
+        </form> */}
 
         <div className="space-y-2 flex-1">
           {props.tasks.map((task: TaskProps) => (

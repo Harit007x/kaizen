@@ -1,5 +1,5 @@
 'use client';
-
+// app/project/[project_id]/page.tsx
 import { extractClosestEdge } from '@atlaskit/pragmatic-drag-and-drop-hitbox/closest-edge';
 import { getReorderDestinationIndex } from '@atlaskit/pragmatic-drag-and-drop-hitbox/util/get-reorder-destination-index';
 import { combine } from '@atlaskit/pragmatic-drag-and-drop/combine';
@@ -52,7 +52,14 @@ interface SessionUser {
   email: string;
   image: string;
 }
-export default function TestPage() {
+
+interface ProjectPageProps {
+  params: { project_id: string };
+}
+
+export default function ProjectPage({ params }: ProjectPageProps) {
+  const { project_id } = params;
+
   const session = useSession();
   const user = session.data?.user as SessionUser;
 
@@ -63,7 +70,7 @@ export default function TestPage() {
     }
   }, [user]);
 
-  const { projectId, data, setData, fetchProjectDetails } = UseProjectDetails('e3c67c47-ee5c-4fb5-9c26-9917aac480cc');
+  const { projectId, projectName, columnData, setColumnData, fetchProjectDetails } = UseProjectDetails(project_id);
   async function updateCategoryReorder(projectId: string, source_column_id: string, destination_column_id: string) {
     try {
       const response = await fetch('/api/project/update-category-reorder', {
@@ -155,7 +162,7 @@ export default function TestPage() {
   //   const [data, setData] = useState(DATA);
   const reorderColumn = useCallback(
     ({ sourceIndex, destinationIndex }: ReorderColumnProps) => {
-      setData((prevData) => {
+      setColumnData((prevData) => {
         const newData = [...prevData];
         const [movedColumn] = newData.splice(sourceIndex, 1);
         newData.splice(destinationIndex, 0, movedColumn);
@@ -165,8 +172,8 @@ export default function TestPage() {
         newData.map((category) => {
           categories.push({ id: category.id });
         });
-        const source_column_id = data[sourceIndex].id;
-        const destination_column_id = data[destinationIndex].id;
+        const source_column_id = columnData[sourceIndex].id;
+        const destination_column_id = columnData[destinationIndex].id;
 
         updateCategoryReorder(projectId, source_column_id, destination_column_id);
 
@@ -184,8 +191,8 @@ export default function TestPage() {
       movedCardIndexInDestinationColumn = 0,
     }: MoveCardProps) => {
       // Ensure source and destination columns exist
-      const sourceColumnData = data.find((column) => column.id === sourceColumnId);
-      const destinationColumnData = data.find((column) => column.id === destinationColumnId);
+      const sourceColumnData = columnData.find((column) => column.id === sourceColumnId);
+      const destinationColumnData = columnData.find((column) => column.id === destinationColumnId);
 
       if (!sourceColumnData || !destinationColumnData) {
         console.error('Invalid source or destination column ID');
@@ -211,7 +218,7 @@ export default function TestPage() {
       updatedDestinationCards.splice(destinationIndex, 0, cardToMove);
 
       // Update the state with the modified source and destination columns
-      const newData = data.map((column) => {
+      const newData = columnData.map((column) => {
         if (column.id === sourceColumnId) {
           return { ...column, items: updatedSourceCards };
         }
@@ -236,9 +243,9 @@ export default function TestPage() {
         isMovedBottom
       );
 
-      setData(newData);
+      setColumnData(newData);
     },
-    [data]
+    [columnData]
   );
 
   const reorderCard = useCallback(
@@ -246,7 +253,7 @@ export default function TestPage() {
       // Ensure the startIndex and finishIndex are different; no need to reorder if they’re the same
       if (startIndex === finishIndex) return;
       // Find the source column by ID
-      const sourceColumnData = data.find((column) => column.id === columnId);
+      const sourceColumnData = columnData.find((column) => column.id === columnId);
 
       if (sourceColumnData) {
         const updatedItems: any = reorder({
@@ -274,17 +281,17 @@ export default function TestPage() {
         // updateTaskPositions(projectId, tasks)
         console.log('update source col =', updatedSourceColumn);
 
-        const newData = data.map((column) => {
+        const newData = columnData.map((column) => {
           if (column.id === columnId) {
             return updatedSourceColumn;
           }
           return column;
         });
         console.log('reordered task =', newData);
-        setData(newData);
+        setColumnData(newData);
       }
     },
-    [data]
+    [columnData]
   );
 
   const handleDrop = useCallback(
@@ -304,7 +311,7 @@ export default function TestPage() {
         const sourceColumnId = sourceColumnRecord.data.columnId;
 
         // Get the data of the source column
-        const sourceColumnData = data.find((col) => col.id === sourceColumnId);
+        const sourceColumnData = columnData.find((col) => col.id === sourceColumnId);
 
         // Get the index of the card in the source column
         const indexOfSource = sourceColumnData?.items.findIndex((card) => card.id === draggedCardId);
@@ -319,7 +326,7 @@ export default function TestPage() {
           if (sourceColumnId === destinationColumnId) {
             const destinationIndex = getReorderDestinationIndex({
               startIndex: indexOfSource!,
-              indexOfTarget: data.findIndex((col) => col.id === destinationColumnId) - 1,
+              indexOfTarget: columnData.findIndex((col) => col.id === destinationColumnId) - 1,
               closestEdgeOfTarget: null,
               axis: 'vertical',
             });
@@ -335,7 +342,7 @@ export default function TestPage() {
 
           const destinationIndex = getReorderDestinationIndex({
             startIndex: indexOfSource!,
-            indexOfTarget: data.find((col) => col.id === destinationColumnId)!.items.length - 1,
+            indexOfTarget: columnData.find((col) => col.id === destinationColumnId)!.items.length - 1,
             closestEdgeOfTarget: null,
             axis: 'vertical',
           });
@@ -354,7 +361,7 @@ export default function TestPage() {
           const destinationColumnId = destinationColumnRecord.data.columnId;
 
           // Retrieve the destination column data using the destination column ID
-          const destinationColumn = data.find((col) => col.id === destinationColumnId);
+          const destinationColumn = columnData.find((col) => col.id === destinationColumnId);
 
           if (destinationColumn) {
             // Find the index of the target card within the destination column's cards
@@ -395,8 +402,10 @@ export default function TestPage() {
       }
 
       if (source.data.type === 'column' && source.data.columnId) {
-        const sourceIndex = data.findIndex((col) => col.id === source.data.columnId);
-        const destinationIndex = data.findIndex((col) => col.id === location.current.dropTargets[0].data.columnId);
+        const sourceIndex = columnData.findIndex((col) => col.id === source.data.columnId);
+        const destinationIndex = columnData.findIndex(
+          (col) => col.id === location.current.dropTargets[0].data.columnId
+        );
 
         console.log('source =', sourceIndex, 'destination =', destinationIndex);
 
@@ -405,7 +414,7 @@ export default function TestPage() {
         }
       }
     },
-    [data, reorderCard]
+    [columnData, reorderCard]
   );
 
   useEffect(() => {
@@ -474,7 +483,7 @@ export default function TestPage() {
     try {
       const formData = new FormData();
       formData.append('category_name', categoryName);
-      formData.append('project_id', 'b414b846-76cc-4827-b383-558b5b620fcb');
+      formData.append('project_id', projectId);
       console.log('formdata =', formData);
       const res = await fetch('/api/project/create-category', {
         method: 'POST',
@@ -496,23 +505,23 @@ export default function TestPage() {
     <div className="w-full overflow-x-scroll p-6 select-none bg-background flex flex-col h-screen gap-10">
       <div className="w-80 flex flex-col gap-4">
         <SidebarTrigger />
-
-        <form className="flex justify-center" onSubmit={handleWorkspaceCreate}>
+        <div className="text-xl font-extrabold">{projectName}</div>
+        {/* <form className="flex justify-center" onSubmit={handleWorkspaceCreate}>
           <Input placeholder="Workspace" onChange={(e) => setWorkspaceTitle(e.target.value)} disabled={isLoading} />
           <Button disabled={isLoading}>Create</Button>
-        </form>
-        <form className="flex justify-center" onSubmit={handleBoardCreate}>
+        </form> */}
+        {/* <form className="flex justify-center" onSubmit={handleBoardCreate}>
           <Input placeholder="Board" onChange={(e) => setProjectName(e.target.value)} disabled={isLoading} />
           <Button disabled={isLoading}>Create</Button>
-        </form>
+        </form> */}
         <form className="flex justify-center" onSubmit={handleCategoryCreate}>
           <Input placeholder="Category" onChange={(e) => setCategoryName(e.target.value)} disabled={isLoading} />
           <Button disabled={isLoading}>Create</Button>
         </form>
       </div>
       <div className="flex gap-4">
-        {data &&
-          Object.values(data).map((column) => (
+        {columnData &&
+          Object.values(columnData).map((column) => (
             <Category
               key={column.title}
               title={column.title}

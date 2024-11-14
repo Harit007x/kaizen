@@ -26,6 +26,8 @@ const useCreateProject = () => {
       } else {
         toast.error(data.message || 'Something went wrong');
       }
+
+      return res;
     } catch (error) {
       console.error(error);
       toast.error('Something went wrong');

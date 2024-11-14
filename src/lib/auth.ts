@@ -36,15 +36,13 @@ export const authOptions: AuthOptions = {
       clientSecret: process.env.GOOGLE_CLIENT_SECRET || '',
       async profile(profile) {
         const { email, name, picture } = profile;
-        console.log('check the user create =', email, name, picture);
         const user = await prisma.user.findUnique({
-          where: { email },
-          include: {
-            accounts: true,
-          },
+            where: { email },
+            include: {
+                accounts: true,
+            },
         });
 
-        console.log(' user =', user);
 
         if (user) {
           return user;
@@ -106,7 +104,6 @@ export const authOptions: AuthOptions = {
   callbacks: {
     jwt: async ({ token, user }): Promise<JWT> => {
       const newToken: token = token as token;
-      console.log('token =', user);
       if (user) {
         newToken.uid = user.id;
         newToken.jwtToken = (user as IUser).token;
@@ -116,7 +113,6 @@ export const authOptions: AuthOptions = {
     },
     session: async ({ session, token }: any) => {
       const newSession: session = session as session;
-      console.log('sesison from auth =', token);
       if (newSession.user && token.uid) {
         newSession.user.id = token.uid as string;
         newSession.user.email = session.user?.email ?? '';

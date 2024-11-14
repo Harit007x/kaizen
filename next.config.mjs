@@ -3,7 +3,7 @@
 const nextConfig = {
   /* config options here */
   images: {
-    domains: ['res.cloudinary.com'],
+    domains: ['res.cloudinary.com', 'lh3.googleusercontent.com'],
   },
 };
 

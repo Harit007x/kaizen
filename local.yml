@@ -1,4 +1,4 @@
-version: '3.8' # Add version if not specified
+version: '3.8'
 
 services:
   db:
@@ -16,6 +16,7 @@ services:
       interval: 10s
       timeout: 5s
       retries: 5
+    restart: always
 
   redis:
     image: redis:alpine

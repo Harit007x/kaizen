@@ -1,8 +1,9 @@
 import React, { useEffect, useState } from 'react';
 
 export const UseProjectDetails = (workspace_id: string) => {
-  const [data, setData] = useState<any>(null);
+  const [columnData, setColumnData] = useState<any>(null);
   const [projectId, setProjectId] = useState<string>('');
+  const [projectName, setProjectName] = useState<string>('');
   async function fetchProjectDetails() {
     try {
       const res = await fetch(`/api/project/get-project-details?workspace_id=${workspace_id}`, {
@@ -13,9 +14,10 @@ export const UseProjectDetails = (workspace_id: string) => {
         }
         return res.json();
       });
+      setProjectName(res.data.name);
       setProjectId(res.data.id);
       console.log('response =', res.data);
-      setData(res.data.columnMap);
+      setColumnData(res.data.columnMap);
     } catch (err) {
       console.log('Something went wrong :', err);
     }
@@ -27,8 +29,9 @@ export const UseProjectDetails = (workspace_id: string) => {
 
   return {
     fetchProjectDetails,
-    setData,
-    data,
+    setColumnData,
+    columnData,
     projectId,
+    projectName,
   };
 };

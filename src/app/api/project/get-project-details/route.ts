@@ -20,7 +20,7 @@ export async function GET(request: NextRequest) {
     const board = await prisma.project.findFirst({
       where: {
         userId: session.user.id,
-        workspaceId: workspace_id,
+        id: workspace_id,
       },
       include: {
         categories: {

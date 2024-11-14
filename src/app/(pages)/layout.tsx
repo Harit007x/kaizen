@@ -1,4 +1,4 @@
-import SideBar from '@/components/add-sidebar';
+import SideBar from '@/components/sidebar/add-sidebar';
 
 interface AuthLayoutProps {
   children: React.ReactNode;
@@ -6,7 +6,7 @@ interface AuthLayoutProps {
 
 export default function AuthLayout({ children }: AuthLayoutProps) {
   return (
-    <main className="min-h-screen w-full p-0 bg-blue-400">
+    <main className="min-h-screen w-full p-0">
       {/* <SideBar/> */}
       {children}
     </main>

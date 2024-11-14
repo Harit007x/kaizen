@@ -20,8 +20,6 @@ model User {
   name           String?
   profilePicture String?
   publicId       String?
-  createdAt      DateTime @default(now())
-  updatedAt      DateTime @updatedAt
   token          String?
 
   accounts         Account[]
@@ -31,7 +29,9 @@ model User {
   pushSubscription PushSubscription[]
 
   userWorkspaces UserWorkspace[]
-
+  
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
   // Label       Label[]
 }
 
@@ -58,6 +58,8 @@ model UserWorkspace {
   user        User      @relation(fields: [userId], references: [id])
   workspaceId String
   workspace   Workspace @relation(fields: [workspaceId], references: [id])
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
 }
 
 model Workspace {
@@ -66,6 +68,8 @@ model Workspace {
   projects       Project[]
   is_personal    Boolean         @default(false)
   userWorkspaces UserWorkspace[]
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
 }
 
 model Project {
@@ -73,12 +77,12 @@ model Project {
   name        String
   userId      String
   user        User          @relation(fields: [userId], references: [id])
-  createdAt   DateTime      @default(now())
-  updatedAt   DateTime      @updatedAt
   activityLog ActivityLog[]
   categories  Category[]
   workspaceId String
   workspace   Workspace     @relation(fields: [workspaceId], references: [id])
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
 }
 
 model Category {
@@ -89,6 +93,8 @@ model Category {
   project          Project @relation(fields: [projectId], references: [id])
   position         Float
   reorderThreshold Int     @default(0)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
 }
 
 model Task {
@@ -100,6 +106,8 @@ model Task {
   categoryId  String
   category    Category @relation(fields: [categoryId], references: [id])
   position    Float
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
 }
 
 // model Label {
@@ -134,13 +142,13 @@ model ActivityLog {
   labelId     String?
   projectId   String?
   commentId   String?
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
   user        User?    @relation(fields: [userId], references: [id])
   // Task        Task?    @relation(fields: [taskId], references: [id])
   // Label       Label?   @relation(fields: [labelId], references: [id])
   project     Project? @relation(fields: [projectId], references: [id])
   comment     Comment? @relation(fields: [commentId], references: [id])
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
 }
 
 enum ACTIONS {

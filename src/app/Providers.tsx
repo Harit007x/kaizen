@@ -3,8 +3,8 @@
 import { SessionProvider } from 'next-auth/react';
 import { ReactNode } from 'react';
 import { SidebarProvider } from '@/components/ui/sidebar';
-import SideBar from '@/components/add-sidebar';
 import { usePathname } from 'next/navigation';
+import { AppSidebar } from '@/components/sidebar/add-sidebar';
 
 export default function Providers({ children }: { children: ReactNode }) {
   const pathname = usePathname();
@@ -14,7 +14,7 @@ export default function Providers({ children }: { children: ReactNode }) {
   return (
     <SidebarProvider>
       <SessionProvider>
-        {showSideBar && <SideBar />}
+        {showSideBar && <AppSidebar />}
         {children}
       </SessionProvider>
     </SidebarProvider>

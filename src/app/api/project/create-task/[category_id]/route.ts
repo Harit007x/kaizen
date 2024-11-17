@@ -3,19 +3,14 @@ import { authOptions } from '@/lib/auth';
 import { getServerSession } from 'next-auth';
 import { NextRequest, NextResponse } from 'next/server';
 
-export async function POST(request: NextRequest) {
+export async function POST(request: NextRequest, { params }: { params: { category_id: string } }) {
   // Validate Request
-  const formData = await request.formData();
-  const name = formData.get('task_name') as string;
-  const description = formData.get('task_description') as string;
-  const category_id = formData.get('category_id') as string;
-  if (!name) {
-    return NextResponse.json({ message: 'Name is required' }, { status: 400 });
-  }
+  const { category_id } = params;
+
+  const { name, description } = await request.json();
 
   try {
     const session: any = await getServerSession(authOptions);
-    console.log('session on server= ', session?.user, formData);
     if (!session?.user) {
       return NextResponse.json({ message: 'Please sign in first to continue' }, { status: 401 });
     }

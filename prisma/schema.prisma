@@ -100,7 +100,7 @@ model Category {
 model Task {
   id          String   @id @default(uuid())
   name        String
-  description String
+  description String?
   priority    String
   isCompleted Boolean  @default(false)
   categoryId  String

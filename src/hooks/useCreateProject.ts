@@ -9,7 +9,7 @@ export interface IDataForCreateProject {
 const useCreateProject = () => {
   const [isLoading, setIsLoading] = useState(false);
 
-  const createProject = async (requestData: IDataForCreateProject) => {
+  const createProject = async (payloadData: IDataForCreateProject) => {
     setIsLoading(true);
     try {
       const res = await fetch('/api/project/create-project', {
@@ -17,7 +17,7 @@ const useCreateProject = () => {
         headers: {
           'Content-Type': 'application/json', // Set Content-Type to application/json
         },
-        body: JSON.stringify(requestData), // Stringify the data object
+        body: JSON.stringify(payloadData), // Stringify the data object
       });
 
       const data = await res.json();

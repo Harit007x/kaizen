@@ -9,12 +9,14 @@ import { Button } from '../ui/button';
 import Task, { TaskProps } from './task';
 import { toast } from 'sonner';
 import { DropIndicator } from '@atlaskit/pragmatic-drag-and-drop-react-drop-indicator/box';
+import { Plus } from 'lucide-react';
+import CreateTask from './create-task';
 
 export interface CategoryProps {
   tasks: TaskProps[];
   title: string;
   id: string;
-  fetchProjectDetails: () => void;
+  fetchProjectDetails: () => Promise<void>;
 }
 
 const Category = (props: CategoryProps) => {
@@ -76,41 +78,17 @@ const Category = (props: CategoryProps) => {
   const [taskDescription, setTaskDescription] = useState<string>('');
   const [isLoading, setIsLoading] = useState<boolean>(false);
 
-  async function handleTaskCreate(e: FormEvent<HTMLFormElement>) {
-    e.preventDefault();
-    setIsLoading(true);
-
-    try {
-      const formData = new FormData();
-      formData.append('task_name', taskName);
-      formData.append('task_description', taskDescription);
-      formData.append('category_id', props.id);
-      const res = await fetch('/api/project/create-task', {
-        method: 'POST',
-        body: formData,
-      });
-
-      const data = await res.json();
-      props.fetchProjectDetails();
-      toast.success(data.message);
-    } catch (error) {
-      console.error(error);
-      toast.error('Something went wrong');
-    } finally {
-      setIsLoading(false);
-    }
-  }
-
   console.log('closet edge data =', closestEdge);
   return (
     <div
-      className={`min-w-[300px] flex text-foreground flex-col border-[1px] p-4 bg-secondary/80 rounded-md hover:border-border 
+      className={`min-w-fit flex text-foreground flex-col border-[1px] p-2 bg-secondary/80 rounded-md hover:border-border 
             ${isReordering && 'opacity-30'} relative`}
       ref={columnRef}
     >
       <div>
-        <div>
-          <h1 className="text-sm font-bold mb-2">{props.title}</h1>
+        <div className="flex align-center items-center justify-between mb-2">
+          <h1 className="text-sm font-bold">{props.title}</h1>
+          <CreateTask category_id={props.id} fetchProjectDetails={props.fetchProjectDetails} />
         </div>
         {closestEdge && 'visible'}
         {/* 
@@ -124,7 +102,13 @@ const Category = (props: CategoryProps) => {
 
         <div className="space-y-2 flex-1">
           {props.tasks.map((task: TaskProps) => (
-            <Task key={task.id} id={task.id} name={task.name} />
+            <Task
+              key={task.id}
+              id={task.id}
+              name={task.name}
+              createdAt={task.createdAt}
+              fetchProjectDetails={props.fetchProjectDetails}
+            />
           ))}
         </div>
       </div>

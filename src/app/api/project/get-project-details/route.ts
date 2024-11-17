@@ -41,6 +41,7 @@ export async function GET(request: NextRequest) {
                 description: true,
                 priority: true,
                 isCompleted: true,
+                createdAt: true,
               },
             },
           },

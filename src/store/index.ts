@@ -18,3 +18,13 @@ export const userStore = create<UserStore>((set) => ({
       user: userData,
     }),
 }));
+
+interface TaskDialogStore {
+  isTaskDialogOpen: boolean;
+  setIsTaskDialogOpen: (state: boolean) => void;
+}
+
+export const taskDialogStore = create<TaskDialogStore>((set) => ({
+  isTaskDialogOpen: false,
+  setIsTaskDialogOpen: (state) => set({ isTaskDialogOpen: state }),
+}));

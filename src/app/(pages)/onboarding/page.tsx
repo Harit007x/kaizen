@@ -28,7 +28,7 @@ export default function OnboardingPage() {
         formData.append('profile', profileImage);
       }
 
-      const res = await fetch('/api/user/create-profile', {
+      const res = await fetch('/api/user/create', {
         method: 'POST',
         body: formData,
       });

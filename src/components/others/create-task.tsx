@@ -20,19 +20,20 @@ import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from '@
 import { toast } from 'sonner';
 import useCreateProject from '@/hooks/useCreateProject';
 import { Plus } from 'lucide-react';
+import TaskForm from '../forms/taskForm';
 
-interface IHandleTaskCreate {
+export interface IHandleTaskCreate {
   name: string;
   description?: string;
   priority?: string;
 }
 
-interface ICreateProject {
+interface ICreateTask {
   category_id: string;
   fetchProjectDetails: () => Promise<void>;
 }
 
-const CreateTask = (props: ICreateProject) => {
+const CreateTask = (props: ICreateTask) => {
   const [isDialogOpen, setIsDialogOpen] = useState<boolean>(false);
   const [workspaceList, setWorkspaceList] = useState<{ id: string; title: string; is_personal: boolean }[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(false);
@@ -41,7 +42,7 @@ const CreateTask = (props: ICreateProject) => {
     setIsLoading(true);
 
     try {
-      const res = await fetch(`/api/project/create-task/${category_id}`, {
+      const res = await fetch(`/api/task/create/${category_id}`, {
         method: 'POST',
         body: JSON.stringify(payloadData),
       });
@@ -114,52 +115,13 @@ const CreateTask = (props: ICreateProject) => {
           <DialogDescription>Create tasks to maintain goals efficiently.</DialogDescription>
         </DialogHeader>
 
-        <Form {...form}>
-          <form
-            onSubmit={form.handleSubmit(onSubmit)}
-            className="w-full space-y-4"
-            // onKeyDown={(e) => {
-            //   if (e.key === 'Enter' && (e.target as HTMLElement).tagName === 'INPUT') {
-            //     e.preventDefault();
-            //   }
-            // }}
-          >
-            <FormField
-              control={form.control}
-              name="name"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Name</FormLabel>
-                  <FormControl>
-                    <Input placeholder="Project name" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <FormField
-              control={form.control}
-              name="description"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Description</FormLabel>
-                  <FormControl>
-                    <Input placeholder="Description" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <div className="flex justify-end gap-4 pt-4">
-              <Button type="button" variant="secondary" onClick={() => setIsDialogOpen(false)}>
-                Cancel
-              </Button>
-              <Button type="submit" disabled={isLoading}>
-                {isLoading ? 'Adding...' : 'Add'}
-              </Button>
-            </div>
-          </form>
-        </Form>
+        <TaskForm
+          onSubmit={handleTaskCreate}
+          onCancel={() => setIsDialogOpen(false)}
+          isLoading={isLoading}
+          submitLabel="Create"
+          categoryId={props.category_id}
+        />
       </DialogContent>
     </Dialog>
   );

@@ -11,6 +11,7 @@ import { toast } from 'sonner';
 import { DropIndicator } from '@atlaskit/pragmatic-drag-and-drop-react-drop-indicator/box';
 import { Plus } from 'lucide-react';
 import CreateTask from './create-task';
+import { ScrollArea } from '../ui/scroll-area';
 
 export interface CategoryProps {
   tasks: TaskProps[];
@@ -79,39 +80,35 @@ const Category = (props: CategoryProps) => {
   const [isLoading, setIsLoading] = useState<boolean>(false);
 
   console.log('closet edge data =', closestEdge);
+  // In Category component
   return (
     <div
-      className={`min-w-fit flex text-foreground flex-col border-[1px] p-2 bg-secondary/80 rounded-md hover:border-border 
-            ${isReordering && 'opacity-30'} relative`}
+      className={`min-w-fit flex flex-col border-[1px] bg-secondary/80 rounded-md hover:border-border 
+          ${isReordering && 'opacity-30'} relative`}
       ref={columnRef}
     >
-      <div>
-        <div className="flex align-center items-center justify-between mb-2">
-          <h1 className="text-sm font-bold">{props.title}</h1>
-          <CreateTask category_id={props.id} fetchProjectDetails={props.fetchProjectDetails} />
-        </div>
-        {closestEdge && 'visible'}
-        {/* 
-        <form className="flex flex-col justify-center" onSubmit={handleTaskCreate}>
-          <Input placeholder="Name" onChange={(e) => setTaskName(e.target.value)} disabled={isLoading} />
-          <Input placeholder="Description" onChange={(e) => setTaskDescription(e.target.value)} disabled={isLoading} />
-          <Button type="submit" disabled={isLoading}>
-            Create
-          </Button>
-        </form> */}
+      {/* Header */}
+      <div className="flex align-center items-center justify-between mb-2 pt-2 px-3">
+        <h1 className="text-sm font-bold">{props.title}</h1>
+        <CreateTask category_id={props.id} fetchProjectDetails={props.fetchProjectDetails} />
+      </div>
+      {closestEdge && 'visible'}
 
-        <div className="space-y-2 flex-1">
+      {/* Scrollable tasks container */}
+      <ScrollArea className="flex-1" thumbClassName="bg-zinc-600/30">
+        <div className="space-y-2 px-3">
           {props.tasks.map((task: TaskProps) => (
             <Task
               key={task.id}
               id={task.id}
               name={task.name}
               createdAt={task.createdAt}
+              category_id={props.id}
               fetchProjectDetails={props.fetchProjectDetails}
             />
           ))}
         </div>
-      </div>
+      </ScrollArea>
       {closestEdge && <DropIndicator edge={closestEdge} gap="20px" />}
     </div>
   );

@@ -12,7 +12,7 @@ const useCreateProject = () => {
   const createProject = async (payloadData: IDataForCreateProject) => {
     setIsLoading(true);
     try {
-      const res = await fetch('/api/project/create-project', {
+      const res = await fetch('/api/project/create', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json', // Set Content-Type to application/json

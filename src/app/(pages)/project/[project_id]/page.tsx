@@ -14,6 +14,7 @@ import { useSession } from 'next-auth/react';
 import { checkForPermissionAndTrigger } from '@/lib/Push';
 import { SidebarTrigger } from '@/components/ui/sidebar';
 import Category from '@/components/others/category';
+import { useTheme } from 'next-themes';
 
 interface HandleDropProps {
   source: {
@@ -73,7 +74,7 @@ export default function ProjectPage({ params }: ProjectPageProps) {
   const { projectId, projectName, columnData, setColumnData, fetchProjectDetails } = UseProjectDetails(project_id);
   async function updateCategoryReorder(projectId: string, source_column_id: string, destination_column_id: string) {
     try {
-      const response = await fetch('/api/project/update-category-reorder', {
+      const response = await fetch('/api/project/reorder-category', {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -99,7 +100,7 @@ export default function ProjectPage({ params }: ProjectPageProps) {
     }
 
     try {
-      const res = await fetch('/api/project/update-task-reorder', {
+      const res = await fetch('/api/project/reorder-task', {
         method: 'PUT',
         body: JSON.stringify({
           category_id,
@@ -129,7 +130,7 @@ export default function ProjectPage({ params }: ProjectPageProps) {
     isMovedBottom: boolean
   ) {
     try {
-      const response = await fetch('/api/project/update-tasks-move', {
+      const response = await fetch('/api/project/move-tasks', {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -434,7 +435,7 @@ export default function ProjectPage({ params }: ProjectPageProps) {
       const formData = new FormData();
       formData.append('title', workspaceTitle);
       console.log('formdata =', formData);
-      const res = await fetch('/api/workspace/create-workspace', {
+      const res = await fetch('/api/workspace/create', {
         method: 'POST',
         body: formData,
       });
@@ -452,29 +453,6 @@ export default function ProjectPage({ params }: ProjectPageProps) {
   const [project_name, setProjectName] = useState<string>('');
   const [categoryName, setCategoryName] = useState<string>('');
   const [isLoading, setIsLoading] = useState<boolean>(false);
-  async function handleBoardCreate(e: FormEvent<HTMLFormElement>) {
-    e.preventDefault();
-    setIsLoading(true);
-
-    try {
-      const formData = new FormData();
-      formData.append('project_name', project_name);
-      formData.append('workspace_id', 'e3c67c47-ee5c-4fb5-9c26-9917aac480cc');
-      console.log('formdata =', formData);
-      const res = await fetch('/api/project/create-project', {
-        method: 'POST',
-        body: formData,
-      });
-
-      const data = await res.json();
-      toast.success(data.message);
-    } catch (error) {
-      console.error(error);
-      toast.error('Something went wrong');
-    } finally {
-      setIsLoading(false);
-    }
-  }
 
   async function handleCategoryCreate(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -485,7 +463,7 @@ export default function ProjectPage({ params }: ProjectPageProps) {
       formData.append('category_name', categoryName);
       formData.append('project_id', projectId);
       console.log('formdata =', formData);
-      const res = await fetch('/api/project/create-category', {
+      const res = await fetch('/api/category/create', {
         method: 'POST',
         body: formData,
       });
@@ -500,36 +478,36 @@ export default function ProjectPage({ params }: ProjectPageProps) {
       setIsLoading(false);
     }
   }
+  const { setTheme, theme } = useTheme();
 
   return (
-    <div className="w-full overflow-x-scroll p-6 select-none bg-background flex flex-col h-screen gap-10">
-      <div className="w-80 flex flex-col gap-4">
+    <div className="w-full h-screen select-none bg-background flex flex-col">
+      {/* Header section */}
+      <div className="w-80 flex p-4 flex-col gap-4 mb-2">
         <SidebarTrigger />
         <div className="text-xl font-extrabold">{projectName}</div>
-        {/* <form className="flex justify-center" onSubmit={handleWorkspaceCreate}>
-          <Input placeholder="Workspace" onChange={(e) => setWorkspaceTitle(e.target.value)} disabled={isLoading} />
-          <Button disabled={isLoading}>Create</Button>
-        </form> */}
-        {/* <form className="flex justify-center" onSubmit={handleBoardCreate}>
-          <Input placeholder="Board" onChange={(e) => setProjectName(e.target.value)} disabled={isLoading} />
-          <Button disabled={isLoading}>Create</Button>
-        </form> */}
         <form className="flex justify-center" onSubmit={handleCategoryCreate}>
           <Input placeholder="Category" onChange={(e) => setCategoryName(e.target.value)} disabled={isLoading} />
           <Button disabled={isLoading}>Create</Button>
         </form>
+        <Button onClick={() => setTheme('dark')}>Dark</Button>
+        <Button onClick={() => setTheme('light')}>Light</Button>
       </div>
-      <div className="flex gap-4">
-        {columnData &&
-          Object.values(columnData).map((column) => (
-            <Category
-              key={column.title}
-              title={column.title}
-              tasks={column.items}
-              id={column.id}
-              fetchProjectDetails={fetchProjectDetails}
-            />
-          ))}
+
+      {/* Scrollable categories container */}
+      <div className="flex-1 overflow-x-auto px-4 pb-4">
+        <div className="flex gap-4 h-full">
+          {columnData &&
+            Object.values(columnData).map((column) => (
+              <Category
+                key={column.title}
+                title={column.title}
+                tasks={column.items}
+                id={column.id}
+                fetchProjectDetails={fetchProjectDetails}
+              />
+            ))}
+        </div>
       </div>
     </div>
   );

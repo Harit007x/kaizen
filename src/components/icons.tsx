@@ -62,6 +62,7 @@ import {
   SkipForward,
   Hash,
   EllipsisVertical,
+  Flag,
 } from 'lucide-react';
 
 export const Icons = {
@@ -125,6 +126,7 @@ export const Icons = {
   skipForward: SkipForward,
   hash: Hash,
   ellipsisVertical: EllipsisVertical,
+  flag: Flag,
   checkSVG: ({ ...props }: LucideProps) => (
     <svg
       aria-hidden="true"

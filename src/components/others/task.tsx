@@ -6,18 +6,20 @@ import { combine } from '@atlaskit/pragmatic-drag-and-drop/combine';
 import { draggable, dropTargetForElements } from '@atlaskit/pragmatic-drag-and-drop/element/adapter';
 import { DropIndicator } from '@atlaskit/pragmatic-drag-and-drop-react-drop-indicator/box';
 import { Edit2, Ghost, Maximize, Trash, Ungroup } from 'lucide-react';
-import { Card, CardContent, CardTitle, CardHeader, CardFooter, CardDescription } from '../ui/card';
+import { Card, CardTitle, CardHeader, CardFooter, CardDescription } from '../ui/card';
 import { Badge } from '../ui/badge';
 import { dateFormatter } from '@/lib/helper';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '../ui/dialog';
 import TaskForm, { TaskFormData } from '../forms/taskForm';
 import { toast } from 'sonner';
+import { cn } from '@/lib/utils';
+import { priorityColor } from '@/constants/priority-list';
 
 export interface TaskProps {
   id: number;
   name: string;
   description?: string;
-  priority?: string;
+  priorityId: 'p1' | 'p2' | 'p3' | 'p4';
   createdAt: string;
   category_id: string;
   fetchProjectDetails: () => Promise<void>;
@@ -35,14 +37,12 @@ const Task = (props: TaskProps) => {
     invariant(cardEl);
 
     return combine(
-      // Add draggable to make the card draggable
       draggable({
         element: cardEl,
         getInitialData: () => ({ type: 'card', cardId: props.id }),
         onDragStart: () => setIsDragging(true),
         onDrop: () => setIsDragging(false),
       }),
-      // Add dropTargetForElements to make the card a drop target
       dropTargetForElements({
         element: cardEl,
         getData: ({ input, element, source }) => {
@@ -64,22 +64,18 @@ const Task = (props: TaskProps) => {
         onDragEnter: (args) => {
           console.log('tak dragging ');
           if (args.source.data.cardId !== props.id) {
-            // Update the closest edge when the draggable item enters the drop zone
             setClosestEdge(extractClosestEdge(args.self.data) as SetStateAction<null>);
           }
         },
         onDrag: (args) => {
-          // Continuously update the closest edge while dragging over the drop zone
           if (args.source.data.cardId !== props.id) {
             setClosestEdge(extractClosestEdge(args.self.data) as SetStateAction<null>);
           }
         },
         onDragLeave: () => {
-          // Reset the closest edge when the draggable item leaves the drop zone
           setClosestEdge(null);
         },
         onDrop: () => {
-          // Reset the closest edge when the draggable item is dropped
           setClosestEdge(null);
         },
       })
@@ -89,7 +85,7 @@ const Task = (props: TaskProps) => {
   const handleTaskUpdate = async (data: TaskFormData) => {
     setIsLoading(true);
     try {
-      const res = await fetch(`/api/project/update-task/${props.id}`, {
+      const res = await fetch(`/api/task/update/${props.id}`, {
         method: 'PUT',
         body: JSON.stringify(data),
       });
@@ -110,7 +106,27 @@ const Task = (props: TaskProps) => {
     }
   };
 
-  console.log('closet edge data =', closestEdge);
+  const handleTaskDelete = async () => {
+    setIsLoading(true);
+    try {
+      const res = await fetch(`/api/task/delete/${props.id}`, {
+        method: 'DELETE',
+      });
+
+      const responseData = await res.json();
+      if (res.ok) {
+        await props.fetchProjectDetails();
+        toast.success(responseData.message);
+      } else {
+        throw new Error(responseData.message);
+      }
+    } catch (error) {
+      console.error(error);
+      toast.error('Failed to update task');
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   return (
     <Card
@@ -119,9 +135,14 @@ const Task = (props: TaskProps) => {
       className="relative w-[16rem] h-[10rem] flex flex-col justify-between rounded-lg"
     >
       <CardHeader className="flex p-0 pt-2 pl-0 mx-2 flex-col gap-2">
-        <div className="flex items-center justify-between border-b pb-2 border-dashed">
-          <div className="flex items-center justify-center w-7 h-7 rounded-sm cursor-pointer text-muted-foreground hover:text-foreground hover:fill-secondary hover:bg-secondary">
-            <Ghost className="" size={14} />
+        <div className={cn('flex items-center justify-between border-b pb-2 border-dashed')}>
+          <div
+            className={cn(
+              'flex items-center justify-center w-7 h-7 rounded-sm cursor-pointer text-muted-foreground hover:text-foreground ',
+              `hover:${priorityColor[props.priorityId].background}`
+            )}
+          >
+            <Ghost className={cn('h-4 w-4', priorityColor[props.priorityId].text)} size={14} />
           </div>
           <div className="flex gap-0">
             <div className="flex items-center justify-center w-7 h-7 rounded-sm cursor-pointer text-muted-foreground hover:text-green/90 hover:fill-green/30 hover:bg-green/10">
@@ -133,7 +154,10 @@ const Task = (props: TaskProps) => {
             >
               <Edit2 className="" size={14} />
             </div>
-            <div className="flex items-center justify-center w-7 h-7 rounded-sm cursor-pointer text-muted-foreground hover:text-red/90 hover:fill-redBackground hover:bg-red/10">
+            <div
+              onClick={() => handleTaskDelete()}
+              className="flex items-center justify-center w-7 h-7 rounded-sm cursor-pointer text-muted-foreground hover:text-red/90 hover:fill-redBackground hover:bg-red/10"
+            >
               <Trash className="" size={14} />
             </div>
           </div>
@@ -149,8 +173,8 @@ const Task = (props: TaskProps) => {
       </CardHeader>
       <CardFooter className="flex flex-row text-start justify-between p-0 px-4 pb-4">
         <div className="flex flex-col justify-end items-center align-center">
-          <Badge variant={'blue'} className="rounded-sm">
-            {'wow'}
+          <Badge variant={priorityColor[props.priorityId].variant} className="rounded-sm">
+            {props.priorityId.toUpperCase()}
           </Badge>
         </div>
         <div className="text-xs bg-secondary rounded-sm py-0.5 px-1">{dateFormatter(props.createdAt)}</div>
@@ -164,11 +188,12 @@ const Task = (props: TaskProps) => {
           <TaskForm
             initialData={{
               name: props.name,
-              description: props.description || '',
-              priority: props.priority || '',
+              description: props.description,
+              priorityId: props.priorityId,
             }}
             onSubmit={handleTaskUpdate}
             onCancel={() => setIsEditDialogOpen(false)}
+            setIsEditDialogOpen={setIsEditDialogOpen}
             isLoading={isLoading}
             submitLabel="Update"
           />

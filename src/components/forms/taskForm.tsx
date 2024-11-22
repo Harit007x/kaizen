@@ -7,13 +7,16 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 import { IHandleTaskCreate } from '../others/create-task';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select';
+import { priorityList } from '@/constants/priority-list';
+import { cn } from '@/lib/utils';
 
 const FormSchema = z.object({
   name: z.string({
     required_error: 'Please enter a task name.',
   }),
   description: z.string().optional(),
-  priority: z.string().optional(),
+  priorityId: z.string().optional(),
 });
 
 export type TaskFormData = z.infer<typeof FormSchema>;
@@ -22,6 +25,8 @@ interface TaskFormProps {
   initialData?: TaskFormData;
   onSubmit: (payloadData: IHandleTaskCreate, category_id: string) => Promise<Response | void>;
   onCancel: () => void;
+  setIsCreateDialogOpen?: React.Dispatch<React.SetStateAction<boolean>>;
+  setIsEditDialogOpen?: React.Dispatch<React.SetStateAction<boolean>>;
   isLoading?: boolean;
   submitLabel?: string;
   categoryId?: string;
@@ -34,18 +39,22 @@ const TaskForm = ({
   isLoading = false,
   submitLabel = 'Submit',
   categoryId,
+  setIsCreateDialogOpen,
+  setIsEditDialogOpen,
 }: TaskFormProps) => {
   const form = useForm<TaskFormData>({
     resolver: zodResolver(FormSchema),
     defaultValues: initialData || {
       name: '',
       description: '',
-      priority: '',
+      priorityId: '',
     },
   });
 
   const handleSubmit = async (data: z.infer<typeof FormSchema>) => {
-    await onSubmit(data, categoryId);
+    await onSubmit(data, categoryId as string);
+    setIsCreateDialogOpen && setIsCreateDialogOpen(false);
+    setIsEditDialogOpen && setIsEditDialogOpen(false);
     form.reset();
   };
 
@@ -85,6 +94,35 @@ const TaskForm = ({
             </FormItem>
           )}
         />
+        <FormField
+          control={form.control}
+          name="priorityId"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Priority</FormLabel>
+              <Select onValueChange={field.onChange} value={field.value}>
+                <FormControl>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Set a priority" />
+                  </SelectTrigger>
+                </FormControl>
+                <SelectContent>
+                  {priorityList.map((workspace) => (
+                    <SelectItem key={workspace.id} value={workspace.id}>
+                      {' '}
+                      <div className="flex items-center gap-2">
+                        {workspace.icon}
+                        <span>{workspace.title}</span>
+                      </div>
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
         <div className="flex justify-end gap-4 pt-4">
           <Button type="button" variant="secondary" onClick={onCancel}>
             Cancel

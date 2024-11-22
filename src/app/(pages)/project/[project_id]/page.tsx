@@ -2,7 +2,6 @@
 // app/project/[project_id]/page.tsx
 import { extractClosestEdge } from '@atlaskit/pragmatic-drag-and-drop-hitbox/closest-edge';
 import { getReorderDestinationIndex } from '@atlaskit/pragmatic-drag-and-drop-hitbox/util/get-reorder-destination-index';
-import { combine } from '@atlaskit/pragmatic-drag-and-drop/combine';
 import { monitorForElements } from '@atlaskit/pragmatic-drag-and-drop/element/adapter';
 import { reorder } from '@atlaskit/pragmatic-drag-and-drop/reorder';
 import { FormEvent, ReactNode, useCallback, useEffect, useState } from 'react';
@@ -84,7 +83,8 @@ export default function ProjectPage({ params }: ProjectPageProps) {
 
       if (!response.ok) {
         const errorData = await response.json();
-        console.error('Error updating category positions:', errorData.message);
+        fetchProjectDetails();
+        toast.error(errorData.message);
       } else {
         const data = await response.json();
         console.log(data.message); // "Category positions updated successfully"
@@ -100,7 +100,7 @@ export default function ProjectPage({ params }: ProjectPageProps) {
     }
 
     try {
-      const res = await fetch('/api/project/reorder-task', {
+      const response = await fetch('/api/project/reorder-task', {
         method: 'PUT',
         body: JSON.stringify({
           category_id,
@@ -109,10 +109,13 @@ export default function ProjectPage({ params }: ProjectPageProps) {
         }),
       });
 
-      const data = await res.json();
-      if (!res.ok) {
-        // fetchProjectDetails()
-        return toast.error(data.message);
+      if (!response.ok) {
+        const errorData = await response.json();
+        fetchProjectDetails();
+        toast.error(errorData.message);
+      } else {
+        const data = await response.json();
+        console.log(data.message);
       }
     } catch (error) {
       return toast.error('Something went wrong');
@@ -149,8 +152,7 @@ export default function ProjectPage({ params }: ProjectPageProps) {
       if (!response.ok) {
         const errorData = await response.json();
         fetchProjectDetails();
-        toast.error('Something wend wrong, please try again!');
-        console.error('Error updating tasks positions:', errorData.message);
+        toast.error(errorData.message);
       } else {
         const data = await response.json();
         console.log(data.message);
@@ -163,25 +165,23 @@ export default function ProjectPage({ params }: ProjectPageProps) {
   //   const [data, setData] = useState(DATA);
   const reorderColumn = useCallback(
     ({ sourceIndex, destinationIndex }: ReorderColumnProps) => {
+      // Add this check to prevent unnecessary reordering
+      if (sourceIndex === destinationIndex) return;
+
+      // Perform state update without making API call inside the setState callback
       setColumnData((prevData) => {
         const newData = [...prevData];
         const [movedColumn] = newData.splice(sourceIndex, 1);
         newData.splice(destinationIndex, 0, movedColumn);
-
-        const categories: any = [];
-
-        newData.map((category) => {
-          categories.push({ id: category.id });
-        });
-        const source_column_id = columnData[sourceIndex].id;
-        const destination_column_id = columnData[destinationIndex].id;
-
-        updateCategoryReorder(projectId, source_column_id, destination_column_id);
-
         return newData;
       });
+
+      // Make API call outside of setState
+      const source_column_id = columnData[sourceIndex].id;
+      const destination_column_id = columnData[destinationIndex].id;
+      updateCategoryReorder(projectId, source_column_id, destination_column_id);
     },
-    [projectId]
+    [columnData, projectId, updateCategoryReorder]
   );
 
   const moveCard = useCallback(
@@ -411,6 +411,7 @@ export default function ProjectPage({ params }: ProjectPageProps) {
         console.log('source =', sourceIndex, 'destination =', destinationIndex);
 
         if (sourceIndex !== -1 && destinationIndex !== -1) {
+          console.log('wow huh ');
           reorderColumn({ sourceIndex, destinationIndex });
         }
       }

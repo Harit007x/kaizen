@@ -29,18 +29,17 @@ export async function PUT(request: NextRequest) {
     if (!source_task || !destination_task) {
       return NextResponse.json({ message: 'Invalid request' }, { status: 400 });
     }
-    let destination_index = tasks.findIndex((task) => task.position === destination_task.position);
+    let destination_index = tasks.findIndex((task) => task.id === destination_task.id);
+    let source_index = tasks.findIndex((task) => task.id === source_task.id);
     // check if there is anything above the destination item
     if (destination_index === 0) {
       isMovedAbove = false;
       new_position = destination_task.position / 2;
     } else if (destination_index === tasks.length - 1) {
       isMovedBelow = false;
-      new_position = (destination_task.position * 2 + 10) / 2;
+      new_position = (destination_task.position * 2 + 1000) / 2;
     } else if (source_task.position > destination_task.position) {
-      const destination_index = tasks.findIndex((task) => task.position === destination_task.position);
       const itemAboveDestination = tasks[destination_index - 1];
-      console.log('wtf nigga -', itemAboveDestination, destination_index);
       if (!itemAboveDestination) {
         return NextResponse.json({ message: 'Invalid position' }, { status: 400 });
       }
@@ -48,7 +47,6 @@ export async function PUT(request: NextRequest) {
       new_position = (destination_task.position + itemAboveDestination?.position) / 2;
       // console.log('source position =', new_position)
     } else if (source_task.position < destination_task.position) {
-      const destination_index = tasks.findIndex((task) => task.position === destination_task.position);
       const itemBelowDestination = tasks[destination_index + 1];
 
       if (!itemBelowDestination) {
@@ -60,8 +58,11 @@ export async function PUT(request: NextRequest) {
     const reorderThresholdHit = await prisma.category.findUnique({ where: { id: category_id } });
     const conflict = tasks.some((task) => task.position === new_position);
 
-    if (conflict) {
-      console.log('conflicting cases - - - - - - - - -');
+    if (conflict || reorderThresholdHit?.reorderThreshold === 20) {
+      console.log('conflicting cases - - - - - - - - -', destination_index);
+      tasks.splice(source_index, 1);
+      tasks.splice(destination_index, 0, source_task);
+
       const resetTaskPositions = tasks.map((task, index) => {
         return prisma.task.update({
           where: {
@@ -69,10 +70,13 @@ export async function PUT(request: NextRequest) {
             categoryId: category_id,
           },
           data: {
-            position: 10 * (index + 1),
+            position: 1000 * (index + 1),
           },
         });
       });
+
+      await Promise.all(resetTaskPositions);
+
       await prisma.category.update({
         where: {
           id: category_id,
@@ -80,16 +84,8 @@ export async function PUT(request: NextRequest) {
         data: { reorderThreshold: 0 },
       });
 
-      await Promise.all(resetTaskPositions);
-      return NextResponse.json({ message: 'Something went wrong, please try again!' }, { status: 400 });
+      return NextResponse.json({ message: 'Task positions updated successfully' }, { status: 200 });
     }
-    // console.log('tasks -=', tasks)
-    // if (reorderThresholdHit?.reorderThreshold === 10) {
-    //   const destination_task = tasks.splice(destination_index, 1)
-    //   tasks.splice(index, 0, itemToInsert);
-
-    //   // tasks
-    // }
 
     await prisma.task.update({
       where: { id: source_task.id },

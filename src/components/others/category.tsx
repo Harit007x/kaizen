@@ -4,14 +4,21 @@ import { attachClosestEdge, extractClosestEdge } from '@atlaskit/pragmatic-drag-
 import invariant from 'tiny-invariant';
 import { combine } from '@atlaskit/pragmatic-drag-and-drop/combine';
 import { draggable, dropTargetForElements } from '@atlaskit/pragmatic-drag-and-drop/element/adapter';
-import { Input } from '../ui/input';
-import { Button } from '../ui/button';
 import Task, { TaskProps } from './task';
-import { toast } from 'sonner';
 import { DropIndicator } from '@atlaskit/pragmatic-drag-and-drop-react-drop-indicator/box';
-import { Plus } from 'lucide-react';
 import CreateTask from './create-task';
 import { ScrollArea } from '../ui/scroll-area';
+import { Icons } from '../icons';
+import { Button } from '../ui/button';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuGroup,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from '../ui/dropdown-menu';
 
 export interface CategoryProps {
   tasks: TaskProps[];
@@ -22,7 +29,6 @@ export interface CategoryProps {
 
 const Category = (props: CategoryProps) => {
   const columnRef = useRef<HTMLDivElement>(null);
-  const [isDraggedOver, setIsDraggedOver] = useState(false);
   const [isReordering, setIsReordering] = useState(false);
   const [closestEdge, setClosestEdge] = useState<'left' | 'right' | null>(null);
 
@@ -75,26 +81,45 @@ const Category = (props: CategoryProps) => {
     );
   }, [props.id]);
 
-  const [taskName, setTaskName] = useState<string>('');
-  const [taskDescription, setTaskDescription] = useState<string>('');
-  const [isLoading, setIsLoading] = useState<boolean>(false);
-
-  console.log('closet edge data =', closestEdge);
-  // In Category component
   return (
     <div
-      className={`min-w-fit flex flex-col border-[1px] bg-secondary/80 rounded-md hover:border-border 
+      className={`min-w-[280px] flex flex-col border-[1px] bg-secondary/80 rounded-md hover:border-border 
           ${isReordering && 'opacity-30'} relative`}
       ref={columnRef}
     >
       {/* Header */}
       <div className="flex align-center items-center justify-between mb-2 pt-2 px-3">
-        <h1 className="text-sm font-bold">{props.title}</h1>
-        <CreateTask category_id={props.id} fetchProjectDetails={props.fetchProjectDetails} />
-      </div>
-      {closestEdge && 'visible'}
+        <div className="flex items-center justify-center gap-2">
+          <h1 className="text-sm font-bold">{props.title}</h1>
+          <CreateTask category_id={props.id} fetchProjectDetails={props.fetchProjectDetails} />
+        </div>
 
-      {/* Scrollable tasks container */}
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button
+              variant={'ghost'}
+              size={'icon'}
+              className="w-7 h-7 hover:text-foreground hover:bg-background hover:border-primary/10 border-secondary"
+            >
+              <Icons.ellipsis className="h-4 w-4" />
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent
+            className="w-[--radix-dropdown-menu-trigger-width] min-w-56 rounded-lg"
+            side={'bottom'}
+            align="end"
+            sideOffset={4}
+          >
+            <DropdownMenuGroup>
+              <DropdownMenuItem className="cursor-pointer text-red hover:bg-redBackground hover:text-red">
+                <Icons.trash className="h-4 w-4" />
+                Delete
+              </DropdownMenuItem>
+            </DropdownMenuGroup>
+          </DropdownMenuContent>
+        </DropdownMenu>
+      </div>
+
       <ScrollArea className="flex-1" thumbClassName="bg-zinc-600/30">
         <div className="space-y-2 px-3">
           {props.tasks.map((task: TaskProps) => (
@@ -102,8 +127,10 @@ const Category = (props: CategoryProps) => {
               key={task.id}
               id={task.id}
               name={task.name}
+              description={task.description}
               createdAt={task.createdAt}
               category_id={props.id}
+              priorityId={task.priorityId}
               fetchProjectDetails={props.fetchProjectDetails}
             />
           ))}

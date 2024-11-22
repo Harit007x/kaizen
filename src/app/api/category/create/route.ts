@@ -19,19 +19,29 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ message: 'Please sign in first to continue' }, { status: 401 });
     }
 
-    const previous_category_count = await prisma.category.count({
+    const maxPositionTask = await prisma.category.findFirst({
       where: {
         projectId: project_id,
       },
+      orderBy: {
+        position: 'desc',
+      },
+      take: 1,
     });
 
-    console.log('total categorie =-', previous_category_count);
+    let position;
+
+    if (!maxPositionTask) {
+      position = 1000;
+    } else {
+      position = maxPositionTask.position + 1000;
+    }
 
     const category = await prisma.category.create({
       data: {
         projectId: project_id,
         title: name,
-        position: (previous_category_count + 1) * 10,
+        position: position,
       },
     });
 

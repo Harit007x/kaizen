@@ -1,24 +1,17 @@
-import React, { FormEvent, useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   Dialog,
-  DialogClose,
   DialogContent,
   DialogDescription,
-  DialogFooter,
   DialogHeader,
   DialogTitle,
   DialogTrigger,
 } from '@/components/ui/dialog';
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Button } from '../ui/button';
-import { Icons } from '../icons';
-import { Input } from '../ui/input';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
-import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from '@/components/ui/select';
 import { toast } from 'sonner';
-import useCreateProject from '@/hooks/useCreateProject';
 import { Plus } from 'lucide-react';
 import TaskForm from '../forms/taskForm';
 
@@ -34,8 +27,7 @@ interface ICreateTask {
 }
 
 const CreateTask = (props: ICreateTask) => {
-  const [isDialogOpen, setIsDialogOpen] = useState<boolean>(false);
-  const [workspaceList, setWorkspaceList] = useState<{ id: string; title: string; is_personal: boolean }[]>([]);
+  const [isCreateDialogOpen, setIsCreateDialogOpen] = useState<boolean>(false);
   const [isLoading, setIsLoading] = useState<boolean>(false);
 
   async function handleTaskCreate(payloadData: IHandleTaskCreate, category_id: string) {
@@ -75,7 +67,7 @@ const CreateTask = (props: ICreateTask) => {
       props.fetchProjectDetails();
     }
     form.reset();
-    setIsDialogOpen(false);
+    setIsCreateDialogOpen(false);
   }
 
   const form = useForm<z.infer<typeof FormSchema>>({
@@ -83,13 +75,13 @@ const CreateTask = (props: ICreateTask) => {
   });
 
   useEffect(() => {
-    if (isDialogOpen) {
+    if (isCreateDialogOpen) {
       // fetchWorkspaceList();
     } else {
       form.reset();
       form.clearErrors();
     }
-  }, [isDialogOpen]);
+  }, [isCreateDialogOpen]);
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === 'Enter') {
@@ -99,7 +91,7 @@ const CreateTask = (props: ICreateTask) => {
   };
 
   return (
-    <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+    <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
       <DialogTrigger asChild>
         <Button
           variant={'outline'}
@@ -117,9 +109,10 @@ const CreateTask = (props: ICreateTask) => {
 
         <TaskForm
           onSubmit={handleTaskCreate}
-          onCancel={() => setIsDialogOpen(false)}
+          onCancel={() => setIsCreateDialogOpen(false)}
+          setIsCreateDialogOpen={setIsCreateDialogOpen}
           isLoading={isLoading}
-          submitLabel="Create"
+          submitLabel="Add"
           categoryId={props.category_id}
         />
       </DialogContent>

@@ -59,7 +59,7 @@ export async function PUT(request: Request) {
       new_position = destination_task.position / 2;
     } else if (isMovedBottom) {
       console.log('moved to bottom');
-      new_position = (destination_task.position * 2 + 10) / 2;
+      new_position = (destination_task.position * 2 + 1000) / 2;
     } else {
       console.log('moved between');
       const itemAboveDestination: any = destination_category_tasks[destinationIndex - 1];
@@ -68,8 +68,21 @@ export async function PUT(request: Request) {
 
     const reorderThresholdHit = await prisma.category.findUnique({ where: { id: destinationColumnId } });
     const conflict = destination_category_tasks.some((task) => task.position === new_position);
-    if (conflict || reorderThresholdHit?.reorderThreshold === 10) {
-      console.log('conflicting cases - - - - - - - - -');
+    if (conflict || reorderThresholdHit?.reorderThreshold === 20) {
+      const moved_task = await prisma.task.update({
+        where: {
+          id: taskId,
+        },
+        data: {
+          categoryId: destinationColumnId,
+        },
+      });
+
+      if (moved_task) {
+        destination_category_tasks.splice(1, 0, moved_task);
+        // console.log('conflicting cases - - - - - - - - -', destination_category_tasks);
+      }
+
       const resetTaskPositions = destination_category_tasks.map((task, index) => {
         return prisma.task.update({
           where: {
@@ -77,11 +90,13 @@ export async function PUT(request: Request) {
             categoryId: destinationColumnId,
           },
           data: {
-            position: 10 * (index + 1),
+            position: 1000 * (index + 1),
           },
         });
       });
 
+      await Promise.all(resetTaskPositions);
+      // console.log('wow it worked ');
       await prisma.category.update({
         where: {
           id: destinationColumnId,
@@ -89,8 +104,7 @@ export async function PUT(request: Request) {
         data: { reorderThreshold: 0 },
       });
 
-      await Promise.all(resetTaskPositions);
-      return NextResponse.json({ message: 'Something went wrong' }, { status: 400 });
+      return NextResponse.json({ message: 'Position updated successfully' }, { status: 200 });
     }
 
     await prisma.task.update({
@@ -110,6 +124,7 @@ export async function PUT(request: Request) {
 
     return NextResponse.json({ message: 'Position updated successfully' }, { status: 200 });
   } catch (error) {
+    console.error(error);
     return NextResponse.json({ message: 'Error updating task position' }, { status: 500 });
   }
 }

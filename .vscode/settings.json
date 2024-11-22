@@ -1,4 +1,16 @@
 {
     "editor.defaultFormatter": "esbenp.prettier-vscode",
-    "editor.formatOnSave": true
+    "editor.formatOnSave": true,
+    "sqltools.connections": [
+        {
+            "previewLimit": 50,
+            "server": "localhost",
+            "port": 5432,
+            "driver": "PostgreSQL",
+            "name": "Kaizen DB",
+            "database": "kaizen",
+            "username": "postgres",
+            "password": "postgres"
+        }
+    ]
 }

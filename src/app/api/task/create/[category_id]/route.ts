@@ -7,7 +7,7 @@ export async function POST(request: NextRequest, { params }: { params: { categor
   // Validate Request
   const { category_id } = params;
 
-  const { name, description } = await request.json();
+  const { name, description, priorityId } = await request.json();
 
   try {
     const session: any = await getServerSession(authOptions);
@@ -16,20 +16,32 @@ export async function POST(request: NextRequest, { params }: { params: { categor
     }
     console.log('server call =', name, description, category_id);
 
-    const previous_task_count = await prisma.task.count({
+    const maxPositionTask = await prisma.task.findFirst({
       where: {
         categoryId: category_id,
       },
+      orderBy: {
+        position: 'desc',
+      },
+      take: 1,
     });
 
-    const category = await prisma.task.create({
+    let position;
+
+    if (!maxPositionTask) {
+      position = 1000;
+    } else {
+      position = maxPositionTask.position + 1000;
+    }
+
+    const task = await prisma.task.create({
       data: {
         categoryId: category_id,
         name: name,
         description: description,
-        priority: '',
+        priorityId: priorityId ? priorityId : 'p4',
         isCompleted: false,
-        position: (previous_task_count + 1) * 10,
+        position: position,
       },
     });
 

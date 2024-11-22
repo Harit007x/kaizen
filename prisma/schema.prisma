@@ -78,6 +78,7 @@ model Project {
   userId      String
   user        User          @relation(fields: [userId], references: [id])
   activityLog ActivityLog[]
+  reorderThreshold Int     @default(0)
   categories  Category[]
   workspaceId String
   workspace   Workspace     @relation(fields: [workspaceId], references: [id])
@@ -101,7 +102,7 @@ model Task {
   id          String   @id @default(uuid())
   name        String
   description String?
-  priority    String
+  priorityId  String   @default("p4")
   isCompleted Boolean  @default(false)
   categoryId  String
   category    Category @relation(fields: [categoryId], references: [id])

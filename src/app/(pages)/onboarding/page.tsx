@@ -37,7 +37,7 @@ export default function OnboardingPage() {
 
       if (!res.ok) {
         if (res.status === 401) {
-          router.push('/sign-in');
+          router.push('login');
         }
         return toast.error(data.message);
       } else {

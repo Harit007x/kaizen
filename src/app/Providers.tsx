@@ -9,8 +9,7 @@ import { ThemeProvider } from '@/components/others/theme-providers';
 
 export default function Providers({ children }: { children: ReactNode }) {
   const pathname = usePathname();
-  console.log('path =', pathname);
-  const notAllowedSideBarPaths = ['/sign-in', '/sign-up', '/reset-password'];
+  const notAllowedSideBarPaths = ['/login', '/signup', '/forgot-password'];
   const showSideBar = !notAllowedSideBarPaths.includes(pathname);
   return (
     <SidebarProvider>

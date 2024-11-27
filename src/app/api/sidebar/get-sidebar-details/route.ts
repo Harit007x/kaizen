@@ -29,6 +29,9 @@ export async function GET(request: NextRequest) {
             id: true,
             name: true,
           },
+          orderBy: {
+            createdAt: 'asc',
+          },
         },
       },
     });

@@ -17,7 +17,8 @@ model User {
   email          String?  @unique
   password       String?
   isVerified     Boolean  @default(false)
-  name           String?
+  firstName     String?
+  lastName      String?
   profilePicture String?
   publicId       String?
   token          String?
@@ -27,7 +28,6 @@ model User {
   comments         Comment[]
   activityLog      ActivityLog[]
   pushSubscription PushSubscription[]
-
   userWorkspaces UserWorkspace[]
   
   createdAt      DateTime @default(now())
@@ -46,6 +46,16 @@ model Account {
   createdAt         DateTime @default(now())
   updatedAt         DateTime @updatedAt
 }
+
+model Otp {
+  id         Int      @id @default(autoincrement())
+  email       String  @unique
+  otp        String   @unique
+  expiresAt  DateTime
+  createdAt  DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+}
+
 
 enum ROLES {
   ADMIN

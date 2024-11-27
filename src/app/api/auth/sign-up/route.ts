@@ -1,72 +1,72 @@
+import OnboardingTemplate from '@/components/emailTemplates/OnboardingTemplate';
 import prisma from '@/db';
+import { sendMail } from '@/lib/resend';
 import { signUpSchema } from '@/zod/user';
 import { User } from '@prisma/client';
 import { genSalt, hash } from 'bcrypt';
 import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
 
-async function createAccount(email: string, hashedPassword: string, user?: User) {
-  if (!user) {
-    // Create new user if not found
-    user = await prisma.user.create({
-      data: {
-        email,
-        password: hashedPassword,
-        isVerified: false,
-      },
-    });
-  } else {
-    // Update existing user with hashed password
-    await prisma.user.update({
-      where: { id: user.id },
-      data: { password: hashedPassword },
-    });
-  }
-
-  // Create new account associated with user
-  const newAccount = await prisma.account.create({
-    data: {
-      provider: 'EMAIL',
-      userId: user.id,
-    },
-  });
-
-  return newAccount;
-}
-
 export async function POST(request: NextRequest) {
+  const extendedSchema = signUpSchema.extend({
+    otp: z.string().min(1, 'OTP is required'),
+  });
   try {
     // Validate Request
     const body = await request.json();
-    const { email, password } = await signUpSchema.parseAsync(body);
+    const { email, password, firstName, lastName, otp } = await extendedSchema.parseAsync(body);
 
-    // Check if user exists and if it has EMAIL account
-    const result = await prisma.$transaction(async (prisma) => {
-      const user = await prisma.user.findUnique({
-        where: { email },
-        include: { accounts: true },
-      });
+    const storedOtp = await prisma.otp.findUnique({
+      where: {
+        email,
+        otp,
+      },
+    });
 
-      // Hash password
+    if (!storedOtp) {
+      return NextResponse.json({ message: 'The entered OTP is incorrect. Please try again.' }, { status: 500 });
+    }
+
+    const result = await prisma.$transaction(async (tx) => {
       const salt = await genSalt(10);
       const hashedPassword = await hash(password, salt);
+      const user = await tx.user.create({
+        data: {
+          email,
+          firstName,
+          lastName,
+          password: hashedPassword,
+          isVerified: true,
+        },
+      });
 
-      if (user) {
-        const hasEmailAccount = user.accounts.some((account) => account.provider === 'EMAIL');
-        if (hasEmailAccount) {
-          throw new Error('Email already registered');
-        }
+      const newAccount = await tx.account.create({
+        data: {
+          provider: 'EMAIL',
+          userId: user.id,
+        },
+      });
 
-        return await createAccount(email, hashedPassword, user);
-      }
-      return await createAccount(email, hashedPassword);
+      await tx.otp.delete({
+        where: {
+          email,
+          otp,
+        },
+      });
+
+      return { user, newAccount };
     });
 
     if (!result) {
       return NextResponse.json({ message: 'Failed to create account' }, { status: 500 });
     }
 
-    return NextResponse.json({ message: 'User created successfully' }, { status: 201 });
+    await sendMail(email, 'Welcome to Kaizen', OnboardingTemplate());
+
+    return NextResponse.json(
+      { message: 'Welcome aboard! Your account has been successfully created.' },
+      { status: 201 }
+    );
   } catch (error) {
     if (error instanceof z.ZodError) {
       const fieldErrors = error.flatten().fieldErrors;

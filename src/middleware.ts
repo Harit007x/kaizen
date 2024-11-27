@@ -6,7 +6,7 @@ export default withAuth(
   async (req) => {
     const token = await getToken({ req });
     const isAuth = !!token;
-    const isAuthPage = req.nextUrl.pathname.startsWith('/sign-in') || req.nextUrl.pathname.startsWith('/sign-up');
+    const isAuthPage = req.nextUrl.pathname.startsWith('/login') || req.nextUrl.pathname.startsWith('/signup');
 
     if (isAuthPage) {
       if (isAuth) {
@@ -20,7 +20,7 @@ export default withAuth(
     }
 
     if (!isAuth) {
-      return NextResponse.redirect(new URL(`/sign-in`, req.url));
+      return NextResponse.redirect(new URL(`/login`, req.url));
     }
 
     return NextResponse.next();
@@ -38,8 +38,8 @@ export const config = {
   matcher: [
     '/',
     '/test',
-    '/sign-in',
-    '/sign-up',
+    '/login',
+    '/signup',
     // '/live-session/:path*'  // This handles dynamic routes like /live-session/[id]
   ],
 };

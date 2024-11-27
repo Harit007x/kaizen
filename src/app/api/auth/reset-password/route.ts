@@ -14,41 +14,28 @@ export async function POST(request: NextRequest) {
   }
 
   try {
-    const user = await prisma.user.findFirst({
-      where: { email },
-      include: { accounts: true },
+    const storedOtp = await prisma.otp.findUnique({
+      where: {
+        email,
+        otp,
+      },
     });
 
-    if (user) {
-      const hasAccount = user.accounts.some((account) => account.provider === 'EMAIL');
-
-      if (hasAccount) {
-        const token = cookies().get('verificiation_token')?.value;
-        if (!token) {
-          return NextResponse.json({ message: 'Resent OTP and try again' }, { status: 400 });
-        }
-
-        const isVerified = compare(otp, token);
-        if (!isVerified) {
-          return NextResponse.json({ message: 'Incorrect OTP' }, { status: 400 });
-        }
-
-        // Hash password
-        const salt = await genSalt(10);
-        const hashedPassword = await hash(password, salt);
-
-        await prisma.user.update({
-          where: { id: user.id },
-          data: { password: hashedPassword },
-        });
-
-        return NextResponse.json({ message: 'Password Reset Successfully' });
-      }
-
-      return NextResponse.json({ message: 'Try again with Google sign in' }, { status: 400 });
+    if (!storedOtp) {
+      return NextResponse.json({ message: 'The entered OTP is incorrect. Please try again.' }, { status: 500 });
     }
 
-    return NextResponse.json({ message: "Account doesn't exist" }, { status: 400 });
+    const salt = await genSalt(10);
+    const hashedPassword = await hash(password, salt);
+
+    const user = await prisma.user.update({
+      where: { email },
+      data: {
+        password: hashedPassword,
+      },
+    });
+
+    return NextResponse.json({ message: 'Your password has been reset successfully.' }, { status: 200 });
   } catch (error) {
     if (error instanceof z.ZodError) {
       const fieldErrors = error.flatten().fieldErrors;

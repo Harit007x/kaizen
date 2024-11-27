@@ -11,7 +11,7 @@ export interface session extends Session {
   user: {
     id: string;
     email: string;
-    name: string;
+    firstName: string;
     profilePicture: string;
   };
 }
@@ -23,7 +23,7 @@ interface token extends JWT {
 
 interface IUser {
   id: string;
-  name: string;
+  firstName: string;
   email: string;
   token: string;
   profilePicture: string;
@@ -37,29 +37,28 @@ export const authOptions: AuthOptions = {
       async profile(profile) {
         const { email, name, picture } = profile;
         const user = await prisma.user.findUnique({
-            where: { email },
-            include: {
-                accounts: true,
-            },
+          where: { email },
+          include: {
+            accounts: true,
+          },
         });
-
 
         if (user) {
           return user;
         }
 
-        const newAccount = await prisma.account.create({
+        const newUser = await prisma.user.create({
           data: {
-            provider: 'GOOGLE',
-            providerAccountId: profile.sub,
-            refreshToken: profile.refresh_token,
-            accessToken: profile.access_token,
-            user: {
+            email,
+            firstName: name,
+            profilePicture: picture,
+            isVerified: true,
+            accounts: {
               create: {
-                email,
-                name,
-                profilePicture: picture,
-                isVerified: true,
+                provider: 'GOOGLE',
+                providerAccountId: profile.sub,
+                refreshToken: profile.refresh_token,
+                accessToken: profile.access_token,
               },
             },
           },
@@ -67,14 +66,14 @@ export const authOptions: AuthOptions = {
 
         await sendMail(email, 'Welcome to Kaizen', OnboardingTemplate());
 
-        return newAccount;
+        return newUser;
       },
     }),
     CredentialsProvider({
       name: 'Credentials',
       credentials: {
         email: { label: 'email', type: 'text' },
-        name: { label: 'name', type: 'text' },
+        password: { label: 'password', type: 'password' },
       },
       async authorize(credentials: any) {
         const { email, password } = credentials;
@@ -108,6 +107,8 @@ export const authOptions: AuthOptions = {
         newToken.uid = user.id;
         newToken.jwtToken = (user as IUser).token;
         newToken.profilePicture = (user as IUser).profilePicture;
+        newToken.email = (user as IUser).email;
+        newToken.firstName = (user as IUser).firstName;
       }
       return newToken;
     },
@@ -116,18 +117,19 @@ export const authOptions: AuthOptions = {
       if (newSession.user && token.uid) {
         newSession.user.id = token.uid as string;
         newSession.user.email = session.user?.email ?? '';
+        newSession.user.firstName = token.firstName;
         newSession.user.profilePicture = token.profilePicture;
       }
       return newSession!;
     },
     redirect: async ({ url, baseUrl }) => {
-      if (url.includes('/sign-in') || url.includes('/sign-up')) {
+      if (url.includes('/login') || url.includes('/signup')) {
         return `${baseUrl}/`;
       }
       return baseUrl;
     },
   },
   pages: {
-    signIn: '/sign-in',
+    signIn: '/login',
   },
 };

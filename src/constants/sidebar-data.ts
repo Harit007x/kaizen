@@ -128,7 +128,7 @@ export const sidebarData = {
   projects: [
     {
       name: 'Inbox',
-      url: '#',
+      url: '/inbox',
       icon: Inbox,
     },
     {

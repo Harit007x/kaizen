@@ -6,9 +6,9 @@ import { NextRequest, NextResponse } from 'next/server';
 export async function GET(request: NextRequest) {
   try {
     const url = new URL(request.url);
-    const workspace_id = url.searchParams.get('workspace_id');
+    const project_id = url.searchParams.get('project_id');
 
-    if (!workspace_id) {
+    if (!project_id) {
       return NextResponse.json({ message: 'Invalid request' }, { status: 400 });
     }
 
@@ -20,7 +20,7 @@ export async function GET(request: NextRequest) {
     const board = await prisma.project.findFirst({
       where: {
         userId: session.user.id,
-        id: workspace_id,
+        id: project_id,
       },
       include: {
         categories: {

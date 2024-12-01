@@ -4,6 +4,7 @@ import Providers from './Providers';
 import { Inter } from 'next/font/google';
 import { Toaster } from '@/components/ui/sonner';
 import SessionChange from '@/components/others/session-change';
+import PreviousPageTracker from '@/components/others/previousPageTracker';
 
 // Metadata
 const inter = Inter({ subsets: ['latin'] });
@@ -21,6 +22,7 @@ export default function RootLayout({
         {/* <GoogleAnalytics /> */}
         <Providers>
           <SessionChange />
+          <PreviousPageTracker />
           {children}
           <Toaster />
         </Providers>

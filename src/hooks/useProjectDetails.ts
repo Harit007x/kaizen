@@ -1,12 +1,12 @@
 import React, { useEffect, useState } from 'react';
 
-export const UseProjectDetails = (workspace_id: string) => {
+export const UseProjectDetails = (project_id: string) => {
   const [columnData, setColumnData] = useState<any>(null);
   const [projectId, setProjectId] = useState<string>('');
   const [projectName, setProjectName] = useState<string>('');
   async function fetchProjectDetails() {
     try {
-      const res = await fetch(`/api/project/get-project-details?workspace_id=${workspace_id}`, {
+      const res = await fetch(`/api/project/get-project-details?project_id=${project_id}`, {
         method: 'GET',
       }).then((res) => {
         if (!res.ok) {

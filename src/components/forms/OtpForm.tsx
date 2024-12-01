@@ -12,10 +12,9 @@ import { Icons } from '../icons';
 interface OTPFormProps {
   isLoading: boolean;
   handleVerifyOTP: (values: z.infer<typeof optSchema>) => void;
-  setOtp?: Dispatch<SetStateAction<string>>;
 }
 
-export default function OTPForm({ isLoading, setOtp, handleVerifyOTP }: OTPFormProps) {
+export default function OTPForm({ isLoading, handleVerifyOTP }: OTPFormProps) {
   const form = useForm<z.infer<typeof optSchema>>({
     resolver: zodResolver(optSchema),
     defaultValues: {
@@ -23,14 +22,22 @@ export default function OTPForm({ isLoading, setOtp, handleVerifyOTP }: OTPFormP
     },
   });
   return (
-    <div className="flex align-center items-center justify-center">
+    <div className="flex flex-col align-center items-center justify-center space-y-6 ">
+      <div className="flex flex-col space-y-2 text-center">
+        {/* <Icons.logo className="mx-auto h-6 w-6" /> */}
+        <h1 className="text-2xl font-semibold tracking-tight">Create an account</h1>
+        <p className="text-sm text-muted-foreground">Enter your email below to create your account</p>
+      </div>
       <Form {...form}>
-        <form onSubmit={form.handleSubmit(handleVerifyOTP)} className="space-y-6 w-full">
+        <form
+          onSubmit={form.handleSubmit(handleVerifyOTP)}
+          className="space-y-6 w-full flex flex-col justify-center align-center items-center"
+        >
           <FormField
             control={form.control}
             name="otp"
             render={({ field }) => (
-              <FormItem>
+              <FormItem className="flex flex-col items-center justify-center bg-red-400">
                 <FormLabel>One-Time Password (OTP)</FormLabel>
                 <FormControl>
                   <InputOTP maxLength={6} {...field}>
@@ -52,9 +59,9 @@ export default function OTPForm({ isLoading, setOtp, handleVerifyOTP }: OTPFormP
             )}
           />
 
-          <Button type="submit" disabled={isLoading}>
+          <Button type="submit" disabled={isLoading} className="w-full">
             {isLoading && <Icons.spinner className="mr-2 h-4 w-4 animate-spin" />}
-            Verify Email
+            Create Account
           </Button>
         </form>
       </Form>

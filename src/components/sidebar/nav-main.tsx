@@ -59,9 +59,11 @@ export function NavMain({
                   <span>{workspace.title}</span>
                   <div className="flex items-center justify-center ml-auto h-4 gap-3">
                     <CreateProject workspace_id={workspace.id} fetchSidebarDetails={fetchSidebarDetails} />
-                    <CollapsibleTrigger asChild>
-                      <ChevronRight className="w-4 h-4 transition-transform duration-200 group-data-[state=open]/collapsible:rotate-90" />
-                    </CollapsibleTrigger>
+                    {workspace.projects.length > 0 && (
+                      <CollapsibleTrigger asChild>
+                        <ChevronRight className="w-4 h-4 transition-transform duration-200 group-data-[state=open]/collapsible:rotate-90" />
+                      </CollapsibleTrigger>
+                    )}
                   </div>
                 </SidebarMenuButton>
                 <CollapsibleContent>

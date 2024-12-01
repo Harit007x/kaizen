@@ -47,6 +47,25 @@ export async function POST(request: NextRequest) {
         },
       });
 
+      const defaultWorkspace = await tx.workspace.create({
+        data: {
+          title: 'My Projects',
+          userWorkspaces: {
+            create: {
+              userId: user.id,
+            },
+          },
+        },
+      });
+
+      await tx.project.create({
+        data: {
+          workspaceId: defaultWorkspace.id,
+          userId: user.id,
+          name: 'Inbox',
+        },
+      });
+
       await tx.otp.delete({
         where: {
           email,
@@ -68,6 +87,7 @@ export async function POST(request: NextRequest) {
       { status: 201 }
     );
   } catch (error) {
+    console.log('error: ', error);
     if (error instanceof z.ZodError) {
       const fieldErrors = error.flatten().fieldErrors;
       const formattedMessage = (() => {

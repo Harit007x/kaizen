@@ -10,17 +10,38 @@ export default withAuth(
 
     if (isAuthPage) {
       if (isAuth) {
+        const callbackUrl = req.nextUrl.searchParams.get('callbackUrl');
+        if (callbackUrl) {
+          return NextResponse.redirect(new URL(callbackUrl, req.url));
+        }
         return NextResponse.redirect(new URL('/', req.url));
       }
       return null;
-    } else if (req.nextUrl.pathname === '/') {
-      // if (isAuth) {
-      //   return NextResponse.redirect(new URL('/sessions', req.url));
-      // }
+    }
+
+    if (req.nextUrl.pathname === '/') {
+      if (isAuth) {
+        const previousPage = req.cookies.get('previousPage')?.value;
+        if (
+          previousPage &&
+          previousPage !== '/' &&
+          !previousPage.startsWith('/login') &&
+          !previousPage.startsWith('/signup')
+        ) {
+          const response = NextResponse.redirect(new URL(previousPage, req.url));
+          response.cookies.delete('previousPage');
+          return response;
+        }
+
+        return NextResponse.redirect(new URL('/inbox', req.url));
+      }
+      return NextResponse.next();
     }
 
     if (!isAuth) {
-      return NextResponse.redirect(new URL(`/login`, req.url));
+      let loginUrl = new URL('/login', req.url);
+      loginUrl.searchParams.set('callbackUrl', req.nextUrl.pathname);
+      return NextResponse.redirect(loginUrl);
     }
 
     return NextResponse.next();
@@ -35,11 +56,5 @@ export default withAuth(
 );
 
 export const config = {
-  matcher: [
-    '/',
-    '/test',
-    '/login',
-    '/signup',
-    // '/live-session/:path*'  // This handles dynamic routes like /live-session/[id]
-  ],
+  matcher: ['/', '/inbox', '/test', '/login', '/signup', '/project/:path*'],
 };

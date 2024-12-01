@@ -21,7 +21,6 @@ import OTPForm from './OtpForm';
 export default function SignUpForm() {
   const router = useRouter();
 
-  const [otp, setOtp] = useState<string>('');
   const [showOTPPage, setShowOTPPage] = useState<boolean>(false);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [userData, setUserData] = useState<{
@@ -136,7 +135,7 @@ export default function SignUpForm() {
   return (
     <main className="flex h-screen w-screen items-center justify-center sm:p-0">
       {showOTPPage ? (
-        <OTPForm setOtp={setOtp} handleVerifyOTP={handleVerifyOTP} isLoading={isLoading} />
+        <OTPForm handleVerifyOTP={handleVerifyOTP} isLoading={isLoading} />
       ) : (
         <FormComponent form={form} isLoading={isLoading} sendOTP={sendOTP} />
       )}

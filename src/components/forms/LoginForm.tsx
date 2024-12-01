@@ -40,7 +40,7 @@ export default function LoginForm() {
 
       if (!res?.error) {
         toast.success('Signed In');
-        router.push('/');
+        router.push('/inbox');
       } else {
         switch (res.status) {
           case 401:
@@ -139,7 +139,7 @@ export default function LoginForm() {
                 onClick={async () => {
                   setIsGoogleLogin(true);
                   try {
-                    const res = await signIn('google', { redirect: false });
+                    const res = await signIn('google', { callbackUrl: '/inbox' });
                     // Check for !res?.error instead of res?.ok
                     if (!res?.error) {
                       toast.success('Signed In');

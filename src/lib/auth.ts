@@ -6,6 +6,11 @@ import { JWT } from 'next-auth/jwt';
 import CredentialsProvider from 'next-auth/providers/credentials';
 import Google from 'next-auth/providers/google';
 import { sendMail } from './resend';
+import { User as PrismaUser } from '@prisma/client';
+
+interface CustomUser extends PrismaUser {
+  firstName: string;
+}
 
 export interface session extends Session {
   user: {
@@ -34,7 +39,7 @@ export const authOptions: AuthOptions = {
     Google({
       clientId: process.env.GOOGLE_CLIENT_ID || '',
       clientSecret: process.env.GOOGLE_CLIENT_SECRET || '',
-      async profile(profile) {
+      async profile(profile, tokens) {
         const { email, name, picture } = profile;
         const user = await prisma.user.findUnique({
           where: { email },
@@ -57,10 +62,38 @@ export const authOptions: AuthOptions = {
               create: {
                 provider: 'GOOGLE',
                 providerAccountId: profile.sub,
-                refreshToken: profile.refresh_token,
-                accessToken: profile.access_token,
               },
             },
+          },
+        });
+
+        await prisma.workspace.create({
+          data: {
+            title: 'My Projects',
+            userWorkspaces: {
+              create: {
+                userId: newUser.id,
+              },
+            },
+          },
+        });
+
+        const inboxWorkspace = await prisma.workspace.create({
+          data: {
+            title: 'Inbox',
+            userWorkspaces: {
+              create: {
+                userId: newUser.id,
+              },
+            },
+          },
+        });
+
+        await prisma.project.create({
+          data: {
+            name: 'Inbox',
+            workspaceId: inboxWorkspace.id,
+            userId: newUser.id,
           },
         });
 
@@ -101,7 +134,7 @@ export const authOptions: AuthOptions = {
   ],
   secret: process.env.NEXTAUTH_SECRET || '',
   callbacks: {
-    jwt: async ({ token, user }): Promise<JWT> => {
+    jwt: async ({ token, user, account }): Promise<JWT> => {
       const newToken: token = token as token;
       if (user) {
         newToken.uid = user.id;
@@ -114,6 +147,7 @@ export const authOptions: AuthOptions = {
     },
     session: async ({ session, token }: any) => {
       const newSession: session = session as session;
+
       if (newSession.user && token.uid) {
         newSession.user.id = token.uid as string;
         newSession.user.email = session.user?.email ?? '';
@@ -123,10 +157,17 @@ export const authOptions: AuthOptions = {
       return newSession!;
     },
     redirect: async ({ url, baseUrl }) => {
-      if (url.includes('/login') || url.includes('/signup')) {
-        return `${baseUrl}/`;
+      if (url === baseUrl || url === `${baseUrl}/`) {
+        return `${baseUrl}/inbox`;
       }
-      return baseUrl;
+
+      if (url.startsWith('/login') || url.startsWith('/signup')) {
+        return `${baseUrl}/inbox`;
+      }
+
+      if (url.startsWith(baseUrl)) return url;
+
+      return `${baseUrl}/inbox`;
     },
   },
   pages: {

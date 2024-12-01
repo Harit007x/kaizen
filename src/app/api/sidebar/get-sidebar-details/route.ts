@@ -11,13 +11,18 @@ export async function GET(request: NextRequest) {
   }
 
   const userId = session.user.id;
-
+  const excludedWorkspaces = ['Inbox'];
   try {
     const workspace_project_list = await prisma.workspace.findMany({
       where: {
         userWorkspaces: {
           some: {
             userId: userId,
+          },
+        },
+        NOT: {
+          title: {
+            in: excludedWorkspaces,
           },
         },
       },

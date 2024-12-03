@@ -69,7 +69,15 @@ export default function LoginForm() {
   const isFormEmpty = form.watch('email') === '' && form.watch('password') === '';
 
   return (
-    <main className="flex h-screen w-screen flex-col items-center justify-center px-6">
+    <main className="relative flex h-screen w-screen flex-col items-center justify-center px-6">
+      <Link
+        href="/"
+        className={cn(
+          'absolute flex justify-center items-center align-center gap-2 left-4 top-4 md:left-8 md:top-8 hover:bg-accent hover:text-accent-foreground h-9 px-4 py-2 rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:opacity-50 disabled:pointer-events-none ring-offset-background'
+        )}
+      >
+        <Icons.chevronLeft className="w-4 h-4" /> Home
+      </Link>
       <div className="mx-auto flex w-full flex-col justify-center space-y-6 sm:w-[350px]">
         <div className="flex flex-col space-y-2 text-center">
           <h1 className="text-2xl font-semibold tracking-tight">Welcome back</h1>
@@ -79,7 +87,7 @@ export default function LoginForm() {
         <Form {...form}>
           <form onSubmit={form.handleSubmit(handleSignIn)} className="space-y-5">
             <div className="flex flex-col gap-4">
-              <div className="flex flex-col gap-4">
+              <div className="flex flex-col gap-2">
                 <FormField
                   control={form.control}
                   name="email"

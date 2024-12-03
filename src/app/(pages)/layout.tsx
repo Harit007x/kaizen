@@ -6,7 +6,7 @@ interface AuthLayoutProps {
 
 export default function AuthLayout({ children }: AuthLayoutProps) {
   return (
-    <main className="flex overflow-hidden p-0">
+    <main className="flex overflow-hidden p-0 w-full">
       <AppSidebar />
       {children}
     </main>

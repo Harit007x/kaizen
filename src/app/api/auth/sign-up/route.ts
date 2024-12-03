@@ -47,9 +47,20 @@ export async function POST(request: NextRequest) {
         },
       });
 
-      const defaultWorkspace = await tx.workspace.create({
+      await tx.workspace.create({
         data: {
           title: 'My Projects',
+          userWorkspaces: {
+            create: {
+              userId: user.id,
+            },
+          },
+        },
+      });
+
+      const defaultWorkspace = await tx.workspace.create({
+        data: {
+          title: 'Inbox',
           userWorkspaces: {
             create: {
               userId: user.id,

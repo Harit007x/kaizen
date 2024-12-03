@@ -174,7 +174,7 @@ function FormComponent({ form, isLoading, sendOTP }: FormProps) {
           </div>
           <Form {...form}>
             <form onSubmit={form.handleSubmit(sendOTP)}>
-              <div className="flex flex-col gap-4 py-2 pb-6">
+              <div className="flex flex-col gap-2 py-2 pb-6">
                 <div className="flex flex-col gap-2 items-start">
                   <div className="flex items-center gap-4 w-full">
                     <FormField

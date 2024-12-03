@@ -37,7 +37,7 @@ export default function OTPForm({ isLoading, handleVerifyOTP }: OTPFormProps) {
             control={form.control}
             name="otp"
             render={({ field }) => (
-              <FormItem className="flex flex-col items-center justify-center bg-red-400">
+              <FormItem className="flex flex-col items-center justify-center">
                 <FormLabel>One-Time Password (OTP)</FormLabel>
                 <FormControl>
                   <InputOTP maxLength={6} {...field}>

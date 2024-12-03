@@ -4,9 +4,7 @@ import Link from 'next/link';
 
 export default function Home() {
   return (
-    <main className="relative flex h-screen w-screen flex-col items-center justify-center px-6">
-      <div className="absolute top-0 z-[-2] h-screen w-screen bg-neutral-950 bg-[radial-gradient(ellipse_80%_80%_at_50%_-20%,rgba(120,119,198,0.3),rgba(255,255,255,0))]"></div>
-      <header></header>
+    <main className="flex h-screen w-screen flex-col items-center justify-center px-6">
       <Link
         href="/login"
         className={cn(
@@ -15,7 +13,10 @@ export default function Home() {
       >
         Login
       </Link>
-      <div className="mb-8 flex">
+      <div className="mb-20 flex flex-col justify-center items-center gap-6">
+        <div className="bg-black p-4 rounded-lg shadow-[0px_2px_26px_0px_rgba(255,255,255,_0.3)]">
+          <img src="kaizen_logo.png" alt="Logo" className="w-8 h-8" />
+        </div>
         <a
           href="https://github.com/ibelick/background-snippets"
           target="_blank"
@@ -25,16 +26,21 @@ export default function Home() {
           <span className="relative inline-block overflow-hidden rounded-full p-[1px]">
             <span className="absolute inset-[-1000%] animate-[spin_2s_linear_infinite] bg-[conic-gradient(from_90deg_at_50%_50%,#a9a9a9_0%,#0c0c0c_50%,#a9a9a9_100%)] dark:bg-[conic-gradient(from_90deg_at_50%_50%,#171717_0%,#737373_50%,#171717_100%)]" />
             <div className="inline-flex h-full w-full cursor-pointer justify-center rounded-full bg-white px-3 py-1 text-xs font-medium leading-5 text-slate-600 backdrop-blur-xl dark:bg-black dark:text-slate-200">
-              New snippets ⚡️
-              <span className="inline-flex items-center pl-2 text-black dark:text-white">
-                Read more <Icons.arrowRight className="pl-0.5 text-black dark:text-white" size={16} />
+              We are open source ⚡️
+              <span className="inline-flex items-center pl-1 text-black dark:text-white">
+                Github <Icons.arrowRight className="pl-0.5 text-black dark:text-white" size={16} />
               </span>
             </div>
           </span>
         </a>
-      </div>
-      <div className="text-5xl font-semibold text-center leading-[3.5rem]">
-        Organize,connect and <br /> achieve together
+        <h2 className="text-3xl md:text-5xl lg:text-6xl font-medium text-center leading-tight lg:leading-[4rem] tracking-wide">
+          Organize,connect<span className="block">achieve together</span>
+        </h2>
+
+        <div className="text-sm lg:text-base font-normal text-center leading-relaxed max-w-md lg:max-w-xl tracking-wider">
+          Streamline your projects with task management and team collaboration. Built with simplicity to fit seamlessly
+          into your workflow.
+        </div>
       </div>
     </main>
   );

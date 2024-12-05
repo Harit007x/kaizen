@@ -63,6 +63,7 @@ import {
   Hash,
   EllipsisVertical,
   Flag,
+  FolderKanban,
 } from 'lucide-react';
 
 export const Icons = {
@@ -127,6 +128,7 @@ export const Icons = {
   hash: Hash,
   ellipsisVertical: EllipsisVertical,
   flag: Flag,
+  folderKanban: FolderKanban,
   checkSVG: ({ ...props }: LucideProps) => (
     <svg
       aria-hidden="true"

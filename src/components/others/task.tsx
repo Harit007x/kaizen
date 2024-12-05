@@ -6,7 +6,7 @@ import { combine } from '@atlaskit/pragmatic-drag-and-drop/combine';
 import { draggable, dropTargetForElements } from '@atlaskit/pragmatic-drag-and-drop/element/adapter';
 import { DropIndicator } from '@atlaskit/pragmatic-drag-and-drop-react-drop-indicator/box';
 import { Edit2, Ghost, Maximize, Trash, Ungroup } from 'lucide-react';
-import { Card, CardTitle, CardHeader, CardFooter, CardDescription } from '../ui/card';
+import { Card, CardTitle, CardHeader, CardFooter } from '../ui/card';
 import { Badge } from '../ui/badge';
 import { dateFormatter } from '@/lib/helper';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '../ui/dialog';
@@ -14,7 +14,17 @@ import TaskForm, { TaskFormData } from '../forms/taskForm';
 import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
 import { priorityColor } from '@/constants/priority-list';
-
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from '../ui/alert-dialog';
 export interface TaskProps {
   id: number;
   name: string;
@@ -154,12 +164,32 @@ const Task = (props: TaskProps) => {
             >
               <Edit2 className="" size={14} />
             </div>
-            <div
-              onClick={() => handleTaskDelete()}
-              className="flex items-center justify-center w-7 h-7 rounded-sm cursor-pointer text-muted-foreground hover:text-red/90 hover:fill-redBackground hover:bg-red/10"
-            >
-              <Trash className="" size={14} />
-            </div>
+            <AlertDialog>
+              <AlertDialogTrigger asChild>
+                <div className="flex items-center justify-center w-7 h-7 rounded-sm cursor-pointer text-muted-foreground hover:text-red/90 hover:fill-redBackground hover:bg-red/10">
+                  <Trash className="" size={14} />
+                </div>
+              </AlertDialogTrigger>
+              <AlertDialogContent>
+                <AlertDialogHeader>
+                  <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+                  <AlertDialogDescription>
+                    The <b className="text-white">{props.name}</b> task will be permanently deleted.
+                  </AlertDialogDescription>
+                </AlertDialogHeader>
+                <AlertDialogFooter>
+                  <AlertDialogCancel disabled={isLoading}>Cancel</AlertDialogCancel>
+                  <AlertDialogAction
+                    disabled={isLoading}
+                    onClick={(e) => {
+                      handleTaskDelete();
+                    }}
+                  >
+                    {isLoading ? 'Deleting...' : 'Delete'}
+                  </AlertDialogAction>
+                </AlertDialogFooter>
+              </AlertDialogContent>
+            </AlertDialog>
           </div>
         </div>
         <CardTitle className="text-md">

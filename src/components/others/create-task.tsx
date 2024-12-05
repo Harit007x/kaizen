@@ -62,7 +62,6 @@ const CreateTask = (props: ICreateTask) => {
 
   async function onSubmit(data: z.infer<typeof FormSchema>) {
     const res = await handleTaskCreate(data, props.category_id);
-    console.log('chekc the repso  =', data);
     if (res?.ok) {
       props.fetchProjectDetails();
     }

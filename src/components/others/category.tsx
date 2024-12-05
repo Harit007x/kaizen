@@ -19,7 +19,18 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '../ui/dropdown-menu';
-
+import { toast } from 'sonner';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from '../ui/alert-dialog';
 export interface CategoryProps {
   tasks: TaskProps[];
   title: string;
@@ -31,6 +42,7 @@ const Category = (props: CategoryProps) => {
   const columnRef = useRef<HTMLDivElement>(null);
   const [isReordering, setIsReordering] = useState(false);
   const [closestEdge, setClosestEdge] = useState<'left' | 'right' | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
     const columnEl = columnRef.current;
@@ -81,13 +93,60 @@ const Category = (props: CategoryProps) => {
     );
   }, [props.id]);
 
+  const handleCategoryDelete = async () => {
+    setIsLoading(true);
+    try {
+      const res = await fetch(`/api/category/delete/${props.id}`, {
+        method: 'DELETE',
+      });
+
+      const responseData = await res.json();
+      if (res.ok) {
+        await props.fetchProjectDetails();
+        toast.success(responseData.message);
+        setShowDeleteDialog(false);
+      } else {
+        throw new Error(responseData.message);
+      }
+    } catch (error) {
+      console.error(error);
+      toast.error('Failed to update task');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+  const [showDeleteDialog, setShowDeleteDialog] = React.useState(false);
+
   return (
     <div
       className={`min-w-[280px] flex flex-col border-[1px] bg-secondary/80 rounded-md hover:border-border 
           ${isReordering && 'opacity-30'} relative`}
       ref={columnRef}
     >
-      {/* Header */}
+      <AlertDialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+            <AlertDialogDescription>
+              <b className="text-white">{props.tasks.length}</b> task(s) within the{' '}
+              <b className="text-white">{props.title}</b> section will be wiped out permanently.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={isLoading}>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              disabled={isLoading}
+              onClick={(e) => {
+                e.preventDefault();
+                handleCategoryDelete();
+              }}
+            >
+              {isLoading ? 'Deleting...' : 'Delete'}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
       <div className="flex align-center items-center justify-between mb-2 pt-2 px-3">
         <div className="flex items-center justify-center gap-2">
           <h1 className="text-sm font-bold">{props.title}</h1>
@@ -111,7 +170,10 @@ const Category = (props: CategoryProps) => {
             sideOffset={4}
           >
             <DropdownMenuGroup>
-              <DropdownMenuItem className="cursor-pointer text-red hover:bg-redBackground hover:text-red">
+              <DropdownMenuItem
+                className="cursor-pointer text-red hover:bg-redBackground hover:text-red"
+                onClick={() => setShowDeleteDialog(true)}
+              >
                 <Icons.trash className="h-4 w-4" />
                 Delete
               </DropdownMenuItem>

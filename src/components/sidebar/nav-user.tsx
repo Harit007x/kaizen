@@ -16,6 +16,7 @@ import { SidebarMenu, SidebarMenuButton, SidebarMenuItem, useSidebar } from '@/c
 import { userStore } from '@/store';
 import { signOut } from 'next-auth/react';
 import { useTheme } from 'next-themes';
+import { Icons } from '../icons';
 
 export function NavUser() {
   const { setTheme, theme } = useTheme();
@@ -36,9 +37,8 @@ export function NavUser() {
 
                   <AvatarFallback className="rounded-lg">{user.firstName[0]}</AvatarFallback>
                 </Avatar>
-                <div className="grid flex-1 text-left text-sm leading-tight">
+                <div className="grid flex-1 text-left pl-1 text-sm leading-tight">
                   <span className="truncate font-semibold">{user.firstName}</span>
-                  <span className="truncate text-xs">{user.email}</span>
                 </div>
                 <ChevronsUpDown className="ml-auto size-4" />
               </SidebarMenuButton>
@@ -63,28 +63,28 @@ export function NavUser() {
               </DropdownMenuLabel>
               <DropdownMenuSeparator />
               <DropdownMenuGroup>
-                <DropdownMenuItem>
+                <DropdownMenuItem disabled={true}>
                   <Sparkles />
                   Upgrade to Pro
                 </DropdownMenuItem>
               </DropdownMenuGroup>
               <DropdownMenuSeparator />
               <DropdownMenuGroup>
-                <DropdownMenuItem onClick={() => setTheme('dark')}>
-                  <BadgeCheck />
-                  {theme === 'dark' ? 'Dark' : 'Light'}
+                <DropdownMenuItem>
+                  <Icons.plus className="w-4 h-4" />
+                  Add workspace
                 </DropdownMenuItem>
                 <DropdownMenuItem>
                   <BadgeCheck />
                   Account
                 </DropdownMenuItem>
-                <DropdownMenuItem>
+                {/* <DropdownMenuItem>
                   <CreditCard />
                   Billing
-                </DropdownMenuItem>
+                </DropdownMenuItem> */}
                 <DropdownMenuItem>
-                  <Bell />
-                  Notifications
+                  <Icons.settings className="w-4 h-4" />
+                  Settings
                 </DropdownMenuItem>
               </DropdownMenuGroup>
               <DropdownMenuSeparator />

@@ -12,6 +12,7 @@ body {
     --foreground: 240 10% 3.9%;
     --card: 0 0% 100%;
     --card-foreground: 240 10% 3.9%;
+    --mattBlack: 0 0% 24%;
     --popover: 0 0% 100%;
     --popover-foreground: 240 10% 3.9%;
     --primary: 240 5.9% 10%;
@@ -26,8 +27,8 @@ body {
     --destructive-foreground: 0 0% 98%;
     --blue: 202 100% 50%;
     --blueBackground: 205 100% 93%;
-    --red : 0 100% 59%;
-    --redBackground : 0 100% 95%;
+    --red: 0 100% 59%;
+    --redBackground: 0 100% 95%;
     --green: 144 90% 36%;
     --greenBackground: 142 50% 89%;
     --purple: 259 100% 71%;
@@ -54,7 +55,7 @@ body {
   }
   .dark {
     --blueBackground: 205 100% 10%;
-    --redBackground : 0 100% 10%;
+    --redBackground: 0 100% 10%;
     --greenBackground: 142 50% 10%;
     --purpleBackground: 259 100% 10%;
     --orangeBackground: 36, 100%, 10%;
@@ -99,5 +100,46 @@ body {
   }
   body {
     @apply bg-background text-foreground;
+  }
+}
+
+@layer base {
+  ::-webkit-scrollbar {
+    @apply w-3 h-3;
+  }
+
+  ::-webkit-scrollbar-track {
+    @apply bg-secondary dark:bg-secondary/30;
+  }
+
+  ::-webkit-scrollbar-thumb {
+    @apply bg-muted-foreground/50 dark:bg-muted-foreground/30 
+           rounded-full 
+           border-4 border-transparent 
+           bg-clip-content;
+  }
+
+  ::-webkit-scrollbar-thumb:hover {
+    @apply bg-muted-foreground/70 dark:bg-muted-foreground/50;
+  }
+
+  ::-webkit-scrollbar-button {
+    @apply bg-secondary dark:bg-secondary/30 
+           w-3 h-3;
+  }
+
+  ::-webkit-scrollbar-button:hover {
+    @apply bg-muted-foreground/50 dark:bg-muted-foreground/30;
+  }
+
+  /* For Firefox */
+  * {
+    scrollbar-width: thin;
+    scrollbar-color: hsl(var(--muted-foreground) / 0.5) hsl(var(--secondary) / 1);
+  }
+
+  /* Dark mode for Firefox */
+  .dark * {
+    scrollbar-color: hsl(var(--muted-foreground) / 0.3) hsl(var(--secondary) / 0.3);
   }
 }

@@ -2,20 +2,21 @@
 
 import * as React from 'react';
 
-import { NavMain } from '@/components/sidebar/nav-main';
-import {
-  Sidebar,
-  SidebarContent,
-  SidebarFooter,
-  SidebarHeader,
-  SidebarRail,
-  SidebarTrigger,
-} from '@/components/ui/sidebar';
+import { NavMain, NavWorkspaces } from '@/components/sidebar/nav-main';
+import { Sidebar, SidebarContent, SidebarFooter, SidebarHeader } from '@/components/ui/sidebar';
 import { NavUser } from './nav-user';
 import { NavProjects } from './new-projects';
 import { sidebarData } from '@/constants/sidebar-data';
+import { NavSecondary } from './nav-secondary';
+import { Separator } from '../ui/separator';
 
-// This is sample data.
+const CustomSeparator = () => {
+  return (
+    <div className="w-full flex justify-center items-center">
+      <Separator className="bg-secondary w-[90%]" />
+    </div>
+  );
+};
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   return (
@@ -25,12 +26,16 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
           <NavUser />
         </div>
       </SidebarHeader>
+      <Separator className="bg-secondary" />
       <SidebarContent>
         <NavProjects projects={sidebarData.projects} />
-        <NavMain items={sidebarData.navMain} />
+        <CustomSeparator />
+        <NavWorkspaces />
+        <CustomSeparator />
+        {/* <NavWorkspaces workspaces={sidebarData.workspaces}/> */}
+        <NavSecondary items={sidebarData.navSecondary} />
       </SidebarContent>
       <SidebarFooter></SidebarFooter>
-      <SidebarRail />
     </Sidebar>
   );
 }

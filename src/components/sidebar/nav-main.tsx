@@ -1,12 +1,14 @@
 'use client';
 
-import { ChevronRight, type LucideIcon } from 'lucide-react';
+import { ChevronRight, MoreHorizontal, Plus, type LucideIcon } from 'lucide-react';
 
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import {
   SidebarGroup,
+  SidebarGroupContent,
   SidebarGroupLabel,
   SidebarMenu,
+  SidebarMenuAction,
   SidebarMenuButton,
   SidebarMenuItem,
   SidebarMenuSub,
@@ -29,33 +31,20 @@ export interface IWorkspace {
   projects: IProjects[];
 }
 
-export function NavMain({
-  items,
-}: {
-  items: {
-    title: string;
-    url: string;
-    icon?: LucideIcon;
-    isActive?: boolean;
-    items?: {
-      title: string;
-      url: string;
-    }[];
-  }[];
-}) {
+export function NavMain() {
   const router = useRouter();
   const { data, fetchSidebarDetails } = UseSidebarDetails();
 
   return (
     <SidebarGroup>
-      {data && <SidebarGroupLabel className="font-bold text-sm text-gray-600">Workspaces</SidebarGroupLabel>}
+      {data && <SidebarGroupLabel className="text-xs text-foreground/70">Workspaces</SidebarGroupLabel>}
       <SidebarMenu>
         {data &&
           data.map((workspace: IWorkspace) => (
             <Collapsible key={workspace.title} asChild defaultOpen={false} className="group/collapsible">
               <SidebarMenuItem>
                 <SidebarMenuButton tooltip={workspace.title}>
-                  <Icons.hash className="text-gray-500" />
+                  <Icons.hash />
                   <span>{workspace.title}</span>
                   <div className="flex items-center justify-center ml-auto h-4 gap-3">
                     <CreateProject workspace_id={workspace.id} fetchSidebarDetails={fetchSidebarDetails} />
@@ -84,6 +73,58 @@ export function NavMain({
             </Collapsible>
           ))}
       </SidebarMenu>
+    </SidebarGroup>
+  );
+}
+
+export function NavWorkspaces() {
+  const router = useRouter();
+  const { data, fetchSidebarDetails } = UseSidebarDetails();
+
+  return (
+    <SidebarGroup>
+      <SidebarGroupLabel>Workspaces</SidebarGroupLabel>
+      <SidebarGroupContent>
+        <SidebarMenu>
+          {data &&
+            data.map((workspace: IWorkspace) => (
+              <Collapsible key={workspace.title}>
+                <SidebarMenuItem>
+                  <SidebarMenuButton asChild>
+                    <a href="#">
+                      <Icons.folderKanban />
+                      <span>{workspace.title}</span>
+                    </a>
+                  </SidebarMenuButton>
+                  <CollapsibleTrigger asChild>
+                    <SidebarMenuAction
+                      className="left-2 bg-sidebar-accent text-sidebar-accent-foreground data-[state=open]:rotate-90"
+                      showOnHover
+                    >
+                      <ChevronRight />
+                    </SidebarMenuAction>
+                  </CollapsibleTrigger>
+                  <SidebarMenuAction showOnHover>
+                    <CreateProject workspace_id={workspace.id} fetchSidebarDetails={fetchSidebarDetails} />
+                  </SidebarMenuAction>
+                  <CollapsibleContent>
+                    <SidebarMenuSub>
+                      {workspace.projects.map((project: IProjects) => (
+                        <SidebarMenuSubItem key={project.name} onClick={() => router.push(`/project/${project.id}`)}>
+                          <SidebarMenuSubButton asChild>
+                            <a href="#">
+                              <span>{project.name}</span>
+                            </a>
+                          </SidebarMenuSubButton>
+                        </SidebarMenuSubItem>
+                      ))}
+                    </SidebarMenuSub>
+                  </CollapsibleContent>
+                </SidebarMenuItem>
+              </Collapsible>
+            ))}
+        </SidebarMenu>
+      </SidebarGroupContent>
     </SidebarGroup>
   );
 }

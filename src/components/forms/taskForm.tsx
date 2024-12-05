@@ -9,7 +9,6 @@ import { z } from 'zod';
 import { IHandleTaskCreate } from '../others/create-task';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select';
 import { priorityList } from '@/constants/priority-list';
-import { cn } from '@/lib/utils';
 
 const FormSchema = z.object({
   name: z.string({
@@ -59,6 +58,12 @@ const TaskForm = ({
   };
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
+    const targetElement = e.target as HTMLElement;
+
+    if (targetElement.closest('[role="listbox"]') || targetElement.closest('[role="combobox"]')) {
+      return;
+    }
+
     if (e.key === 'Enter') {
       e.preventDefault();
       form.handleSubmit(handleSubmit)();

@@ -14,6 +14,8 @@ import { checkForPermissionAndTrigger } from '@/lib/Push';
 import { SidebarTrigger } from '@/components/ui/sidebar';
 import Category from '@/components/others/category';
 import { useTheme } from 'next-themes';
+import { Icons } from '../icons';
+import { cn } from '@/lib/utils';
 
 interface HandleDropProps {
   source: {
@@ -460,7 +462,6 @@ export default function Kanban(props: IKanbanPage) {
       const formData = new FormData();
       formData.append('category_name', categoryName);
       formData.append('project_id', projectId);
-      console.log('formdata =', formData);
       const res = await fetch('/api/category/create', {
         method: 'POST',
         body: formData,
@@ -468,6 +469,7 @@ export default function Kanban(props: IKanbanPage) {
 
       const data = await res.json();
       fetchProjectDetails();
+      setCategoryName('');
       toast.success(data.message);
     } catch (error) {
       console.error(error);
@@ -488,9 +490,28 @@ export default function Kanban(props: IKanbanPage) {
       <div className="w-80 flex p-4 flex-col gap-4 mb-2">
         <SidebarTrigger />
         <div className="text-xl font-extrabold">{projectName}</div>
-        <form className="flex justify-center" onSubmit={handleCategoryCreate}>
-          <Input placeholder="Category" onChange={(e) => setCategoryName(e.target.value)} disabled={isLoading} />
-          <Button disabled={isLoading}>Create</Button>
+        <form
+          className={cn({
+            'flex items-center gap-4': categoryName !== '',
+          })}
+          onSubmit={handleCategoryCreate}
+        >
+          <Input
+            placeholder="Category"
+            value={categoryName}
+            onBlur={(e) => {
+              if (!e.relatedTarget || e.relatedTarget.tagName !== 'BUTTON') {
+                setCategoryName('');
+              }
+            }}
+            onChange={(e) => setCategoryName(e.target.value)}
+            disabled={isLoading}
+          />
+          {categoryName !== '' && (
+            <Button type="submit" disabled={isLoading}>
+              {isLoading ? <Icons.spinner className="mr-2 h-4 w-4 animate-spin" /> : 'Create'}
+            </Button>
+          )}
         </form>
         <Button onClick={() => setTheme('dark')}>Dark</Button>
         <Button onClick={() => setTheme('light')}>Light</Button>

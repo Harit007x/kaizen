@@ -11,6 +11,7 @@ import {
   Inbox,
   Map,
   PieChart,
+  Settings,
   Settings2,
   SquareTerminal,
 } from 'lucide-react';
@@ -38,12 +39,8 @@ export const sidebarData = {
       plan: 'Free',
     },
   ],
-  navMain: [
+  workspaces: [
     {
-      title: 'Playground',
-      url: '#',
-      icon: SquareTerminal,
-      isActive: true,
       items: [
         {
           title: 'History',
@@ -141,5 +138,22 @@ export const sidebarData = {
       url: '#',
       icon: Filter,
     },
+  ],
+  navSecondary: [
+    // {
+    //   title: 'Calendar',
+    //   url: '#',
+    //   icon: Calendar,
+    // },
+    {
+      title: 'Settings',
+      url: '/settings',
+      icon: Settings,
+    },
+    // {
+    //   title: 'Help',
+    //   url: '#',
+    //   icon: Filter,
+    // },
   ],
 };

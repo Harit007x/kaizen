@@ -110,11 +110,13 @@ export function NavWorkspaces() {
                   <CollapsibleContent>
                     <SidebarMenuSub>
                       {workspace.projects.map((project: IProjects) => (
-                        <SidebarMenuSubItem key={project.name} onClick={() => router.push(`/project/${project.id}`)}>
+                        <SidebarMenuSubItem
+                          className="cursor-pointer"
+                          key={project.name}
+                          onClick={() => router.push(`/project/${project.id}`)}
+                        >
                           <SidebarMenuSubButton asChild>
-                            <a href="#">
-                              <span>{project.name}</span>
-                            </a>
+                            <span>{project.name}</span>
                           </SidebarMenuSubButton>
                         </SidebarMenuSubItem>
                       ))}

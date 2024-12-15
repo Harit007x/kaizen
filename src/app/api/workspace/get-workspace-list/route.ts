@@ -10,6 +10,7 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ message: 'Please sign in first to continue' }, { status: 401 });
   }
   const userId = session.user.id;
+  const excludedWorkspaces = ['Inbox'];
 
   try {
     const workspace_list = await prisma.workspace.findMany({
@@ -17,6 +18,11 @@ export async function GET(request: NextRequest) {
         userWorkspaces: {
           some: {
             userId: userId,
+          },
+        },
+        NOT: {
+          title: {
+            in: excludedWorkspaces,
           },
         },
       },

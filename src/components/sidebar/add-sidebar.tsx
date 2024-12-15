@@ -2,12 +2,12 @@
 
 import * as React from 'react';
 
-import { NavMain, NavWorkspaces } from '@/components/sidebar/nav-main';
+import { NavWorkspaces } from '@/components/sidebar/nav-main';
 import { Sidebar, SidebarContent, SidebarFooter, SidebarHeader } from '@/components/ui/sidebar';
 import { NavUser } from './nav-user';
 import { NavProjects } from './new-projects';
 import { sidebarData } from '@/constants/sidebar-data';
-import { NavSecondary } from './nav-secondary';
+import { SettingsDialog } from './nav-secondary';
 import { Separator } from '../ui/separator';
 
 const CustomSeparator = () => {
@@ -32,8 +32,9 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         <CustomSeparator />
         <NavWorkspaces />
         <CustomSeparator />
+
         {/* <NavWorkspaces workspaces={sidebarData.workspaces}/> */}
-        <NavSecondary items={sidebarData.navSecondary} />
+        <SettingsDialog />
       </SidebarContent>
       <SidebarFooter></SidebarFooter>
     </Sidebar>

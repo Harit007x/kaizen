@@ -7,7 +7,6 @@ import { NextRequest, NextResponse } from 'next/server';
 export async function PUT(request: NextRequest) {
   try {
     const { firstName, email, password } = await request.json();
-    console.log('wow =', firstName, email);
     const session: any = await getServerSession(authOptions);
     if (!session?.user) {
       return NextResponse.json({ message: 'Please sign in first to continue' }, { status: 401 });
@@ -23,19 +22,25 @@ export async function PUT(request: NextRequest) {
       if (!user) {
         return NextResponse.json({ message: 'User not found' }, { status: 404 });
       }
-      console.log('whole e- - - - - - - - - - - - - ', password, user.password);
+
       const isPasswordMatch = await compare(password, user.password as string);
 
       if (!isPasswordMatch) {
         return NextResponse.json({ message: 'Incorrect password. Please type a valid password.' });
       }
+
+      await prisma.user.update({
+        where: { id: session.user.id },
+        data: {
+          email,
+        },
+      });
     }
 
     await prisma.user.update({
       where: { id: session.user.id },
       data: {
         firstName: firstName,
-        email,
       },
     });
 

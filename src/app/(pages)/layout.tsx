@@ -1,4 +1,4 @@
-import { AppSidebar } from '@/components/sidebar/add-sidebar';
+import { AppSidebar } from '@/components/sidebar/app-sidebar';
 
 interface PagesLayoutProps {
   children: React.ReactNode;

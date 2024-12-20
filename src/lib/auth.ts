@@ -8,10 +8,6 @@ import Google from 'next-auth/providers/google';
 import { sendMail } from './resend';
 import { User as PrismaUser } from '@prisma/client';
 
-interface CustomUser extends PrismaUser {
-  firstName: string;
-}
-
 export interface session extends Session {
   user: {
     id: string;
@@ -32,6 +28,7 @@ interface IUser {
   email: string;
   token: string;
   profilePicture: string;
+  password: string;
 }
 
 export const authOptions: AuthOptions = {
@@ -40,14 +37,14 @@ export const authOptions: AuthOptions = {
       clientId: process.env.GOOGLE_CLIENT_ID || '',
       clientSecret: process.env.GOOGLE_CLIENT_SECRET || '',
       async profile(profile, tokens) {
-        const { email, name, picture } = profile;
-        const user = await prisma.user.findUnique({
-          where: { email },
-          include: {
-            accounts: true,
+        const { email, name, picture, sub } = profile;
+        const user = await prisma.user.findFirst({
+          where: {
+            accounts: {
+              some: { providerAccountId: sub },
+            },
           },
         });
-
         if (user) {
           return user;
         }
@@ -119,8 +116,7 @@ export const authOptions: AuthOptions = {
         });
 
         if (user) {
-          const hasEmailAccount = user.accounts.some((account) => account.provider === 'EMAIL');
-          if (hasEmailAccount && user.password) {
+          if (user.password) {
             const isMatch = await compare(password, user.password);
             if (isMatch) {
               return user;
@@ -147,7 +143,6 @@ export const authOptions: AuthOptions = {
     },
     session: async ({ session, token }: any) => {
       const newSession: session = session as session;
-
       if (newSession.user && token.uid) {
         newSession.user.id = token.uid as string;
         newSession.user.email = session.user?.email ?? '';

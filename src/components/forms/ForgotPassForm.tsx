@@ -6,7 +6,7 @@ import { Input } from '@/components/ui/input';
 import { useRouter } from 'next/navigation';
 import { Form, FormField, FormItem, FormControl, FormMessage, FormDescription, FormLabel } from '../ui/form';
 import { useForm } from 'react-hook-form';
-import { forgotPassSchema, resetPassSchema } from '@/zod/user';
+import { emailSchema, forgotPasswordSchema } from '@/zod/user';
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
 import Link from 'next/link';
@@ -20,15 +20,15 @@ export default function ForgotPassForm() {
   const [showResetPage, setShowResetPage] = useState<boolean>(false);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [email, setEmail] = useState<string>('');
-  const forgotPassForm = useForm<z.infer<typeof forgotPassSchema>>({
-    resolver: zodResolver(forgotPassSchema),
+  const forgotPassForm = useForm<z.infer<typeof emailSchema>>({
+    resolver: zodResolver(emailSchema),
     defaultValues: {
       email: '',
     },
   });
 
-  const resetPassForm = useForm<z.infer<typeof resetPassSchema>>({
-    resolver: zodResolver(resetPassSchema),
+  const resetPassForm = useForm<z.infer<typeof forgotPasswordSchema>>({
+    resolver: zodResolver(forgotPasswordSchema),
     defaultValues: {
       newPassword: '',
       confirmPassword: '',
@@ -36,7 +36,7 @@ export default function ForgotPassForm() {
     },
   });
 
-  async function sendOTP(values: z.infer<typeof forgotPassSchema>) {
+  async function sendOTP(values: z.infer<typeof emailSchema>) {
     setIsLoading(true);
     try {
       const res = await fetch('/api/auth/send-otp', {
@@ -69,17 +69,18 @@ export default function ForgotPassForm() {
     }
   }
 
-  async function handleChangePassword(values: z.infer<typeof resetPassSchema>) {
+  async function handleChangePassword(values: z.infer<typeof forgotPasswordSchema>) {
     try {
       setIsLoading(true);
-      const res = await fetch('/api/auth/reset-password', {
+      const res = await fetch('/api/auth/forgot-password', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
           email: email,
-          password: values.newPassword,
+          newPassword: values.newPassword,
+          confirmPassword: values.confirmPassword,
           otp: values.otp,
         }),
       });

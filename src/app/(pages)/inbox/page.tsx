@@ -15,6 +15,5 @@ export default async function InboxPage() {
       },
     },
   });
-  console.log('chekc the inxov =', session?.user);
   return <Kanban projectId={inbox?.id as string} />;
 }

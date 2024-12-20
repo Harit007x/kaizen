@@ -22,13 +22,18 @@ export const profileSchema = z
       .refine((value) => !value || /[@$!%*?&]/.test(value), {
         message: 'Include at least one special character (@, $, !, %, *, ?, or &).',
       }),
+    originalEmail: z.string().optional(),
   })
-  .superRefine((data, ctx) => {
-    if (data.email && (!data.password || data.password.trim() === '')) {
-      ctx.addIssue({
-        code: z.ZodIssueCode.custom,
-        message: 'Password is required when email is provided.',
-        path: ['password'],
-      });
+  .refine(
+    (data) => {
+      // Only require password if email is different from the original
+      if (data.email && data.email !== data.originalEmail && (!data.password || data.password.trim() === '')) {
+        return false;
+      }
+      return true;
+    },
+    {
+      message: 'Password is required when changing email.',
+      path: ['password'],
     }
-  });
+  );

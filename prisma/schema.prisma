@@ -38,7 +38,7 @@ model User {
 model Account {
   id                String   @id @default(uuid())
   provider          Provider
-  providerAccountId String?
+  providerAccountId String?  @unique
   userId            String?
   user              User?    @relation(fields: [userId], references: [id], onDelete: Cascade)
   accessToken       String?

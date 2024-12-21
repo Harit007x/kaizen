@@ -14,7 +14,7 @@ import { checkForPermissionAndTrigger } from '@/lib/Push';
 import { SidebarTrigger } from '@/components/ui/sidebar';
 import Category from '@/components/others/category';
 import { useTheme } from 'next-themes';
-import { Icons } from '../icons';
+import { Icons } from '../ui-extended/icons';
 import { cn } from '@/lib/utils';
 
 interface HandleDropProps {

@@ -9,7 +9,7 @@ import {
 } from '@/components/ui/dialog';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Button } from '../ui/button';
-import { Icons } from '../icons';
+import { Icons } from '../ui-extended/icons';
 import { Input } from '../ui/input';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';

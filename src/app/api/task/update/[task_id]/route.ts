@@ -7,7 +7,7 @@ export async function PUT(request: NextRequest, { params }: { params: { task_id:
   // Validate Request
   const { task_id } = params;
 
-  const { name, description, priorityId } = await request.json();
+  const { name, description, priorityId, dueDate } = await request.json();
 
   try {
     const session: any = await getServerSession(authOptions);
@@ -23,6 +23,7 @@ export async function PUT(request: NextRequest, { params }: { params: { task_id:
         name: name,
         description: description,
         priorityId: priorityId,
+        dueDate: dueDate,
         isCompleted: false,
       },
     });

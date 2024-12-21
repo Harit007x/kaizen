@@ -16,7 +16,7 @@ import { SidebarMenu, SidebarMenuButton, SidebarMenuItem, useSidebar } from '@/c
 import { userStore } from '@/store';
 import { signOut } from 'next-auth/react';
 import { useTheme } from 'next-themes';
-import { Icons } from '../icons';
+import { Icons } from '../ui-extended/icons';
 
 export function NavUser() {
   const { setTheme, theme } = useTheme();

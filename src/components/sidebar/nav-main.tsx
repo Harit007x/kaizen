@@ -16,7 +16,7 @@ import {
   SidebarMenuSubItem,
 } from '@/components/ui/sidebar';
 import { UseSidebarDetails } from '@/hooks/useSidebarDetails';
-import { Icons } from '../icons';
+import { Icons } from '../ui-extended/icons';
 import CreateProject from '../others/create-project';
 import { useRouter } from 'next/navigation';
 

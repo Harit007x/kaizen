@@ -14,7 +14,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 import { resetPasswordSchema } from '@/zod/user';
-import { Icons } from '../icons';
+import { Icons } from '../ui-extended/icons';
 
 interface ISecurityProps {
   profileData: UserProfile | undefined;

@@ -8,7 +8,7 @@ import { DropIndicator } from '@atlaskit/pragmatic-drag-and-drop-react-drop-indi
 import { Edit2, Ghost, Maximize, Trash, Ungroup } from 'lucide-react';
 import { Card, CardTitle, CardHeader, CardFooter } from '../ui/card';
 import { Badge } from '../ui/badge';
-import { dateFormatter } from '@/lib/helper';
+import { timezoneDateFormatter } from '@/lib/helper';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '../ui/dialog';
 import TaskForm, { TaskFormData } from '../forms/taskForm';
 import { toast } from 'sonner';
@@ -30,6 +30,7 @@ export interface TaskProps {
   name: string;
   description?: string;
   priorityId: 'p1' | 'p2' | 'p3' | 'p4';
+  dueDate: Date;
   createdAt: string;
   category_id: string;
   fetchProjectDetails: () => Promise<void>;
@@ -137,6 +138,14 @@ const Task = (props: TaskProps) => {
       setIsLoading(false);
     }
   };
+  const userTimezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+
+  const localDate = new Date(props.createdAt).toLocaleString('en-US', {
+    timeZone: userTimezone,
+    hour: 'numeric',
+    minute: 'numeric',
+    hour12: true,
+  });
 
   return (
     <Card
@@ -207,7 +216,7 @@ const Task = (props: TaskProps) => {
             {props.priorityId.toUpperCase()}
           </Badge>
         </div>
-        <div className="text-xs bg-secondary rounded-sm py-0.5 px-1">{dateFormatter(props.createdAt)}</div>
+        <div className="text-xs bg-secondary rounded-sm py-0.5 px-1">{timezoneDateFormatter(props.createdAt)}</div>
       </CardFooter>
       <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
         <DialogContent className="sm:max-w-[425px]">
@@ -220,6 +229,7 @@ const Task = (props: TaskProps) => {
               name: props.name,
               description: props.description,
               priorityId: props.priorityId,
+              dueDate: new Date(props.dueDate),
             }}
             onSubmit={handleTaskUpdate}
             onCancel={() => setIsEditDialogOpen(false)}

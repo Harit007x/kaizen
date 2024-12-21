@@ -1,6 +1,6 @@
 // components/TaskForm.tsx
 import React from 'react';
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage, FormDescription } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -9,6 +9,12 @@ import { z } from 'zod';
 import { IHandleTaskCreate } from '../others/create-task';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select';
 import { priorityList } from '@/constants/priority-list';
+import { DateTimePicker } from '../ui-extended/data-time-picker';
+import { Calendar } from '../ui/calendar';
+import { Popover, PopoverTrigger, PopoverContent } from '../ui/popover';
+import { Icons } from '../ui-extended/icons';
+import { format } from 'date-fns';
+import { cn } from '@/lib/utils';
 
 const FormSchema = z.object({
   name: z.string({
@@ -16,6 +22,11 @@ const FormSchema = z.object({
   }),
   description: z.string().optional(),
   priorityId: z.string().optional(),
+  dueDate: z
+    .date({
+      required_error: 'Due date is required.',
+    })
+    .optional(),
 });
 
 export type TaskFormData = z.infer<typeof FormSchema>;
@@ -47,6 +58,7 @@ const TaskForm = ({
       name: '',
       description: '',
       priorityId: '',
+      dueDate: undefined,
     },
   });
 
@@ -69,7 +81,7 @@ const TaskForm = ({
       form.handleSubmit(handleSubmit)();
     }
   };
-
+  console.log('data =', initialData);
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(handleSubmit)} className="w-full space-y-4" onKeyDown={handleKeyDown}>
@@ -99,6 +111,54 @@ const TaskForm = ({
             </FormItem>
           )}
         />
+        {/* <FormField
+          control={form.control}
+          name="dueDate"
+          render={({ field }) => (
+            <FormItem className="flex flex-col gap-2">
+              <FormLabel>Due Date</FormLabel>
+
+              <FormControl>
+                <DateTimePicker value={field.value} onChange={field.onChange} enableTimePicker={false} />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        /> */}
+        <FormField
+          control={form.control}
+          name="dueDate"
+          render={({ field }) => (
+            <FormItem className="flex flex-col">
+              <FormLabel>Date of birth</FormLabel>
+              <Popover>
+                <PopoverTrigger asChild>
+                  <FormControl>
+                    <Button
+                      variant={'outline'}
+                      className={cn('w-[240px] pl-3 text-left font-normal', !field.value && 'text-muted-foreground')}
+                    >
+                      {field.value ? format(field.value, 'PPP') : <span>Pick a date</span>}
+                      <Icons.calender className="ml-auto h-4 w-4 opacity-50" />
+                    </Button>
+                  </FormControl>
+                </PopoverTrigger>
+                <PopoverContent className="w-auto p-0" align="start">
+                  <Calendar
+                    mode="single"
+                    selected={field.value}
+                    onSelect={field.onChange}
+                    disabled={(date) => date > new Date() || date < new Date('1900-01-01')}
+                    initialFocus
+                  />
+                </PopoverContent>
+              </Popover>
+              <FormDescription>Your date of birth is used to calculate your age.</FormDescription>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
         <FormField
           control={form.control}
           name="priorityId"

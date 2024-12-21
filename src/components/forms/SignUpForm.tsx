@@ -1,7 +1,7 @@
 'use client';
 import { Dispatch, FormEvent, SetStateAction, useState } from 'react';
 
-import { Icons } from '@/components/icons';
+import { Icons } from '@/components/ui-extended/icons';
 import { Button } from '@/components/ui/button';
 import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';

@@ -81,13 +81,28 @@ export const encryptPassword = async (password: string) => {
   }
 };
 
-export const dateFormatter = (dateString: string) => {
+export const timezoneDateFormatter = (dateString: string) => {
+  const userTimezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
   const dateObject = new Date(dateString);
+
   const formattedDate = dateObject.toLocaleString('en-US', {
-    weekday: 'short', // Short day name (e.g., Thu)
-    month: 'short', // Short month name (e.g., Dec)
-    day: 'numeric', // Day of the month (e.g., 21)
+    timeZone: userTimezone,
+    weekday: 'short',
+    month: 'short',
+    day: 'numeric',
   });
 
   return formattedDate;
+};
+
+export const timezoneTimeFormatter = (date: Date) => {
+  const userTimezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+
+  const localTime = new Date(date).toLocaleString('en-US', {
+    timeZone: userTimezone,
+    hour: 'numeric',
+    minute: 'numeric',
+    hour12: true,
+  });
+  return localTime;
 };

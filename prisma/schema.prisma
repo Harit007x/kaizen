@@ -56,7 +56,6 @@ model Otp {
   updatedAt         DateTime @updatedAt
 }
 
-
 enum ROLES {
   ADMIN
   MEMBER
@@ -118,6 +117,7 @@ model Task {
   categoryId  String
   category    Category @relation(fields: [categoryId], references: [id])
   position    Float
+  dueDate     DateTime
   createdAt   DateTime      @default(now())
   updatedAt   DateTime      @updatedAt
 }

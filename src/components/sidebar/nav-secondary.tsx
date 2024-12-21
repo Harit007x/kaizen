@@ -2,7 +2,7 @@
 
 import React, { useEffect, useState } from 'react';
 import { Dialog, DialogContent, DialogDescription, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
-import { Icons } from '../icons';
+import { Icons } from '../ui-extended/icons';
 import { Separator } from '../ui/separator';
 import Profile from '../settings/profile';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';

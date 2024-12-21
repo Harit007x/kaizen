@@ -39,6 +39,7 @@ export async function GET(request: NextRequest) {
                 id: true,
                 name: true,
                 description: true,
+                dueDate: true,
                 priorityId: true,
                 isCompleted: true,
                 createdAt: true,

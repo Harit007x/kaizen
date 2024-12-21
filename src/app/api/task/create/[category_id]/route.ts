@@ -7,7 +7,7 @@ export async function POST(request: NextRequest, { params }: { params: { categor
   // Validate Request
   const { category_id } = params;
 
-  const { name, description, priorityId } = await request.json();
+  const { name, description, priorityId, dueDate } = await request.json();
 
   try {
     const session: any = await getServerSession(authOptions);
@@ -39,6 +39,7 @@ export async function POST(request: NextRequest, { params }: { params: { categor
         categoryId: category_id,
         name: name,
         description: description,
+        dueDate: dueDate,
         priorityId: priorityId ? priorityId : 'p4',
         isCompleted: false,
         position: position,

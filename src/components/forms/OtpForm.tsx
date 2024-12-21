@@ -7,7 +7,7 @@ import { optSchema } from '@/zod/user';
 import { InputOTP, InputOTPGroup, InputOTPSlot } from '@/components/ui/input-otp';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Icons } from '../icons';
+import { Icons } from '../ui-extended/icons';
 
 interface OTPFormProps {
   isLoading: boolean;

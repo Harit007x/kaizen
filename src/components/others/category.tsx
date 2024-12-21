@@ -8,7 +8,7 @@ import Task, { TaskProps } from './task';
 import { DropIndicator } from '@atlaskit/pragmatic-drag-and-drop-react-drop-indicator/box';
 import CreateTask from './create-task';
 import { ScrollArea } from '../ui/scroll-area';
-import { Icons } from '../icons';
+import { Icons } from '../ui-extended/icons';
 import { Button } from '../ui/button';
 import {
   DropdownMenu,
@@ -190,6 +190,7 @@ const Category = (props: CategoryProps) => {
               id={task.id}
               name={task.name}
               description={task.description}
+              dueDate={task.dueDate}
               createdAt={task.createdAt}
               category_id={props.id}
               priorityId={task.priorityId}

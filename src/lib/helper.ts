@@ -1,4 +1,5 @@
 import crypto from 'crypto';
+import { EncryptJWT, jwtDecrypt } from 'jose';
 import JSEncrypt from 'jsencrypt';
 // import fs from 'fs';
 // export async function uploadToCloudinary(fileUri: string, fileName: string) {
@@ -26,61 +27,6 @@ import JSEncrypt from 'jsencrypt';
 //   }
 // }
 
-// export function decryptPassword(encryptedPassword: string) {
-//   const privateKey = fs.readFileSync('./keys/private_key.pem', 'utf8');
-//   const decryptedPassword = crypto.privateDecrypt(
-//     {
-//       key: privateKey,
-//       padding: crypto.constants.RSA_PKCS1_PADDING,
-//     },
-//     Buffer.from(encryptedPassword, 'base64')
-//   );
-
-//   return decryptedPassword.toString('utf8');
-// }
-
-export const encryptPassword = async (password: string) => {
-  try {
-    // Generate a random AES key
-    const aesKey = crypto.randomBytes(32);
-    const iv = crypto.randomBytes(16);
-
-    // Encrypt the password with AES
-    const cipher = crypto.createCipheriv('aes-256-cbc', aesKey, iv);
-    let encryptedPassword = cipher.update(password, 'utf8', 'base64');
-    encryptedPassword += cipher.final('base64');
-
-    // Encrypt the AES key with the RSA public key
-    const response = await fetch('public_key.pem');
-    const publicKey = await response.text();
-
-    console.log('Public key =', publicKey);
-    if (!publicKey) {
-      throw new Error('Public key is missing');
-    }
-
-    const encryptedAesKey = crypto
-      .publicEncrypt(
-        {
-          key: publicKey,
-          padding: crypto.constants.RSA_PKCS1_PADDING,
-        },
-        aesKey
-      )
-      .toString('base64');
-
-    // Return both encrypted password and encrypted AES key
-    return {
-      encryptedPassword,
-      encryptedAesKey,
-      iv: iv.toString('base64'),
-    };
-  } catch (error) {
-    console.error('Encryption error:', error);
-    throw error;
-  }
-};
-
 export const timezoneDateFormatter = (dateString: string) => {
   const userTimezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
   const dateObject = new Date(dateString);
@@ -106,3 +52,61 @@ export const timezoneTimeFormatter = (date: Date) => {
   });
   return localTime;
 };
+
+async function generateSecretKey() {
+  const key = crypto.getRandomValues(new Uint8Array(32));
+  return key;
+}
+
+function setCookie(name: string, value: string, days: number) {
+  const expires = days ? `; expires=${new Date(Date.now() + days * 864e5).toUTCString()}` : '';
+  document.cookie = `${name}=${value || ''}${expires}; path=/; Secure; SameSite=Strict`;
+}
+
+export function base64ToUint8Array(base64Key: string): Uint8Array {
+  const binaryString = atob(base64Key);
+  const byteArray = new Uint8Array(binaryString.length);
+  for (let i = 0; i < binaryString.length; i++) {
+    byteArray[i] = binaryString.charCodeAt(i);
+  }
+  return byteArray;
+}
+
+export async function encryptAndStoreInCookie(data: Record<string, any>) {
+  const secret = await generateSecretKey();
+  const base64Key = btoa(String.fromCharCode(...secret));
+  console.log('data ype =', typeof process.env.NEXT_PUBLIC_BASE_KEY, process.env.NEXT_PUBLIC_BASE_KEY);
+  const originalKey = base64ToUint8Array(process.env.NEXT_PUBLIC_BASE_KEY as string);
+  const jwt = await new EncryptJWT(data)
+    .setProtectedHeader({ alg: 'dir', enc: 'A256GCM' })
+    .setIssuedAt()
+    .setExpirationTime('2h')
+    .encrypt(originalKey);
+
+  setCookie('user_data', jwt, 7);
+}
+
+export async function decryptCookie() {
+  const encryptedCookie = getCookie('user_data');
+  if (!encryptedCookie) {
+    console.error('Cookie not found');
+    return null;
+  }
+  const originalKey = base64ToUint8Array(process.env.NEXT_PUBLIC_BASE_KEY as string);
+
+  try {
+    const { payload } = await jwtDecrypt(encryptedCookie, originalKey);
+    console.log('Decrypted Data:', payload);
+    return payload;
+  } catch (error) {
+    console.error('Decryption failed:', error);
+    return null;
+  }
+}
+
+export function getCookie(name: string): string | null {
+  const value = `; ${document.cookie}`;
+  const parts = value.split(`; ${name}=`);
+  if (parts.length === 2) return parts.pop()?.split(';').shift() || null;
+  return null;
+}

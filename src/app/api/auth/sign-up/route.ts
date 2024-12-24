@@ -2,7 +2,6 @@ import OnboardingTemplate from '@/components/emailTemplates/OnboardingTemplate';
 import prisma from '@/db';
 import { sendMail } from '@/lib/resend';
 import { signUpSchema } from '@/zod/user';
-import { User } from '@prisma/client';
 import { genSalt, hash } from 'bcrypt';
 import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
@@ -12,7 +11,6 @@ export async function POST(request: NextRequest) {
     otp: z.string().min(1, 'OTP is required'),
   });
   try {
-    // Validate Request
     const body = await request.json();
     const { email, password, firstName, lastName, otp } = await extendedSchema.parseAsync(body);
 

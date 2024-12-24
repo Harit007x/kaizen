@@ -19,6 +19,7 @@ import { UseSidebarDetails } from '@/hooks/useSidebarDetails';
 import { Icons } from '../ui-extended/icons';
 import CreateProject from '../others/create-project';
 import { useRouter } from 'next/navigation';
+import { useEffect } from 'react';
 
 export interface IProjects {
   id: string;
@@ -77,17 +78,20 @@ export function NavMain() {
   );
 }
 
-export function NavWorkspaces() {
+interface INavWorkspacesProps {
+  data: any;
+  fetchSidebarDetails: () => Promise<void>;
+}
+export function NavWorkspaces(props: INavWorkspacesProps) {
   const router = useRouter();
-  const { data, fetchSidebarDetails } = UseSidebarDetails();
 
   return (
     <SidebarGroup>
       <SidebarGroupLabel>Workspaces</SidebarGroupLabel>
       <SidebarGroupContent>
         <SidebarMenu>
-          {data &&
-            data.map((workspace: IWorkspace) => (
+          {props.data &&
+            props.data.map((workspace: IWorkspace) => (
               <Collapsible key={workspace.title}>
                 <SidebarMenuItem>
                   <SidebarMenuButton asChild>
@@ -105,7 +109,7 @@ export function NavWorkspaces() {
                     </SidebarMenuAction>
                   </CollapsibleTrigger>
                   <SidebarMenuAction showOnHover>
-                    <CreateProject workspace_id={workspace.id} fetchSidebarDetails={fetchSidebarDetails} />
+                    <CreateProject workspace_id={workspace.id} fetchSidebarDetails={props.fetchSidebarDetails} />
                   </SidebarMenuAction>
                   <CollapsibleContent>
                     <SidebarMenuSub>

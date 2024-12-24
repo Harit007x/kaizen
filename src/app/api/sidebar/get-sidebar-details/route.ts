@@ -26,6 +26,9 @@ export async function GET(request: NextRequest) {
           },
         },
       },
+      orderBy: {
+        createdAt: 'asc',
+      },
       select: {
         id: true,
         title: true,

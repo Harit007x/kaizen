@@ -70,6 +70,11 @@ export default function Kanban(props: IKanbanPage) {
   }, [user]);
 
   const { projectId, projectName, columnData, setColumnData, fetchProjectDetails } = UseProjectDetails(props.projectId);
+
+  useEffect(() => {
+    fetchProjectDetails();
+  }, []);
+
   async function updateCategoryReorder(projectId: string, source_column_id: string, destination_column_id: string) {
     try {
       const response = await fetch('/api/project/reorder-category', {
@@ -426,29 +431,6 @@ export default function Kanban(props: IKanbanPage) {
   }, [handleDrop]);
 
   const [workspaceTitle, setWorkspaceTitle] = useState<string>('');
-
-  async function handleWorkspaceCreate(e: FormEvent<HTMLFormElement>) {
-    e.preventDefault();
-    setIsLoading(true);
-
-    try {
-      const formData = new FormData();
-      formData.append('title', workspaceTitle);
-      console.log('formdata =', formData);
-      const res = await fetch('/api/workspace/create', {
-        method: 'POST',
-        body: formData,
-      });
-
-      const data = await res.json();
-      toast.success(data.message);
-    } catch (error) {
-      console.error(error);
-      toast.error('Something went wrong');
-    } finally {
-      setIsLoading(false);
-    }
-  }
 
   const [project_name, setProjectName] = useState<string>('');
   const [categoryName, setCategoryName] = useState<string>('');

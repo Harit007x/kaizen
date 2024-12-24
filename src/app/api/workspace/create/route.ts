@@ -5,15 +5,13 @@ import { NextRequest, NextResponse } from 'next/server';
 
 export async function POST(request: NextRequest) {
   // Validate Request
-  const formData = await request.formData();
-  const title = formData.get('title') as string;
+  const { title } = await request.json();
   if (!title) {
     return NextResponse.json({ message: 'Title is required' }, { status: 400 });
   }
 
   try {
     const session: any = await getServerSession(authOptions);
-    console.log('session on server= ', session?.user, formData);
     if (!session?.user) {
       return NextResponse.json({ message: 'Please sign in first to continue' }, { status: 401 });
     }

@@ -9,7 +9,6 @@ import { z } from 'zod';
 import { IHandleTaskCreate } from '../others/create-task';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select';
 import { priorityList } from '@/constants/priority-list';
-import { DateTimePicker } from '../ui-extended/data-time-picker';
 import { Calendar } from '../ui/calendar';
 import { Popover, PopoverTrigger, PopoverContent } from '../ui/popover';
 import { Icons } from '../ui-extended/icons';
@@ -153,7 +152,6 @@ const TaskForm = ({
                   />
                 </PopoverContent>
               </Popover>
-              <FormDescription>Your date of birth is used to calculate your age.</FormDescription>
               <FormMessage />
             </FormItem>
           )}

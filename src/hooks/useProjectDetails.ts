@@ -23,10 +23,6 @@ export const UseProjectDetails = (project_id: string) => {
     }
   }
 
-  useEffect(() => {
-    fetchProjectDetails();
-  }, []);
-
   return {
     fetchProjectDetails,
     setColumnData,

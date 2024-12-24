@@ -1,6 +1,6 @@
 'use client';
 
-import { BadgeCheck, Bell, ChevronsUpDown, CreditCard, LogOut, Sparkles } from 'lucide-react';
+import { BadgeCheck, ChevronsUpDown, LogOut, Sparkles } from 'lucide-react';
 
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import {
@@ -17,15 +17,29 @@ import { userStore } from '@/store';
 import { signOut } from 'next-auth/react';
 import { useTheme } from 'next-themes';
 import { Icons } from '../ui-extended/icons';
+import CreateWorkspace from '../others/create-workspace';
+import { useState } from 'react';
 
-export function NavUser() {
+interface INavUserProps {
+  fetchSidebarDetails: () => Promise<void>;
+}
+
+export function NavUser(props: INavUserProps) {
   const { setTheme, theme } = useTheme();
   const { isMobile } = useSidebar();
   const { user } = userStore();
+
+  const [isWorkspaceDialogOpen, setIsWorkspaceDialogOpen] = useState<boolean>(false);
+
   return (
     user && (
       <SidebarMenu>
         <SidebarMenuItem>
+          <CreateWorkspace
+            setIsWorkspaceDialogOpen={setIsWorkspaceDialogOpen}
+            isWorkspaceDialogOpen={isWorkspaceDialogOpen}
+            fetchSidebarDetails={props.fetchSidebarDetails}
+          />
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <SidebarMenuButton
@@ -70,7 +84,11 @@ export function NavUser() {
               </DropdownMenuGroup>
               <DropdownMenuSeparator />
               <DropdownMenuGroup>
-                <DropdownMenuItem>
+                <DropdownMenuItem
+                  onClick={() => {
+                    setIsWorkspaceDialogOpen(true);
+                  }}
+                >
                   <Icons.plus className="w-4 h-4" />
                   Add workspace
                 </DropdownMenuItem>

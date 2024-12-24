@@ -41,7 +41,6 @@ export default function SignUpForm() {
   });
 
   async function sendOTP(values: z.infer<typeof signUpSchema>) {
-    console.log('checking the otp =');
     setIsLoading(true);
     try {
       const res = await fetch('/api/auth/send-otp', {
@@ -176,7 +175,7 @@ function FormComponent({ form, isLoading, sendOTP }: FormProps) {
             <form onSubmit={form.handleSubmit(sendOTP)}>
               <div className="flex flex-col gap-2 py-2 pb-6">
                 <div className="flex flex-col gap-2 items-start">
-                  <div className="flex items-center gap-4 w-full">
+                  <div className="flex items-center gap-2 w-full">
                     <FormField
                       control={form.control}
                       name="firstName"

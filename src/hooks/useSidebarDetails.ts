@@ -1,7 +1,8 @@
-import React, { useEffect, useState } from 'react';
+import { WorkspaceProjectList } from '@/app/api/sidebar/get-sidebar-details/route';
+import { useState } from 'react';
 
 export const UseSidebarDetails = () => {
-  const [data, setData] = useState<any>(null);
+  const [data, setData] = useState<WorkspaceProjectList[]>([]);
   async function fetchSidebarDetails() {
     try {
       const res = await fetch(`/api/sidebar/get-sidebar-details`, {

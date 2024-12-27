@@ -1,11 +1,12 @@
 // Route to set subscription
 
+import { NextRequest, NextResponse } from 'next/server';
+import { getServerSession } from 'next-auth';
+import { PushSubscription } from 'web-push';
+
 import { getUserData } from '@/actions/getUserData';
 import prisma from '@/db';
 import { authOptions } from '@/lib/auth';
-import { getServerSession } from 'next-auth';
-import { NextRequest, NextResponse } from 'next/server';
-import { PushSubscription } from 'web-push';
 
 export async function POST(request: NextRequest) {
   const body: { subscription: PushSubscription } = await request.json();

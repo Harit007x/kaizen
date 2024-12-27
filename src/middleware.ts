@@ -1,6 +1,6 @@
+import { NextResponse } from 'next/server';
 import { getToken } from 'next-auth/jwt';
 import { withAuth } from 'next-auth/middleware';
-import { NextResponse } from 'next/server';
 
 export default withAuth(
   async (req) => {
@@ -39,7 +39,7 @@ export default withAuth(
     }
 
     if (!isAuth) {
-      let loginUrl = new URL('/login', req.url);
+      const loginUrl = new URL('/login', req.url);
       loginUrl.searchParams.set('callbackUrl', req.nextUrl.pathname);
       return NextResponse.redirect(loginUrl);
     }

@@ -56,7 +56,6 @@ import {
   Eye,
   EyeOff,
   CirclePlay,
-  Play,
   CirclePause,
   CircleArrowRight,
   SkipForward,

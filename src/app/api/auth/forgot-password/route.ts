@@ -1,9 +1,9 @@
-import prisma from '@/db';
-import { forgotPasswordSchema } from '@/zod/user';
-import { compare, genSalt, hash } from 'bcrypt';
-import { cookies } from 'next/headers';
+import { genSalt, hash } from 'bcrypt';
 import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
+
+import prisma from '@/db';
+import { forgotPasswordSchema } from '@/zod/user';
 
 export async function POST(request: NextRequest) {
   const body = await request.json();
@@ -29,7 +29,7 @@ export async function POST(request: NextRequest) {
     const salt = await genSalt(10);
     const hashedPassword = await hash(newPassword, salt);
 
-    const user = await prisma.user.update({
+    await prisma.user.update({
       where: { email },
       data: {
         password: hashedPassword,

@@ -1,6 +1,7 @@
 import fs from 'fs';
-import type { MetadataRoute } from 'next';
 import path from 'path';
+
+import type { MetadataRoute } from 'next';
 
 // Add Details according to the project requirements
 const URL = 'https://kaizen.haritpatel.site';

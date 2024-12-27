@@ -1,25 +1,15 @@
 'use client';
-import React, { FormEvent, SetStateAction, useEffect, useRef, useState } from 'react';
-import { attachClosestEdge, extractClosestEdge } from '@atlaskit/pragmatic-drag-and-drop-hitbox/closest-edge';
-import invariant from 'tiny-invariant';
+import React, { useEffect, useRef, useState } from 'react';
+
 import { combine } from '@atlaskit/pragmatic-drag-and-drop/combine';
 import { draggable, dropTargetForElements } from '@atlaskit/pragmatic-drag-and-drop/element/adapter';
-import Task, { TaskProps } from './task';
+import { attachClosestEdge, extractClosestEdge } from '@atlaskit/pragmatic-drag-and-drop-hitbox/closest-edge';
 import { DropIndicator } from '@atlaskit/pragmatic-drag-and-drop-react-drop-indicator/box';
-import CreateTask from './create-task';
-import { ScrollArea } from '../ui/scroll-area';
-import { Icons } from '../ui-extended/icons';
-import { Button } from '../ui/button';
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuGroup,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from '../ui/dropdown-menu';
 import { toast } from 'sonner';
+import invariant from 'tiny-invariant';
+
+import CreateTask from './create-task';
+import Task, { TaskProps } from './task';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -29,8 +19,18 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-  AlertDialogTrigger,
 } from '../ui/alert-dialog';
+import { Button } from '../ui/button';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuGroup,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '../ui/dropdown-menu';
+import { ScrollArea } from '../ui/scroll-area';
+import { Icons } from '../ui-extended/icons';
+
 export interface CategoryProps {
   tasks: TaskProps[];
   title: string;

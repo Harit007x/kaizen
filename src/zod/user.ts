@@ -86,6 +86,25 @@ export const verifySchema = signUpSchema.extend({
   otp: z.string().min(1, 'OTP is required'),
 });
 
+export const addPasswordSchema = z.object({
+  addPassword: z
+    .string()
+    .min(1, 'Please enter your password.')
+    .min(8, 'Password must be at least 8 characters.')
+    .refine((value) => /[a-z]/.test(value), {
+      message: 'Include at least one lowercase letter.',
+    })
+    .refine((value) => /[A-Z]/.test(value), {
+      message: 'Include at least one uppercase letter.',
+    })
+    .refine((value) => /\d/.test(value), {
+      message: 'Include at least one number.',
+    })
+    .refine((value) => /[@$!%*?&]/.test(value), {
+      message: 'Include at least one special character (@, $, !, %, *, ?, or &).',
+    }),
+});
+
 export const resetPasswordSchema = z
   .object({
     newPassword: z

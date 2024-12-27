@@ -1,10 +1,11 @@
+import { NextResponse } from 'next/server';
+import { getServerSession, Session } from 'next-auth';
+
 import prisma from '@/db';
 import { authOptions } from '@/lib/auth';
-import { getServerSession } from 'next-auth';
-import { NextRequest, NextResponse } from 'next/server';
 
-export async function GET(request: NextRequest) {
-  const session: any = await getServerSession(authOptions);
+export async function GET() {
+  const session = (await getServerSession(authOptions)) as Session;
 
   if (!session?.user) {
     return NextResponse.json({ message: 'Please sign in first to continue' }, { status: 401 });

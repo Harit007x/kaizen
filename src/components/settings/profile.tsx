@@ -1,19 +1,22 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+
+import { zodResolver } from '@hookform/resolvers/zod';
+import { useForm } from 'react-hook-form';
+import { toast } from 'sonner';
+import { z } from 'zod';
+
+import { profileSchema } from '@/zod/profile';
+
+import Security from './resetPassword';
+import { UserProfile } from '../sidebar/nav-secondary';
 import { Avatar, AvatarImage, AvatarFallback } from '../ui/avatar';
 import { Button } from '../ui/button';
+import { Form, FormField, FormItem, FormControl, FormMessage } from '../ui/form';
 import { Input } from '../ui/input';
 import { Label } from '../ui/label';
 import { ScrollArea } from '../ui/scroll-area';
-import { Form, FormField, FormItem, FormControl, FormMessage } from '../ui/form';
-import { useForm } from 'react-hook-form';
-import { z } from 'zod';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { profileSchema } from '@/zod/profile';
-import { toast } from 'sonner';
-import { UserProfile } from '../sidebar/nav-secondary';
-import Security from './resetPassword';
 
 interface IProfileProps {
   profileData: UserProfile | undefined;
@@ -42,7 +45,7 @@ export default function Profile(props: IProfileProps) {
         isEmailChanged: hasEmailChanged,
       };
 
-      const response = await fetch('/api/user/update', {
+      await fetch('/api/user/update', {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -79,7 +82,7 @@ export default function Profile(props: IProfileProps) {
       setIsModified(true);
     });
     return () => subscription.unsubscribe();
-  }, [form.watch]);
+  }, [form.watch, form]);
 
   const hasEmailChanged = props.profileData?.email !== form.watch('email');
 

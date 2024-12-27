@@ -1,6 +1,7 @@
 'use client';
 
-import { ChevronRight, MoreHorizontal, Plus, type LucideIcon } from 'lucide-react';
+import { ChevronRight } from 'lucide-react';
+import { useRouter } from 'next/navigation';
 
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import {
@@ -16,10 +17,10 @@ import {
   SidebarMenuSubItem,
 } from '@/components/ui/sidebar';
 import { UseSidebarDetails } from '@/hooks/useSidebarDetails';
-import { Icons } from '../ui-extended/icons';
+
 import CreateProject from '../others/create-project';
-import { useRouter } from 'next/navigation';
-import { useEffect } from 'react';
+import { Icons } from '../ui-extended/icons';
+import { WorkspaceProjectList } from '@/app/api/sidebar/get-sidebar-details/route';
 
 export interface IProjects {
   id: string;
@@ -79,7 +80,7 @@ export function NavMain() {
 }
 
 interface INavWorkspacesProps {
-  data: any;
+  data: WorkspaceProjectList[];
   fetchSidebarDetails: () => Promise<void>;
 }
 export function NavWorkspaces(props: INavWorkspacesProps) {

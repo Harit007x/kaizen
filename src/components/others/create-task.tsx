@@ -1,4 +1,11 @@
 import React, { useEffect, useState } from 'react';
+
+import { zodResolver } from '@hookform/resolvers/zod';
+import { Plus } from 'lucide-react';
+import { useForm } from 'react-hook-form';
+import { toast } from 'sonner';
+import { z } from 'zod';
+
 import {
   Dialog,
   DialogContent,
@@ -7,13 +14,9 @@ import {
   DialogTitle,
   DialogTrigger,
 } from '@/components/ui/dialog';
-import { Button } from '../ui/button';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { useForm } from 'react-hook-form';
-import { z } from 'zod';
-import { toast } from 'sonner';
-import { Plus } from 'lucide-react';
+
 import TaskForm from '../forms/taskForm';
+import { Button } from '../ui/button';
 
 export interface IHandleTaskCreate {
   name: string;
@@ -80,7 +83,7 @@ const CreateTask = (props: ICreateTask) => {
       form.reset();
       form.clearErrors();
     }
-  }, [isCreateDialogOpen]);
+  }, [isCreateDialogOpen, form]);
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === 'Enter') {

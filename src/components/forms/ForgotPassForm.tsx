@@ -1,19 +1,20 @@
 'use client';
 
-import { Icons } from '@/components/ui-extended/icons';
+import { useState } from 'react';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { useRouter } from 'next/navigation';
+import { useForm } from 'react-hook-form';
+import { toast } from 'sonner';
+import { z } from 'zod';
+
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { useRouter } from 'next/navigation';
-import { Form, FormField, FormItem, FormControl, FormMessage, FormDescription, FormLabel } from '../ui/form';
-import { useForm } from 'react-hook-form';
-import { emailSchema, forgotPasswordSchema } from '@/zod/user';
-import { z } from 'zod';
-import { zodResolver } from '@hookform/resolvers/zod';
-import Link from 'next/link';
-import { useState } from 'react';
-import { cn } from '@/lib/utils';
-import { toast } from 'sonner';
 import { InputOTP, InputOTPGroup, InputOTPSlot } from '@/components/ui/input-otp';
+import { Icons } from '@/components/ui-extended/icons';
+import { cn } from '@/lib/utils';
+import { emailSchema, forgotPasswordSchema } from '@/zod/user';
+import { Form, FormField, FormItem, FormControl, FormMessage, FormDescription, FormLabel } from '../ui/form';
+import Link from 'next/link';
 
 export default function ForgotPassForm() {
   const router = useRouter();

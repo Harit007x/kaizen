@@ -1,7 +1,9 @@
+import { NextRequest, NextResponse } from 'next/server';
+import { getServerSession } from 'next-auth';
+
 import prisma from '@/db';
 import { authOptions } from '@/lib/auth';
-import { getServerSession } from 'next-auth';
-import { NextRequest, NextResponse } from 'next/server';
+import { Session } from 'next-auth';
 
 export async function POST(request: NextRequest) {
   // Validate Request
@@ -13,7 +15,7 @@ export async function POST(request: NextRequest) {
   }
 
   try {
-    const session: any = await getServerSession(authOptions);
+    const session = (await getServerSession(authOptions)) as Session;
     console.log('session on server= ', session?.user, formData);
     if (!session?.user) {
       return NextResponse.json({ message: 'Please sign in first to continue' }, { status: 401 });
@@ -37,7 +39,7 @@ export async function POST(request: NextRequest) {
       position = maxPositionTask.position + 1000;
     }
 
-    const category = await prisma.category.create({
+    await prisma.category.create({
       data: {
         projectId: project_id,
         title: name,

@@ -1,11 +1,12 @@
+import { NextRequest, NextResponse } from 'next/server';
+import { getServerSession, Session } from 'next-auth';
+
 import prisma from '@/db';
 import { authOptions } from '@/lib/auth';
-import { getServerSession } from 'next-auth';
-import { NextRequest, NextResponse } from 'next/server';
 
 export async function PUT(request: NextRequest) {
   try {
-    const session: any = await getServerSession(authOptions);
+    const session = (await getServerSession(authOptions)) as Session;
     if (!session?.user) {
       return NextResponse.json({ message: 'Please sign in first to continue' }, { status: 401 });
     }
@@ -22,21 +23,21 @@ export async function PUT(request: NextRequest) {
       },
     });
 
-    let isMovedBelow;
-    let isMovedAbove;
+    // let isMovedBelow;
+    // let isMovedAbove;
     const source_task = tasks.find((task) => task.id === source_task_id);
     const destination_task = tasks.find((task) => task.id === destination_task_id);
     if (!source_task || !destination_task) {
       return NextResponse.json({ message: 'Invalid request' }, { status: 400 });
     }
-    let destination_index = tasks.findIndex((task) => task.id === destination_task.id);
-    let source_index = tasks.findIndex((task) => task.id === source_task.id);
+    const destination_index = tasks.findIndex((task) => task.id === destination_task.id);
+    const source_index = tasks.findIndex((task) => task.id === source_task.id);
     // check if there is anything above the destination item
     if (destination_index === 0) {
-      isMovedAbove = false;
+      // isMovedAbove = false;
       new_position = destination_task.position / 2;
     } else if (destination_index === tasks.length - 1) {
-      isMovedBelow = false;
+      // isMovedBelow = false;
       new_position = (destination_task.position * 2 + 1000) / 2;
     } else if (source_task.position > destination_task.position) {
       const itemAboveDestination = tasks[destination_index - 1];

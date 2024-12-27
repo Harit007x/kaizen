@@ -1,6 +1,9 @@
 'use client';
 
+import { useState } from 'react';
+
 import { BadgeCheck, ChevronsUpDown, LogOut, Sparkles } from 'lucide-react';
+import { signOut } from 'next-auth/react';
 
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import {
@@ -14,18 +17,15 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { SidebarMenu, SidebarMenuButton, SidebarMenuItem, useSidebar } from '@/components/ui/sidebar';
 import { userStore } from '@/store';
-import { signOut } from 'next-auth/react';
-import { useTheme } from 'next-themes';
-import { Icons } from '../ui-extended/icons';
+
 import CreateWorkspace from '../others/create-workspace';
-import { useState } from 'react';
+import { Icons } from '../ui-extended/icons';
 
 interface INavUserProps {
   fetchSidebarDetails: () => Promise<void>;
 }
 
 export function NavUser(props: INavUserProps) {
-  const { setTheme, theme } = useTheme();
   const { isMobile } = useSidebar();
   const { user } = userStore();
 

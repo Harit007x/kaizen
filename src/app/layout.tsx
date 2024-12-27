@@ -1,10 +1,11 @@
-import { siteConfig } from '@/config/siteConfig';
 import './globals.css';
-import Providers from './Providers';
 import { Inter } from 'next/font/google';
-import { Toaster } from '@/components/ui/sonner';
+
 import SessionChange from '@/components/others/session-change';
 import PreviousPageTracker from '@/components/others/previousPageTracker';
+import { Toaster } from '@/components/ui/sonner';
+import { siteConfig } from '@/config/siteConfig';
+import Providers from './Providers';
 
 // Metadata
 const inter = Inter({ subsets: ['latin'] });

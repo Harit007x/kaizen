@@ -1,11 +1,15 @@
 import React from 'react';
-import Kanban from '@/components/others/kanban';
-import prisma from '@/db';
+
 import { getServerSession } from 'next-auth';
+import { Session } from 'next-auth';
+
+import prisma from '@/db';
 import { authOptions } from '@/lib/auth';
 
+import Kanban from '@/components/others/kanban';
+
 export default async function InboxPage() {
-  const session: any = await getServerSession(authOptions);
+  const session = (await getServerSession(authOptions)) as Session;
 
   const inbox = await prisma.project.findUnique({
     where: {

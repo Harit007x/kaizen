@@ -1,7 +1,8 @@
-import React, { useEffect, useState } from 'react';
+import { ColumnData } from '@/app/api/project/get-project-details/route';
+import { useState } from 'react';
 
 export const UseProjectDetails = (project_id: string) => {
-  const [columnData, setColumnData] = useState<any>(null);
+  const [columnData, setColumnData] = useState<ColumnData[]>([]);
   const [projectId, setProjectId] = useState<string>('');
   const [projectName, setProjectName] = useState<string>('');
   async function fetchProjectDetails() {

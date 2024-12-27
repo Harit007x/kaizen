@@ -1,7 +1,8 @@
-import { generateAndSendOtp } from '@/actions/sendOtp';
-import prisma from '@/db';
 import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
+
+import { generateAndSendOtp } from '@/actions/sendOtp';
+import prisma from '@/db';
 
 export async function POST(request: NextRequest) {
   const body = await request.json();

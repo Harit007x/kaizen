@@ -2,18 +2,13 @@ import {
   AudioWaveform,
   BookOpen,
   Bot,
-  Calendar,
   CalendarDays,
   Command,
   Filter,
-  Frame,
   GalleryVerticalEnd,
   Inbox,
-  Map,
-  PieChart,
   Settings,
   Settings2,
-  SquareTerminal,
 } from 'lucide-react';
 
 export const sidebarData = {

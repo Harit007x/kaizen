@@ -1,19 +1,26 @@
 'use client';
-import { userStore } from '@/store';
-import { useSession } from 'next-auth/react';
 import { useEffect } from 'react';
+
+import { useSession } from 'next-auth/react';
+
+import { userStore } from '@/store';
 
 const SessionChange = () => {
   const session = useSession();
   const { setUserData } = userStore();
   // console.log('session change =', session?.data?.user)
   useEffect(() => {
-    const user: any = session.data?.user;
-    console.log('user -', user);
+    const user = session.data?.user;
     if (user) {
-      setUserData(user);
+      setUserData({
+        id: user.id || '',
+        firstName: user.firstName || '',
+        email: user.email || '',
+        profilePicture: user.profilePicture || '',
+      });
     }
-  }, [session]);
+  }, [session, setUserData]);
+
   // if (session.status === 'loading') {
   //     return(
   //         <main className="fixed top-0 left-0 z-50 flex h-screen w-screen items-center justify-center ">

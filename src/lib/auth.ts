@@ -1,25 +1,20 @@
-import OnboardingTemplate from '@/components/emailTemplates/OnboardingTemplate';
-import prisma from '@/db';
 import { compare } from 'bcrypt';
-import { AuthOptions, Session } from 'next-auth';
+import { AuthOptions } from 'next-auth';
 import { JWT } from 'next-auth/jwt';
 import CredentialsProvider from 'next-auth/providers/credentials';
 import Google from 'next-auth/providers/google';
+
+import OnboardingTemplate from '@/components/emailTemplates/OnboardingTemplate';
+import prisma from '@/db';
+
 import { sendMail } from './resend';
-import { User as PrismaUser } from '@prisma/client';
 
-export interface session extends Session {
-  user: {
-    id: string;
-    email: string;
-    firstName: string;
-    profilePicture: string;
-  };
-}
-
-interface token extends JWT {
+interface CustomToken extends JWT {
   uid: string;
   jwtToken: string;
+  firstName: string;
+  profilePicture: string;
+  email?: string;
 }
 
 interface IUser {
@@ -36,7 +31,7 @@ export const authOptions: AuthOptions = {
     Google({
       clientId: process.env.GOOGLE_CLIENT_ID || '',
       clientSecret: process.env.GOOGLE_CLIENT_SECRET || '',
-      async profile(profile, tokens) {
+      async profile(profile) {
         const { email, name, picture, sub } = profile;
         const user = await prisma.user.findFirst({
           where: {
@@ -105,7 +100,8 @@ export const authOptions: AuthOptions = {
         email: { label: 'email', type: 'text' },
         password: { label: 'password', type: 'password' },
       },
-      async authorize(credentials: any) {
+      async authorize(credentials) {
+        if (!credentials?.email || !credentials?.password) return null; // Add null check
         const { email, password } = credentials;
 
         const user = await prisma.user.findUnique({
@@ -130,26 +126,27 @@ export const authOptions: AuthOptions = {
   ],
   secret: process.env.NEXTAUTH_SECRET || '',
   callbacks: {
-    jwt: async ({ token, user, account }): Promise<JWT> => {
-      const newToken: token = token as token;
+    jwt: async ({ token, user }): Promise<CustomToken> => {
       if (user) {
-        newToken.uid = user.id;
-        newToken.jwtToken = (user as IUser).token;
-        newToken.profilePicture = (user as IUser).profilePicture;
-        newToken.email = (user as IUser).email;
-        newToken.firstName = (user as IUser).firstName;
+        const typedUser = user as IUser;
+        return {
+          ...token,
+          uid: typedUser.id,
+          jwtToken: typedUser.token,
+          profilePicture: typedUser.profilePicture,
+          email: typedUser.email,
+          firstName: typedUser.firstName,
+        };
       }
-      return newToken;
+      return token as CustomToken;
     },
-    session: async ({ session, token }: any) => {
-      const newSession: session = session as session;
-      if (newSession.user && token.uid) {
-        newSession.user.id = token.uid as string;
-        newSession.user.email = session.user?.email ?? '';
-        newSession.user.firstName = token.firstName;
-        newSession.user.profilePicture = token.profilePicture;
+    session: async ({ session, token }) => {
+      if (session.user) {
+        session.user.id = token.uid as string;
+        session.user.firstName = token.firstName as string;
+        session.user.profilePicture = token.profilePicture as string;
       }
-      return newSession!;
+      return session;
     },
     redirect: async ({ url, baseUrl }) => {
       if (url === baseUrl || url === `${baseUrl}/`) {

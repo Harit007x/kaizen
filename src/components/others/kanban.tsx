@@ -1,21 +1,24 @@
 'use client';
 // app/project/[project_id]/page.tsx
-import { extractClosestEdge } from '@atlaskit/pragmatic-drag-and-drop-hitbox/closest-edge';
-import { getReorderDestinationIndex } from '@atlaskit/pragmatic-drag-and-drop-hitbox/util/get-reorder-destination-index';
+import { FormEvent, ReactNode, useCallback, useEffect, useState } from 'react';
+
 import { monitorForElements } from '@atlaskit/pragmatic-drag-and-drop/element/adapter';
 import { reorder } from '@atlaskit/pragmatic-drag-and-drop/reorder';
-import { FormEvent, ReactNode, useCallback, useEffect, useState } from 'react';
-import { UseProjectDetails } from '@/hooks/useProjectDetails';
-import { toast } from 'sonner';
-import { Input } from '@/components/ui/input';
-import { Button } from '@/components/ui/button';
+import { extractClosestEdge } from '@atlaskit/pragmatic-drag-and-drop-hitbox/closest-edge';
+import { getReorderDestinationIndex } from '@atlaskit/pragmatic-drag-and-drop-hitbox/util/get-reorder-destination-index';
 import { useSession } from 'next-auth/react';
-import { checkForPermissionAndTrigger } from '@/lib/Push';
-import { SidebarTrigger } from '@/components/ui/sidebar';
-import Category from '@/components/others/category';
 import { useTheme } from 'next-themes';
-import { Icons } from '../ui-extended/icons';
+import { toast } from 'sonner';
+
+import Category from '@/components/others/category';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { SidebarTrigger } from '@/components/ui/sidebar';
+import { UseProjectDetails } from '@/hooks/useProjectDetails';
+import { checkForPermissionAndTrigger } from '@/lib/Push';
 import { cn } from '@/lib/utils';
+
+import { Icons } from '../ui-extended/icons';
 
 interface HandleDropProps {
   source: {
@@ -26,7 +29,7 @@ interface HandleDropProps {
     };
     element: ReactNode;
   };
-  location: any;
+  location: DropLocation;
 }
 
 interface ReorderColumnProps {
@@ -58,6 +61,30 @@ interface SessionUser {
 interface IKanbanPage {
   projectId: string;
 }
+
+interface DropLocation {
+  current: {
+    dropTargets: Array<{
+      data: {
+        columnId: string;
+        cardId?: string;
+      };
+    }>;
+  };
+  initial: {
+    dropTargets: Array<{
+      columnId: string;
+    }>;
+  };
+}
+
+interface ColumnItem {
+  id: string;
+  // Add other properties your items have
+  title?: string;
+  description?: string;
+}
+
 export default function Kanban(props: IKanbanPage) {
   const session = useSession();
   const user = session.data?.user as SessionUser;
@@ -73,7 +100,7 @@ export default function Kanban(props: IKanbanPage) {
 
   useEffect(() => {
     fetchProjectDetails();
-  }, []);
+  }, [fetchProjectDetails]);
 
   async function updateCategoryReorder(projectId: string, source_column_id: string, destination_column_id: string) {
     try {
@@ -122,6 +149,7 @@ export default function Kanban(props: IKanbanPage) {
         console.log(data.message);
       }
     } catch (error) {
+      console.log('error :', error);
       return toast.error('Something went wrong');
     }
   }
@@ -185,7 +213,7 @@ export default function Kanban(props: IKanbanPage) {
       const destination_column_id = columnData[destinationIndex].id;
       updateCategoryReorder(projectId, source_column_id, destination_column_id);
     },
-    [columnData, projectId, updateCategoryReorder]
+    [columnData, projectId, setColumnData]
   );
 
   const moveCard = useCallback(
@@ -250,18 +278,18 @@ export default function Kanban(props: IKanbanPage) {
 
       setColumnData(newData);
     },
-    [columnData]
+    [columnData, projectId, setColumnData]
   );
 
   const reorderCard = useCallback(
-    ({ columnId, startIndex, finishIndex, cardId }: ReorderCardProps) => {
+    ({ columnId, startIndex, finishIndex }: ReorderCardProps) => {
       // Ensure the startIndex and finishIndex are different; no need to reorder if they’re the same
       if (startIndex === finishIndex) return;
       // Find the source column by ID
       const sourceColumnData = columnData.find((column) => column.id === columnId);
 
       if (sourceColumnData) {
-        const updatedItems: any = reorder({
+        const updatedItems = reorder({
           list: sourceColumnData.items,
           startIndex,
           finishIndex,
@@ -272,7 +300,7 @@ export default function Kanban(props: IKanbanPage) {
           items: updatedItems,
         };
 
-        const tasks: any = [];
+        const tasks: ColumnItem[] = [];
 
         updatedSourceColumn.items.map((task) => {
           tasks.push({ id: task.id });
@@ -296,7 +324,7 @@ export default function Kanban(props: IKanbanPage) {
         setColumnData(newData);
       }
     },
-    [columnData]
+    [columnData, setColumnData]
   );
 
   const handleDrop = useCallback(
@@ -425,14 +453,11 @@ export default function Kanban(props: IKanbanPage) {
 
   useEffect(() => {
     return monitorForElements({
-      // @ts-ignore
+      // @ts-expect-error: expect an error
       onDrop: handleDrop,
     });
-  }, [handleDrop]);
+  }, [handleDrop, moveCard, reorderColumn]);
 
-  const [workspaceTitle, setWorkspaceTitle] = useState<string>('');
-
-  const [project_name, setProjectName] = useState<string>('');
   const [categoryName, setCategoryName] = useState<string>('');
   const [isLoading, setIsLoading] = useState<boolean>(false);
 
@@ -460,7 +485,7 @@ export default function Kanban(props: IKanbanPage) {
       setIsLoading(false);
     }
   }
-  const { setTheme, theme } = useTheme();
+  const { setTheme } = useTheme();
 
   if (props.projectId == null) {
     return <div className="w-full h-screen select-none bg-background flex flex-col">Inbox not working</div>;

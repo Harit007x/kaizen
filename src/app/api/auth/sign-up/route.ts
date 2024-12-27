@@ -1,10 +1,11 @@
+import { genSalt, hash } from 'bcrypt';
+import { NextRequest, NextResponse } from 'next/server';
+import { z } from 'zod';
+
 import OnboardingTemplate from '@/components/emailTemplates/OnboardingTemplate';
 import prisma from '@/db';
 import { sendMail } from '@/lib/resend';
 import { signUpSchema } from '@/zod/user';
-import { genSalt, hash } from 'bcrypt';
-import { NextRequest, NextResponse } from 'next/server';
-import { z } from 'zod';
 
 export async function POST(request: NextRequest) {
   const extendedSchema = signUpSchema.extend({

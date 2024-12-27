@@ -1,6 +1,7 @@
 'use client';
 // PreviousPageTracker.js
 import { useEffect } from 'react';
+
 import { usePathname } from 'next/navigation';
 
 export default function PreviousPageTracker() {

@@ -1,19 +1,21 @@
 'use client';
 
 import { useState } from 'react';
+
+import { zodResolver } from '@hookform/resolvers/zod';
+import bcrypt from 'bcryptjs';
+import { useForm } from 'react-hook-form';
+import { toast } from 'sonner';
+import { z } from 'zod';
+
+import { addPasswordSchema, resetPasswordSchema } from '@/zod/user';
+
+import { UserProfile } from '../sidebar/nav-secondary';
 import { Button } from '../ui/button';
+import { Form, FormField, FormItem, FormControl, FormMessage } from '../ui/form';
 import { Input } from '../ui/input';
 import { Label } from '../ui/label';
 import { ScrollArea } from '../ui/scroll-area';
-import { useSession } from 'next-auth/react';
-import { toast } from 'sonner';
-import bcrypt from 'bcryptjs';
-import { UserProfile } from '../sidebar/nav-secondary';
-import { Form, FormField, FormItem, FormControl, FormMessage } from '../ui/form';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { useForm } from 'react-hook-form';
-import { z } from 'zod';
-import { resetPasswordSchema } from '@/zod/user';
 import { Icons } from '../ui-extended/icons';
 
 interface ISecurityProps {
@@ -21,27 +23,32 @@ interface ISecurityProps {
   fetchUserProfile: () => void;
 }
 
+interface AddPasswordFormValues {
+  addPassword: string;
+}
+
+interface ResetPasswordFormValues {
+  newPassword: string;
+  confirmPassword: string;
+}
+
 export default function ResetPassword(props: ISecurityProps) {
-  const { data, status } = useSession();
+  const isPasswordNull = props.profileData?.isPasswordNull ?? false;
   const [isLoading, setIsLoading] = useState(false);
-  const [password, setPass] = useState('');
 
-  console.log('data =', data);
-
-  const form = useForm<z.infer<typeof resetPasswordSchema>>({
-    resolver: zodResolver(resetPasswordSchema),
-    defaultValues: {
-      newPassword: '',
-      confirmPassword: '',
-    },
+  const form = useForm<z.infer<typeof resetPasswordSchema> | z.infer<typeof addPasswordSchema>>({
+    resolver: zodResolver(isPasswordNull ? addPasswordSchema : resetPasswordSchema),
+    defaultValues: isPasswordNull ? { addPassword: '' } : { newPassword: '', confirmPassword: '' },
   });
 
-  const handleAddPassword = async (values: z.infer<typeof resetPasswordSchema>) => {
+  const handleAddPassword = async (values: AddPasswordFormValues | ResetPasswordFormValues) => {
     try {
       setIsLoading(true);
-
+      console.log('value = ', values);
       const salt = await bcrypt.genSalt(10);
-      const hashedPassword = await bcrypt.hash(values.newPassword, salt);
+      const hashedPassword = isPasswordNull
+        ? await bcrypt.hash((values as AddPasswordFormValues).addPassword, salt)
+        : await bcrypt.hash((values as ResetPasswordFormValues).newPassword, salt);
 
       const res = await fetch('/api/auth/reset-password', {
         method: 'POST',
@@ -64,77 +71,90 @@ export default function ResetPassword(props: ISecurityProps) {
 
   return (
     <ScrollArea className="h-[calc(70vh-4rem)] w-full">
-      {props.profileData?.isPasswordNull ? (
-        <div className="flex flex-col gap-3 px-4 pt-4">
-          <Label className="font-semibold">Add password</Label>
-          <div className="grid w-full max-w-sm gap-4 pb-6">
-            <div className="grid w-full max-w-sm items-center gap-3">
-              <Input
-                id="addPassword"
-                onChange={(e) => setPass(e.target.value)}
-                type="password"
-                placeholder="Add password"
+      <Form {...form}>
+        <form onSubmit={form.handleSubmit(handleAddPassword)} className="space-y-4 max-w-sm p-4">
+          {isPasswordNull ? (
+            <>
+              <Label htmlFor="newPassword" className="font-semibold">
+                Add password
+              </Label>
+              <FormField
+                control={form.control}
+                name="addPassword"
+                disabled={isLoading}
+                render={({ field }) => (
+                  <FormItem>
+                    <FormControl>
+                      <Input
+                        type="password"
+                        placeholder="Add password"
+                        className="w-full"
+                        disabled={isLoading}
+                        {...field}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
               />
-            </div>
-          </div>
-        </div>
-      ) : (
-        <Form {...form}>
-          <form onSubmit={form.handleSubmit(handleAddPassword)} className="space-y-4 max-w-sm p-4">
-            <Label htmlFor="newPassword" className="font-semibold">
-              Change password
-            </Label>
-            <FormField
-              control={form.control}
-              name="newPassword"
-              disabled={isLoading}
-              render={({ field }) => (
-                <FormItem>
-                  <FormControl>
-                    <Input
-                      type="password"
-                      placeholder="New password"
-                      className="w-full"
-                      disabled={isLoading}
-                      {...field}
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <FormField
-              control={form.control}
-              name="confirmPassword"
-              disabled={isLoading}
-              render={({ field }) => (
-                <FormItem>
-                  <FormControl>
-                    <Input
-                      type="password"
-                      placeholder="Confirm password"
-                      className="w-full"
-                      disabled={isLoading}
-                      {...field}
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <div className="flex items-center align-center gap-2">
-              <Button className="w-fit" variant={'ghost'}>
-                Cancel
-              </Button>
-              <Button className="w-fit" type="submit" variant={'default'} disabled={isLoading}>
-                {isLoading && <Icons.spinner className="mr-2 h-4 w-4 animate-spin" />}
+            </>
+          ) : (
+            <>
+              <Label htmlFor="newPassword" className="font-semibold">
+                Change password
+              </Label>
+              <FormField
+                control={form.control}
+                name="newPassword"
+                disabled={isLoading}
+                render={({ field }) => (
+                  <FormItem>
+                    <FormControl>
+                      <Input
+                        type="password"
+                        placeholder="New password"
+                        className="w-full"
+                        disabled={isLoading}
+                        {...field}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="confirmPassword"
+                disabled={isLoading}
+                render={({ field }) => (
+                  <FormItem>
+                    <FormControl>
+                      <Input
+                        type="password"
+                        placeholder="Confirm password"
+                        className="w-full"
+                        disabled={isLoading}
+                        {...field}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </>
+          )}
+          <div className="flex items-center align-center gap-2">
+            <Button className="w-fit" variant={'ghost'}>
+              Cancel
+            </Button>
+            <Button className="w-fit" type="submit" variant={'default'} disabled={isLoading}>
+              {isLoading && <Icons.spinner className="mr-2 h-4 w-4 animate-spin" />}
 
-                {props.profileData?.isPasswordNull ? 'Add' : 'Update'}
-              </Button>
-            </div>
-          </form>
-        </Form>
-      )}
+              {isPasswordNull ? 'Add' : 'Update'}
+            </Button>
+          </div>
+        </form>
+      </Form>
     </ScrollArea>
   );
 }

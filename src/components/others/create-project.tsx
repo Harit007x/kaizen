@@ -1,4 +1,9 @@
 import React, { useEffect, useState } from 'react';
+
+import { zodResolver } from '@hookform/resolvers/zod';
+import { useForm } from 'react-hook-form';
+import { z } from 'zod';
+
 import {
   Dialog,
   DialogContent,
@@ -8,14 +13,12 @@ import {
   DialogTrigger,
 } from '@/components/ui/dialog';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
-import { Button } from '../ui/button';
-import { Icons } from '../ui-extended/icons';
-import { Input } from '../ui/input';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { useForm } from 'react-hook-form';
-import { z } from 'zod';
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from '@/components/ui/select';
 import useCreateProject from '@/hooks/useCreateProject';
+
+import { Button } from '../ui/button';
+import { Input } from '../ui/input';
+import { Icons } from '../ui-extended/icons';
 
 interface ICreateProject {
   workspace_id: string;
@@ -72,7 +75,7 @@ const CreateProject = (props: ICreateProject) => {
       form.reset();
       form.clearErrors();
     }
-  }, [isDialogOpen]);
+  }, [isDialogOpen, form]);
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === 'Enter') {

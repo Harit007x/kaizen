@@ -1,16 +1,17 @@
 'use client';
 
 import * as React from 'react';
+import { useEffect } from 'react';
 
 import { NavWorkspaces } from '@/components/sidebar/nav-workspaces';
 import { Sidebar, SidebarContent, SidebarFooter, SidebarHeader, SidebarRail } from '@/components/ui/sidebar';
+import { sidebarData } from '@/constants/sidebar-data';
+import { UseSidebarDetails } from '@/hooks/useSidebarDetails';
+
+import { SettingsDialog } from './nav-secondary';
 import { NavUser } from './nav-user';
 import { NavProjects } from './new-projects';
-import { sidebarData } from '@/constants/sidebar-data';
-import { SettingsDialog } from './nav-secondary';
 import { Separator } from '../ui/separator';
-import { UseSidebarDetails } from '@/hooks/useSidebarDetails';
-import { useEffect } from 'react';
 
 const CustomSeparator = () => {
   return (
@@ -25,6 +26,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
 
   useEffect(() => {
     fetchSidebarDetails();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   return (

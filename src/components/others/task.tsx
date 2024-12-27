@@ -1,19 +1,19 @@
 'use client';
 import React, { SetStateAction, useEffect, useRef, useState } from 'react';
-import { attachClosestEdge, extractClosestEdge } from '@atlaskit/pragmatic-drag-and-drop-hitbox/closest-edge';
-import invariant from 'tiny-invariant';
+
 import { combine } from '@atlaskit/pragmatic-drag-and-drop/combine';
 import { draggable, dropTargetForElements } from '@atlaskit/pragmatic-drag-and-drop/element/adapter';
+import { attachClosestEdge, extractClosestEdge } from '@atlaskit/pragmatic-drag-and-drop-hitbox/closest-edge';
 import { DropIndicator } from '@atlaskit/pragmatic-drag-and-drop-react-drop-indicator/box';
 import { Edit2, Ghost, Maximize, Trash, Ungroup } from 'lucide-react';
-import { Card, CardTitle, CardHeader, CardFooter } from '../ui/card';
-import { Badge } from '../ui/badge';
-import { timezoneDateFormatter } from '@/lib/helper';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '../ui/dialog';
-import TaskForm, { TaskFormData } from '../forms/taskForm';
 import { toast } from 'sonner';
-import { cn } from '@/lib/utils';
+import invariant from 'tiny-invariant';
+
 import { priorityColor } from '@/constants/priority-list';
+import { timezoneDateFormatter } from '@/lib/helper';
+import { cn } from '@/lib/utils';
+
+import TaskForm, { TaskFormData } from '../forms/taskForm';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -25,6 +25,9 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from '../ui/alert-dialog';
+import { Badge } from '../ui/badge';
+import { Card, CardTitle, CardHeader, CardFooter } from '../ui/card';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '../ui/dialog';
 export interface TaskProps {
   id: number;
   name: string;
@@ -39,7 +42,7 @@ export interface TaskProps {
 const Task = (props: TaskProps) => {
   const cardRef = useRef<HTMLDivElement | null>(null);
   const [closestEdge, setClosestEdge] = useState(null);
-  const [isDragging, setIsDragging] = useState(false);
+  // const [isDragging, setIsDragging] = useState(false);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
 
@@ -51,8 +54,8 @@ const Task = (props: TaskProps) => {
       draggable({
         element: cardEl,
         getInitialData: () => ({ type: 'card', cardId: props.id }),
-        onDragStart: () => setIsDragging(true),
-        onDrop: () => setIsDragging(false),
+        // onDragStart: () => setIsDragging(true),
+        // onDrop: () => setIsDragging(false),
       }),
       dropTargetForElements({
         element: cardEl,
@@ -138,14 +141,6 @@ const Task = (props: TaskProps) => {
       setIsLoading(false);
     }
   };
-  const userTimezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
-
-  const localDate = new Date(props.createdAt).toLocaleString('en-US', {
-    timeZone: userTimezone,
-    hour: 'numeric',
-    minute: 'numeric',
-    hour12: true,
-  });
 
   return (
     <Card
@@ -190,7 +185,7 @@ const Task = (props: TaskProps) => {
                   <AlertDialogCancel disabled={isLoading}>Cancel</AlertDialogCancel>
                   <AlertDialogAction
                     disabled={isLoading}
-                    onClick={(e) => {
+                    onClick={() => {
                       handleTaskDelete();
                     }}
                   >

@@ -1,13 +1,14 @@
+import { compare } from 'bcrypt';
+import { NextRequest, NextResponse } from 'next/server';
+import { getServerSession, Session } from 'next-auth';
+
 import prisma from '@/db';
 import { authOptions } from '@/lib/auth';
-import { compare } from 'bcrypt';
-import { getServerSession } from 'next-auth';
-import { NextRequest, NextResponse } from 'next/server';
 
 export async function PUT(request: NextRequest) {
   try {
     const { firstName, email, password } = await request.json();
-    const session: any = await getServerSession(authOptions);
+    const session = (await getServerSession(authOptions)) as Session;
     if (!session?.user) {
       return NextResponse.json({ message: 'Please sign in first to continue' }, { status: 401 });
     }

@@ -1,8 +1,7 @@
-import { Icons } from '@/components/ui-extended/icons';
-import { Button } from '@/components/ui/button';
-import { ScrollArea } from '@/components/ui/scroll-area';
-import { cn } from '@/lib/utils';
 import Link from 'next/link';
+import Image from 'next/image';
+import { Button } from '@/components/ui/button';
+import { Icons } from '@/components/ui-extended/icons';
 
 export default function Home() {
   return (
@@ -20,7 +19,7 @@ export default function Home() {
         <div className="container mx-auto flex justify-between items-center px-4">
           <div className="text-xl font-semibold flex justify-center items-center gap-2">
             <div className="bg-black p-2 rounded-md shadow-[0px_2px_26px_0px_rgba(255,255,255,_0.2)]">
-              <img src="kaizen_logo.png" alt="Logo" className="w-4 h-4" />
+              <Image src="/kaizen_logo.png" alt="Logo" width={16} height={16} className="w-4 h-4" />{' '}
             </div>{' '}
             Kaizen
           </div>
@@ -36,7 +35,7 @@ export default function Home() {
             className="bg-black p-3 rounded-lg shadow-[0px_2px_26px_0px_rgba(255,255,255,_0.2)] animate-fade-in opacity-0"
             style={{ animationDelay: '0.2s', animationFillMode: 'forwards' }}
           >
-            <img src="kaizen_logo.png" alt="Logo" className="w-9 h-9" />
+            <Image src="/kaizen_logo.png" alt="Logo" width={36} height={36} className="w-9 h-9" />{' '}
           </div>
           <a
             href="https://github.com/ibelick/background-snippets"

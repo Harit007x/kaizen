@@ -1,7 +1,32 @@
+import { NextRequest, NextResponse } from 'next/server';
+import { getServerSession } from 'next-auth';
 import prisma from '@/db';
 import { authOptions } from '@/lib/auth';
-import { getServerSession } from 'next-auth';
-import { NextRequest, NextResponse } from 'next/server';
+
+export interface Task {
+  id: string;
+  name: string;
+  description: string | null;
+  dueDate: Date;
+  priorityId: string;
+  isCompleted: boolean;
+  createdAt: Date;
+  itemId: string;
+}
+
+export interface ColumnData {
+  title: string;
+  columnId: string;
+  items: Task[];
+  id: string;
+}
+
+export interface ProjectDetails {
+  id: string | undefined;
+  name: string | null | undefined;
+  userId: string | null | undefined;
+  columnMap: ColumnData[];
+}
 
 export async function GET(request: NextRequest) {
   try {
@@ -12,7 +37,7 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ message: 'Invalid request' }, { status: 400 });
     }
 
-    const session: any = await getServerSession(authOptions);
+    const session = await getServerSession(authOptions);
     if (!session?.user) {
       return NextResponse.json({ message: 'Please sign in first to continue' }, { status: 401 });
     }
@@ -24,17 +49,13 @@ export async function GET(request: NextRequest) {
       },
       include: {
         categories: {
-          orderBy: {
-            position: 'asc',
-          },
+          orderBy: { position: 'asc' },
           select: {
             id: true,
             title: true,
             position: true,
             tasks: {
-              orderBy: {
-                position: 'asc',
-              },
+              orderBy: { position: 'asc' },
               select: {
                 id: true,
                 name: true,
@@ -50,39 +71,36 @@ export async function GET(request: NextRequest) {
       },
     });
 
-    const columnMap: any = [];
-    const columnIds: any = [];
-    board?.categories?.forEach((category: any) => {
-      columnIds.push(category.title.toLowerCase());
-      const items = category.tasks.map((task: any) => ({
+    if (!board) {
+      return NextResponse.json({ message: 'Project not found' }, { status: 404 });
+    }
+
+    const columnMap: ColumnData[] = board.categories.map((category) => ({
+      title: category.title,
+      columnId: category.title.toLowerCase(),
+      id: category.id,
+      items: category.tasks.map((task) => ({
         ...task,
-        itemId: `item-${task.id}`, // Customize itemId logic as needed
-      }));
+        itemId: `item-${task.id}`,
+      })),
+    }));
 
-      columnMap.push({
-        title: category.title,
-        columnId: category.title.toLowerCase(),
-        items: items,
-        id: category.id,
-      });
-    });
-
-    const data = {
-      id: board?.id,
-      name: board?.name,
-      userId: board?.userId,
-      columnMap: columnMap,
+    const data: ProjectDetails = {
+      id: board.id,
+      name: board.name,
+      userId: board.userId,
+      columnMap,
     };
 
     return NextResponse.json(
       {
         message: 'Project details fetched successfully',
-        data: data,
+        data,
       },
       { status: 200 }
     );
   } catch (error) {
-    console.error(error);
+    console.error('Error fetching project details:', error);
     return NextResponse.json({ message: 'Something went wrong' }, { status: 500 });
   }
 }

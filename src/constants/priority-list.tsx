@@ -1,5 +1,4 @@
 import { Icons } from '@/components/ui-extended/icons';
-import { Flag } from 'lucide-react';
 export const priorityList = [
   {
     id: 'p1',

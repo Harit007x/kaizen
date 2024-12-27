@@ -1,14 +1,17 @@
+import { NextRequest, NextResponse } from 'next/server';
+import { getServerSession } from 'next-auth';
+
 import prisma from '@/db';
 import { authOptions } from '@/lib/auth';
-import { getServerSession } from 'next-auth';
-import { NextRequest, NextResponse } from 'next/server';
+
+import { Session } from 'next-auth';
 
 export async function DELETE(request: NextRequest, { params }: { params: { category_id: string } }) {
   // Validate Request
   const { category_id } = params;
 
   try {
-    const session: any = await getServerSession(authOptions);
+    const session = (await getServerSession(authOptions)) as Session;
     if (!session?.user) {
       return NextResponse.json({ message: 'Please sign in first to continue' }, { status: 401 });
     }
@@ -22,14 +25,14 @@ export async function DELETE(request: NextRequest, { params }: { params: { categ
     console.log('wow ",', tasksExist);
 
     if (tasksExist) {
-      const tasks = await prisma.task.deleteMany({
+      await prisma.task.deleteMany({
         where: {
           categoryId: category_id,
         },
       });
     }
 
-    const category = await prisma.category.delete({
+    await prisma.category.delete({
       where: {
         id: category_id,
       },

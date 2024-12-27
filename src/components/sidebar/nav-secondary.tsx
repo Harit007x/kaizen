@@ -1,12 +1,14 @@
 'use client';
 
 import React, { useEffect, useState } from 'react';
+
 import { Dialog, DialogContent, DialogDescription, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
-import { Icons } from '../ui-extended/icons';
-import { Separator } from '../ui/separator';
-import Profile from '../settings/profile';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+
+import Profile from '../settings/profile';
 import ResetPassword from '../settings/resetPassword';
+import { Separator } from '../ui/separator';
+import { Icons } from '../ui-extended/icons';
 
 export interface UserProfile {
   email: string;
@@ -69,7 +71,7 @@ export function SettingsDialog() {
       <DialogContent className="sm:max-w-[90%] md:max-w-[80%] lg:max-w-[60%] overflow-hidden p-0 min-h-[70%]">
         <DialogTitle className="sr-only">Settings</DialogTitle>
         <DialogDescription className="sr-only">Customize your settings here.</DialogDescription>
-
+        {isLoading && 'Loading...'}
         <div className="flex flex-col gap-3 w-full h-full">
           <Tabs defaultValue="profile" className="flex flex-row w-full h-full">
             <TabsList className="w-full h-full">

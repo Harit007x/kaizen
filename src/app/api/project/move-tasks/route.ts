@@ -1,23 +1,21 @@
-import { getUserData } from '@/actions/getUserData';
+import { NextResponse } from 'next/server';
+import { getServerSession } from 'next-auth';
 import prisma from '@/db';
 import { authOptions } from '@/lib/auth';
-import { getServerSession } from 'next-auth';
-import { NextResponse } from 'next/server';
-import { promise } from 'zod';
-
+import { Session } from 'next-auth';
 export async function PUT(request: Request) {
   const body = await request.json();
-  const projectId = body.projectId;
-  const sourceColumnId = body.sourceColumnId;
+  // const projectId = body.projectId;
+  // const sourceColumnId = body.sourceColumnId;
   const destinationColumnId = body.destinationColumnId;
   const destination_task_id = body.destination_task_id;
   const destinationIndex = body.destinationIndex;
   const taskId = body.taskId;
-  const isMovedTop = body.isMovedTop;
+  // const isMovedTop = body.isMovedTop;
   const isMovedBottom = body.isMovedBottom;
 
   try {
-    const session: any = await getServerSession(authOptions);
+    const session = (await getServerSession(authOptions)) as Session;
     if (!session?.user) {
       return NextResponse.json({ message: 'Please sign in first to continue' }, { status: 401 });
     }
@@ -62,8 +60,12 @@ export async function PUT(request: Request) {
       new_position = (destination_task.position * 2 + 1000) / 2;
     } else {
       console.log('moved between');
-      const itemAboveDestination: any = destination_category_tasks[destinationIndex - 1];
-      new_position = (destination_task.position + itemAboveDestination?.position) / 2;
+      const itemAboveDestination = destination_category_tasks[destinationIndex - 1];
+      if (itemAboveDestination?.position !== undefined) {
+        new_position = (destination_task.position + itemAboveDestination?.position) / 2;
+      } else {
+        return NextResponse.json({ message: 'Invalid request' }, { status: 400 });
+      }
     }
 
     const reorderThresholdHit = await prisma.category.findUnique({ where: { id: destinationColumnId } });

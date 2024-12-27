@@ -1,7 +1,8 @@
+import { NextRequest, NextResponse } from 'next/server';
+import { getServerSession, Session } from 'next-auth';
+
 import prisma from '@/db';
 import { authOptions } from '@/lib/auth';
-import { getServerSession } from 'next-auth';
-import { NextRequest, NextResponse } from 'next/server';
 
 export async function POST(request: NextRequest, { params }: { params: { category_id: string } }) {
   // Validate Request
@@ -10,7 +11,7 @@ export async function POST(request: NextRequest, { params }: { params: { categor
   const { name, description, priorityId, dueDate } = await request.json();
 
   try {
-    const session: any = await getServerSession(authOptions);
+    const session = (await getServerSession(authOptions)) as Session;
     if (!session?.user) {
       return NextResponse.json({ message: 'Please sign in first to continue' }, { status: 401 });
     }
@@ -34,7 +35,7 @@ export async function POST(request: NextRequest, { params }: { params: { categor
       position = maxPositionTask.position + 1000;
     }
 
-    const task = await prisma.task.create({
+    await prisma.task.create({
       data: {
         categoryId: category_id,
         name: name,

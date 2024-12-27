@@ -1,6 +1,6 @@
-const webPush = require('web-push');
+// const webPush = require('web-push');
 
-const vapidKeys = webPush.generateVAPIDKeys();
+// const vapidKeys = webPush.generateVAPIDKeys();
 
-console.log(vapidKeys.privateKey);
-console.log(vapidKeys.publicKey);
+// console.log(vapidKeys.privateKey);
+// console.log(vapidKeys.publicKey);

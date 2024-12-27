@@ -1,19 +1,21 @@
 'use client';
 
-import { Icons } from '@/components/ui-extended/icons';
-import { Button } from '@/components/ui/button';
-import { Form, FormControl, FormField, FormItem, FormMessage } from '@/components/ui/form';
-import { Input } from '@/components/ui/input';
-import { cn } from '@/lib/utils';
-import { signInSchema } from '@/zod/user';
+import { useState } from 'react';
+
 import { zodResolver } from '@hookform/resolvers/zod';
-import { signIn } from 'next-auth/react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { useState } from 'react';
+import { signIn } from 'next-auth/react';
 import { useForm } from 'react-hook-form';
 import { toast } from 'sonner';
 import { z } from 'zod';
+
+import { Button } from '@/components/ui/button';
+import { Form, FormControl, FormField, FormItem, FormMessage } from '@/components/ui/form';
+import { Input } from '@/components/ui/input';
+import { Icons } from '@/components/ui-extended/icons';
+import { cn } from '@/lib/utils';
+import { signInSchema } from '@/zod/user';
 
 export default function LoginForm() {
   const [isLoading, setIsLoading] = useState(false);
@@ -60,6 +62,7 @@ export default function LoginForm() {
         }
       }
     } catch (error) {
+      console.log('error:', error);
       toast.error('An unexpected error occurred');
     } finally {
       setIsLoading(false);
@@ -155,6 +158,7 @@ export default function LoginForm() {
                       toast.error('Sign in failed');
                     }
                   } catch (error) {
+                    console.log('error:', error);
                     toast.error('An unexpected error occurred');
                   } finally {
                     setIsGoogleLogin(false);
@@ -170,7 +174,7 @@ export default function LoginForm() {
 
         <p className="sm:px-8 text-center text-sm text-gray-500">
           <Link href="/signup" className="hover:text-brand hover:underline underline-offset-4">
-            Don't have an account? Sign Up
+            Don&apos;t have an account? Sign Up
           </Link>
         </p>
       </div>

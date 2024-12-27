@@ -1,9 +1,10 @@
 // Route to send push notification
 
-import prisma from '@/db';
-import { webPush } from '@/lib/webPush';
 import { NextRequest, NextResponse } from 'next/server';
 import { PushSubscription } from 'web-push';
+
+import prisma from '@/db';
+import { webPush } from '@/lib/webPush';
 
 // BODY
 // payload
@@ -43,6 +44,7 @@ export async function POST(request: NextRequest) {
       message: `Notification${users.length > 1 && 's'} sent successfully`,
     });
   } catch (error) {
+    console.log('error :', error);
     return NextResponse.json({ message: 'Notifications could not be sent' }, { status: 500 });
   }
 }

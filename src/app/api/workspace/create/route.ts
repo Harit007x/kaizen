@@ -1,7 +1,8 @@
+import { NextRequest, NextResponse } from 'next/server';
+import { getServerSession, Session } from 'next-auth';
+
 import prisma from '@/db';
 import { authOptions } from '@/lib/auth';
-import { getServerSession } from 'next-auth';
-import { NextRequest, NextResponse } from 'next/server';
 
 export async function POST(request: NextRequest) {
   // Validate Request
@@ -11,14 +12,14 @@ export async function POST(request: NextRequest) {
   }
 
   try {
-    const session: any = await getServerSession(authOptions);
+    const session = (await getServerSession(authOptions)) as Session;
     if (!session?.user) {
       return NextResponse.json({ message: 'Please sign in first to continue' }, { status: 401 });
     }
 
     const user_id = session.user.id;
 
-    const workspace = await prisma.workspace.create({
+    await prisma.workspace.create({
       data: {
         title: title,
         userWorkspaces: {

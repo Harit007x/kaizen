@@ -1,6 +1,7 @@
 import { create } from 'zustand';
 
 interface IUserData {
+  id: string;
   firstName: string;
   email: string;
   profilePicture: string;

@@ -1,19 +1,22 @@
 // components/TaskForm.tsx
 import React from 'react';
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage, FormDescription } from '@/components/ui/form';
-import { Input } from '@/components/ui/input';
-import { Button } from '@/components/ui/button';
+
 import { zodResolver } from '@hookform/resolvers/zod';
+import { format } from 'date-fns';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
-import { IHandleTaskCreate } from '../others/create-task';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select';
+
+import { Button } from '@/components/ui/button';
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
+import { Input } from '@/components/ui/input';
 import { priorityList } from '@/constants/priority-list';
+import { cn } from '@/lib/utils';
+
+import { IHandleTaskCreate } from '../others/create-task';
 import { Calendar } from '../ui/calendar';
 import { Popover, PopoverTrigger, PopoverContent } from '../ui/popover';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select';
 import { Icons } from '../ui-extended/icons';
-import { format } from 'date-fns';
-import { cn } from '@/lib/utils';
 
 const FormSchema = z.object({
   name: z.string({
@@ -63,8 +66,12 @@ const TaskForm = ({
 
   const handleSubmit = async (data: z.infer<typeof FormSchema>) => {
     await onSubmit(data, categoryId as string);
-    setIsCreateDialogOpen && setIsCreateDialogOpen(false);
-    setIsEditDialogOpen && setIsEditDialogOpen(false);
+    if (setIsCreateDialogOpen) {
+      setIsCreateDialogOpen(false);
+    }
+    if (setIsEditDialogOpen) {
+      setIsEditDialogOpen(false);
+    }
     form.reset();
   };
 

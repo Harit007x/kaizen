@@ -1,6 +1,6 @@
-import crypto from 'crypto';
+// import crypto from 'crypto';
+
 import { EncryptJWT, jwtDecrypt } from 'jose';
-import JSEncrypt from 'jsencrypt';
 // import fs from 'fs';
 // export async function uploadToCloudinary(fileUri: string, fileName: string) {
 //   try {
@@ -53,10 +53,10 @@ export const timezoneTimeFormatter = (date: Date) => {
   return localTime;
 };
 
-async function generateSecretKey() {
-  const key = crypto.getRandomValues(new Uint8Array(32));
-  return key;
-}
+// async function generateSecretKey() {
+//   const key = crypto.getRandomValues(new Uint8Array(32));
+//   return key;
+// }
 
 function setCookie(name: string, value: string, days: number) {
   const expires = days ? `; expires=${new Date(Date.now() + days * 864e5).toUTCString()}` : '';
@@ -72,9 +72,9 @@ export function base64ToUint8Array(base64Key: string): Uint8Array {
   return byteArray;
 }
 
-export async function encryptAndStoreInCookie(data: Record<string, any>) {
-  const secret = await generateSecretKey();
-  const base64Key = btoa(String.fromCharCode(...secret));
+export async function encryptAndStoreInCookie(data: Record<string, unknown>) {
+  // const secret = await generateSecretKey();
+  // const base64Key = btoa(String.fromCharCode(...secret));
   console.log('data ype =', typeof process.env.NEXT_PUBLIC_BASE_KEY, process.env.NEXT_PUBLIC_BASE_KEY);
   const originalKey = base64ToUint8Array(process.env.NEXT_PUBLIC_BASE_KEY as string);
   const jwt = await new EncryptJWT(data)

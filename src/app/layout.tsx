@@ -6,8 +6,12 @@ import { Toaster } from '@/components/ui/sonner';
 import { siteConfig } from '@/config/siteConfig';
 import Providers from './Providers';
 
-// Metadata
-const inter = Inter({ subsets: ['latin'] });
+const inter = Inter({
+  subsets: ['latin'],
+  display: 'swap',
+  fallback: ['system-ui', 'arial'], // System fallback fonts
+  variable: '--font-inter-google',
+});
 
 export const metadata = siteConfig;
 

@@ -53,6 +53,7 @@
     "cl": "0.0.1",
     "class-variance-authority": "^0.7.0",
     "cloudinary": "^2.5.1",
+    "clsx": "^2.1.1",
     "date-fns": "^4.1.0",
     "husky": "^9.1.7",
     "input-otp": "^1.2.5",

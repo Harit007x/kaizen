@@ -135,14 +135,14 @@ const TaskForm = ({
           control={form.control}
           name="dueDate"
           render={({ field }) => (
-            <FormItem className="flex flex-col">
+            <FormItem className="w-full flex flex-col">
               <FormLabel>Date of birth</FormLabel>
               <Popover>
                 <PopoverTrigger asChild>
                   <FormControl>
                     <Button
                       variant={'outline'}
-                      className={cn('w-[240px] pl-3 text-left font-normal', !field.value && 'text-muted-foreground')}
+                      className={cn('w-full pl-3 text-left font-normal', !field.value && 'text-muted-foreground')}
                     >
                       {field.value ? format(field.value, 'PPP') : <span>Pick a date</span>}
                       <Icons.calender className="ml-auto h-4 w-4 opacity-50" />

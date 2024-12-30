@@ -4,13 +4,17 @@ import { getServerSession, Session } from 'next-auth';
 import prisma from '@/db';
 import { authOptions } from '@/lib/auth';
 
-export async function PUT(request: NextRequest, { params }: { params: { task_id: string } }) {
+export async function PUT(request: NextRequest) {
   // Validate Request
-  const { task_id } = params;
-
-  const { name, description, priorityId, dueDate } = await request.json();
 
   try {
+    const url = new URL(request.url);
+    const task_id = url.pathname.split('/').pop();
+
+    if (!task_id) {
+      return NextResponse.json({ message: 'Task ID is required' }, { status: 400 });
+    }
+    const { name, description, priorityId, dueDate } = await request.json();
     const session = (await getServerSession(authOptions)) as Session;
     if (!session?.user) {
       return NextResponse.json({ message: 'Please sign in first to continue' }, { status: 401 });

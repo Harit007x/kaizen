@@ -41,7 +41,6 @@ interface ReorderCardProps {
   columnId: string;
   startIndex: number;
   finishIndex: number;
-  cardId: string;
 }
 
 interface MoveCardProps {
@@ -73,25 +72,19 @@ interface DropLocation {
   };
   initial: {
     dropTargets: Array<{
-      columnId: string;
+      data: {
+        columnId: string;
+      };
     }>;
   };
 }
 
-interface ColumnItem {
-  id: string;
-  // Add other properties your items have
-  title?: string;
-  description?: string;
-}
-
 export default function Kanban(props: IKanbanPage) {
-  const session = useSession();
-  const user = session.data?.user as SessionUser;
+  const { data: sessionData } = useSession();
+  const user = sessionData?.user as SessionUser;
 
   useEffect(() => {
     if (user) {
-      console.log(user.id);
       checkForPermissionAndTrigger();
     }
   }, [user]);
@@ -194,13 +187,10 @@ export default function Kanban(props: IKanbanPage) {
     }
   }
 
-  //   const [data, setData] = useState(DATA);
   const reorderColumn = useCallback(
     ({ sourceIndex, destinationIndex }: ReorderColumnProps) => {
-      // Add this check to prevent unnecessary reordering
       if (sourceIndex === destinationIndex) return;
 
-      // Perform state update without making API call inside the setState callback
       setColumnData((prevData) => {
         const newData = [...prevData];
         const [movedColumn] = newData.splice(sourceIndex, 1);
@@ -208,7 +198,6 @@ export default function Kanban(props: IKanbanPage) {
         return newData;
       });
 
-      // Make API call outside of setState
       const source_column_id = columnData[sourceIndex].id;
       const destination_column_id = columnData[destinationIndex].id;
       updateCategoryReorder(projectId, source_column_id, destination_column_id);
@@ -223,7 +212,6 @@ export default function Kanban(props: IKanbanPage) {
       destinationColumnId,
       movedCardIndexInDestinationColumn = 0,
     }: MoveCardProps) => {
-      // Ensure source and destination columns exist
       const sourceColumnData = columnData.find((column) => column.id === sourceColumnId);
       const destinationColumnData = columnData.find((column) => column.id === destinationColumnId);
 
@@ -232,25 +220,20 @@ export default function Kanban(props: IKanbanPage) {
         return;
       }
 
-      // Ensure the card index in source column is valid
       if (movedCardIndexInSourceColumn < 0 || movedCardIndexInSourceColumn >= sourceColumnData.items.length) {
         console.error('Invalid card index in source column');
         return;
       }
 
-      // Extract the card to move
       const cardToMove = sourceColumnData.items[movedCardIndexInSourceColumn];
 
-      // Remove the card from the source column
       const updatedSourceCards = [...sourceColumnData.items];
       updatedSourceCards.splice(movedCardIndexInSourceColumn, 1);
 
-      // Insert the card into the destination column at the specified index
       const updatedDestinationCards = [...destinationColumnData.items];
       const destinationIndex = Math.min(movedCardIndexInDestinationColumn, updatedDestinationCards.length);
       updatedDestinationCards.splice(destinationIndex, 0, cardToMove);
 
-      // Update the state with the modified source and destination columns
       const newData = columnData.map((column) => {
         if (column.id === sourceColumnId) {
           return { ...column, items: updatedSourceCards };
@@ -261,10 +244,10 @@ export default function Kanban(props: IKanbanPage) {
         return column;
       });
 
-      console.log('chekc the items =', destinationColumnData.items[destinationIndex]);
-      const isMovedTop = destinationColumnData.items[destinationIndex] === undefined ? false : true;
-      const isMovedBottom = !isMovedTop ? true : false;
-      const destination_task_id = isMovedTop != false ? destinationColumnData.items[destinationIndex].id : false;
+      const isMovedTop = destinationColumnData.items[destinationIndex] !== undefined;
+      const isMovedBottom = !isMovedTop;
+      const destination_task_id = isMovedTop ? destinationColumnData.items[destinationIndex].id : '';
+
       updateTasksMove(
         projectId,
         sourceColumnId,
@@ -283,9 +266,8 @@ export default function Kanban(props: IKanbanPage) {
 
   const reorderCard = useCallback(
     ({ columnId, startIndex, finishIndex }: ReorderCardProps) => {
-      // Ensure the startIndex and finishIndex are different; no need to reorder if they’re the same
       if (startIndex === finishIndex) return;
-      // Find the source column by ID
+
       const sourceColumnData = columnData.find((column) => column.id === columnId);
 
       if (sourceColumnData) {
@@ -300,19 +282,10 @@ export default function Kanban(props: IKanbanPage) {
           items: updatedItems,
         };
 
-        const tasks: ColumnItem[] = [];
-
-        updatedSourceColumn.items.map((task) => {
-          tasks.push({ id: task.id });
-        });
-
-        console.log('checking the taakss =', sourceColumnData);
         const source_task_id = sourceColumnData.items[startIndex].id;
         const destination_task_id = sourceColumnData.items[finishIndex].id;
-        console.log('check ids =', source_task_id, destination_task_id);
+
         updateTaskReorder(columnId, source_task_id, destination_task_id);
-        // updateTaskPositions(projectId, tasks)
-        console.log('update source col =', updatedSourceColumn);
 
         const newData = columnData.map((column) => {
           if (column.id === columnId) {
@@ -320,7 +293,7 @@ export default function Kanban(props: IKanbanPage) {
           }
           return column;
         });
-        console.log('reordered task =', newData);
+
         setColumnData(newData);
       }
     },
@@ -329,33 +302,20 @@ export default function Kanban(props: IKanbanPage) {
 
   const handleDrop = useCallback(
     ({ source, location }: HandleDropProps) => {
-      // Early return if there are no drop targets in the current location
       const destination = location.current.dropTargets.length;
       if (!destination) return;
 
       if (source.data.type === 'card' && source.data.cardId) {
-        // Retrieve the ID of the card being dragged
         const draggedCardId = source.data.cardId;
-
-        // Get the source column from the initial drop targets
         const [, sourceColumnRecord] = location.initial.dropTargets;
-
-        // Retrieve the ID of the source column
         const sourceColumnId = sourceColumnRecord.data.columnId;
-
-        // Get the data of the source column
         const sourceColumnData = columnData.find((col) => col.id === sourceColumnId);
-
-        // Get the index of the card in the source column
         const indexOfSource = sourceColumnData?.items.findIndex((card) => card.id === draggedCardId);
 
         if (location.current.dropTargets.length === 1) {
           const [destinationColumnRecord] = location.current.dropTargets;
-
-          // Retrieve the ID of the destination column
           const destinationColumnId = destinationColumnRecord.data.columnId;
 
-          // Check if the source and destination columns are the same
           if (sourceColumnId === destinationColumnId) {
             const destinationIndex = getReorderDestinationIndex({
               startIndex: indexOfSource!,
@@ -368,7 +328,6 @@ export default function Kanban(props: IKanbanPage) {
               columnId: sourceColumnId,
               startIndex: indexOfSource!,
               finishIndex: destinationIndex,
-              cardId: draggedCardId,
             });
             return;
           }
@@ -389,20 +348,14 @@ export default function Kanban(props: IKanbanPage) {
         }
         if (location.current.dropTargets.length === 2) {
           const [destinationCardRecord, destinationColumnRecord] = location.current.dropTargets;
-
-          // Retrieve the ID of the destination column
           const destinationColumnId = destinationColumnRecord.data.columnId;
-
-          // Retrieve the destination column data using the destination column ID
           const destinationColumn = columnData.find((col) => col.id === destinationColumnId);
 
           if (destinationColumn) {
-            // Find the index of the target card within the destination column's cards
             const indexOfTarget = destinationColumn.items.findIndex(
               (card) => card.id === destinationCardRecord.data.cardId
             );
 
-            // Determine the closest edge of the target card: top or bottom
             const closestEdgeOfTarget = extractClosestEdge(destinationCardRecord.data);
 
             if (sourceColumnId === destinationColumnId) {
@@ -417,7 +370,6 @@ export default function Kanban(props: IKanbanPage) {
                 columnId: sourceColumnId,
                 startIndex: indexOfSource!,
                 finishIndex: destinationIndex,
-                cardId: draggedCardId,
               });
               return;
             }
@@ -440,23 +392,20 @@ export default function Kanban(props: IKanbanPage) {
           (col) => col.id === location.current.dropTargets[0].data.columnId
         );
 
-        console.log('source =', sourceIndex, 'destination =', destinationIndex);
-
         if (sourceIndex !== -1 && destinationIndex !== -1) {
-          console.log('wow huh ');
           reorderColumn({ sourceIndex, destinationIndex });
         }
       }
     },
-    [columnData, reorderCard]
+    [columnData, reorderCard, moveCard, reorderColumn]
   );
 
   useEffect(() => {
     return monitorForElements({
-      // @ts-expect-error: expect an error
+      // @ts-expect-error: yet to fix the type error
       onDrop: handleDrop,
     });
-  }, [handleDrop, moveCard, reorderColumn]);
+  }, [handleDrop]);
 
   const [categoryName, setCategoryName] = useState<string>('');
   const [isLoading, setIsLoading] = useState<boolean>(false);
@@ -487,7 +436,7 @@ export default function Kanban(props: IKanbanPage) {
   }
   const { setTheme } = useTheme();
 
-  if (props.projectId == null) {
+  if (!props.projectId) {
     return <div className="w-full h-screen select-none bg-background flex flex-col">Inbox not working</div>;
   }
 
@@ -528,15 +477,17 @@ export default function Kanban(props: IKanbanPage) {
       <div className="flex-1 overflow-x-auto px-4 pb-4">
         <div className="flex gap-4 h-full">
           {columnData &&
-            Object.values(columnData).map((column) => (
-              <Category
-                key={column.title}
-                title={column.title}
-                tasks={column.items}
-                id={column.id}
-                fetchProjectDetails={fetchProjectDetails}
-              />
-            ))}
+            columnData.map((column) => {
+              return (
+                <Category
+                  key={column.id}
+                  title={column.title}
+                  tasks={column.items}
+                  id={column.id}
+                  fetchProjectDetails={fetchProjectDetails}
+                />
+              );
+            })}
         </div>
       </div>
     </div>

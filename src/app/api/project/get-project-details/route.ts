@@ -7,10 +7,10 @@ export interface Task {
   id: string;
   name: string;
   description: string | null;
-  dueDate: Date;
   priorityId: string;
-  isCompleted: boolean;
+  dueDate: Date;
   createdAt: Date;
+  isCompleted: boolean;
   itemId: string;
 }
 

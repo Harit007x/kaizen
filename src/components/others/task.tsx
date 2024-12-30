@@ -29,12 +29,12 @@ import { Badge } from '../ui/badge';
 import { Card, CardTitle, CardHeader, CardFooter } from '../ui/card';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '../ui/dialog';
 export interface TaskProps {
-  id: number;
+  id: string;
   name: string;
-  description?: string;
+  description?: string | null;
   priorityId: 'p1' | 'p2' | 'p3' | 'p4';
   dueDate: Date;
-  createdAt: string;
+  createdAt: string | Date;
   category_id: string;
   fetchProjectDetails: () => Promise<void>;
 }
@@ -212,7 +212,7 @@ const Task = (props: TaskProps) => {
           </Badge>
         </div>
         <div className="text-xs bg-secondary rounded-sm py-0.5 px-1" suppressHydrationWarning={true}>
-          {timezoneDateFormatter(props.createdAt)}
+          {timezoneDateFormatter(props.createdAt as string)}
         </div>
       </CardFooter>
       <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
@@ -224,7 +224,7 @@ const Task = (props: TaskProps) => {
           <TaskForm
             initialData={{
               name: props.name,
-              description: props.description,
+              description: props.description as string,
               priorityId: props.priorityId,
               dueDate: new Date(props.dueDate),
             }}

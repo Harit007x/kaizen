@@ -1,1 +1,5 @@
-//  yet to create onboarding, not needed now
+// src/app/(pages)/onboarding/page.tsx
+
+export default function OnboardingPage() {
+  return <>Onboarding Page</>;
+}

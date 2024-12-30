@@ -9,7 +9,7 @@ import { toast } from 'sonner';
 import invariant from 'tiny-invariant';
 
 import CreateTask from './create-task';
-import Task, { TaskProps } from './task';
+import Task from './task';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -31,8 +31,19 @@ import {
 import { ScrollArea } from '../ui/scroll-area';
 import { Icons } from '../ui-extended/icons';
 
+export interface Task {
+  id: string;
+  name: string;
+  description: string | null | undefined;
+  priorityId: string;
+  dueDate: Date;
+  createdAt: Date;
+  isCompleted: boolean;
+  itemId: string;
+}
+
 export interface CategoryProps {
-  tasks: TaskProps[];
+  tasks: Task[];
   title: string;
   id: string;
   fetchProjectDetails: () => Promise<void>;
@@ -184,7 +195,7 @@ const Category = (props: CategoryProps) => {
 
       <ScrollArea className="flex-1" thumbClassName="bg-zinc-600/30">
         <div className="space-y-2 px-3">
-          {props.tasks.map((task: TaskProps) => (
+          {props.tasks.map((task: Task) => (
             <Task
               key={task.id}
               id={task.id}
@@ -193,7 +204,7 @@ const Category = (props: CategoryProps) => {
               dueDate={task.dueDate}
               createdAt={task.createdAt}
               category_id={props.id}
-              priorityId={task.priorityId}
+              priorityId={task.priorityId as 'p1' | 'p2' | 'p3' | 'p4'}
               fetchProjectDetails={props.fetchProjectDetails}
             />
           ))}

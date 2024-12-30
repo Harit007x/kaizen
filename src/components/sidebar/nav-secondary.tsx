@@ -1,10 +1,8 @@
 'use client';
 
 import React, { useEffect, useState } from 'react';
-
 import { Dialog, DialogContent, DialogDescription, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-
 import Profile from '../settings/profile';
 import ResetPassword from '../settings/resetPassword';
 import { Separator } from '../ui/separator';
@@ -20,9 +18,8 @@ export interface UserProfile {
 
 export function SettingsDialog() {
   const [open, setOpen] = React.useState(false);
-
   const [isLoading, setIsLoading] = useState(false);
-  const [profileData, setProfileData] = useState<UserProfile>();
+  const [profileData, setProfileData] = useState<UserProfile | undefined>();
 
   const fetchUserProfile = async () => {
     try {
@@ -32,33 +29,34 @@ export function SettingsDialog() {
         headers: {
           'Content-Type': 'application/json',
         },
-      }).then((res) => {
-        if (!res.ok) {
-          throw new Error('Failed to fetch workspace list');
-        }
-        return res.json();
       });
-      setProfileData(response.data);
-      console.log('ok =', response);
+
+      if (!response.ok) {
+        throw new Error('Failed to fetch user profile');
+      }
+
+      const data = await response.json();
+      setProfileData(data.data);
     } catch (error) {
-      console.log('error: ', error);
+      console.error('Error fetching profile:', error);
     } finally {
       setIsLoading(false);
     }
   };
 
   useEffect(() => {
-    fetchUserProfile();
-  }, []);
-  const Wrapper: React.FC<{ children: React.ReactNode; title: string }> = ({ children, title }) => {
-    return (
-      <div className="flex flex-col mt-0 p-0 w-full">
-        <div className="text-sm font-semibold h-fit p-4">{title}</div>
-        <Separator />
-        {children}
-      </div>
-    );
-  };
+    if (open) {
+      fetchUserProfile();
+    }
+  }, [open]);
+
+  const Wrapper = ({ children, title }: { children: React.ReactNode; title: string }) => (
+    <div className="flex flex-col mt-0 p-0 w-full">
+      <div className="text-sm font-semibold h-fit p-4">{title}</div>
+      <Separator />
+      {children}
+    </div>
+  );
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
@@ -71,25 +69,32 @@ export function SettingsDialog() {
       <DialogContent className="sm:max-w-[90%] md:max-w-[80%] lg:max-w-[60%] overflow-hidden p-0 min-h-[70%]">
         <DialogTitle className="sr-only">Settings</DialogTitle>
         <DialogDescription className="sr-only">Customize your settings here.</DialogDescription>
-        {isLoading && 'Loading...'}
-        <div className="flex flex-col gap-3 w-full h-full">
-          <Tabs defaultValue="profile" className="flex flex-row w-full h-full">
-            <TabsList className="w-full h-full">
-              <TabsTrigger value="profile">Profile</TabsTrigger>
-              <TabsTrigger value="security">Security</TabsTrigger>
-            </TabsList>
-            <TabsContent value="profile" className="w-full">
-              <Wrapper title={'Profile'}>
-                <Profile profileData={profileData} fetchUserProfile={fetchUserProfile} />
-              </Wrapper>
-            </TabsContent>
-            <TabsContent value="security" className="w-full">
-              <Wrapper title={'Security'}>
-                <ResetPassword profileData={profileData} fetchUserProfile={fetchUserProfile} />
-              </Wrapper>
-            </TabsContent>
-          </Tabs>
-        </div>
+        {isLoading ? (
+          'Loading...'
+        ) : (
+          <div className="flex flex-col gap-3 w-full h-full">
+            <Tabs defaultValue="profile" className="flex flex-row w-full h-full">
+              <TabsList className="w-full h-full">
+                <TabsTrigger value="profile">Profile</TabsTrigger>
+                <TabsTrigger value="security">Security</TabsTrigger>
+              </TabsList>
+              {profileData && (
+                <>
+                  <TabsContent value="profile" className="w-full">
+                    <Wrapper title="Profile">
+                      <Profile profileData={profileData} fetchUserProfile={fetchUserProfile} />
+                    </Wrapper>
+                  </TabsContent>
+                  <TabsContent value="security" className="w-full">
+                    <Wrapper title="Security">
+                      <ResetPassword profileData={profileData} fetchUserProfile={fetchUserProfile} />
+                    </Wrapper>
+                  </TabsContent>
+                </>
+              )}
+            </Tabs>
+          </div>
+        )}
       </DialogContent>
     </Dialog>
   );

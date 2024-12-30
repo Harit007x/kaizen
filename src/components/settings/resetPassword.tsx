@@ -75,7 +75,7 @@ export default function ResetPassword(props: ISecurityProps) {
         <form onSubmit={form.handleSubmit(handleAddPassword)} className="space-y-4 max-w-sm p-4">
           {isPasswordNull ? (
             <>
-              <Label htmlFor="newPassword" className="font-semibold">
+              <Label htmlFor="addPassword" className="font-semibold">
                 Add password
               </Label>
               <FormField
@@ -86,6 +86,7 @@ export default function ResetPassword(props: ISecurityProps) {
                   <FormItem>
                     <FormControl>
                       <Input
+                        id="addPassword"
                         type="password"
                         placeholder="Add password"
                         className="w-full"
@@ -111,6 +112,7 @@ export default function ResetPassword(props: ISecurityProps) {
                   <FormItem>
                     <FormControl>
                       <Input
+                        id="newPassword"
                         type="password"
                         placeholder="New password"
                         className="w-full"
@@ -130,6 +132,7 @@ export default function ResetPassword(props: ISecurityProps) {
                   <FormItem>
                     <FormControl>
                       <Input
+                        id="confirmPassword"
                         type="password"
                         placeholder="Confirm password"
                         className="w-full"

@@ -211,7 +211,9 @@ const Task = (props: TaskProps) => {
             {props.priorityId.toUpperCase()}
           </Badge>
         </div>
-        <div className="text-xs bg-secondary rounded-sm py-0.5 px-1">{timezoneDateFormatter(props.createdAt)}</div>
+        <div className="text-xs bg-secondary rounded-sm py-0.5 px-1" suppressHydrationWarning={true}>
+          {timezoneDateFormatter(props.createdAt)}
+        </div>
       </CardFooter>
       <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
         <DialogContent className="sm:max-w-[425px]">

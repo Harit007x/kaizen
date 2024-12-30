@@ -100,7 +100,7 @@ export default function Kanban(props: IKanbanPage) {
 
   useEffect(() => {
     fetchProjectDetails();
-  }, [fetchProjectDetails]);
+  }, []);
 
   async function updateCategoryReorder(projectId: string, source_column_id: string, destination_column_id: string) {
     try {

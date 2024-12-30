@@ -1,9 +1,19 @@
 /** @type {import('next').NextConfig} */
 
 const nextConfig = {
-  /* config options here */
   images: {
-    domains: ['res.cloudinary.com', 'lh3.googleusercontent.com'],
+    remotePatterns: [
+      {
+        protocol: 'https',
+        hostname: 'res.cloudinary.com',
+        pathname: '/**',
+      },
+      {
+        protocol: 'https',
+        hostname: 'lh3.googleusercontent.com',
+        pathname: '/**',
+      },
+    ],
   },
 };
 

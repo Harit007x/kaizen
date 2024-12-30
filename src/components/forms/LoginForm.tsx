@@ -1,7 +1,6 @@
 'use client';
 
 import { useState } from 'react';
-
 import { zodResolver } from '@hookform/resolvers/zod';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
@@ -44,30 +43,42 @@ export default function LoginForm() {
         toast.success('Signed In');
         router.push('/inbox');
       } else {
-        switch (res.status) {
-          case 401:
-            toast.error('Invalid Credentials, try again!');
-            break;
-          case 400:
-            toast.error('Missing Credentials!');
-            break;
-          case 404:
-            toast.error('Account not found!');
-            break;
-          case 403:
-            toast.error('Forbidden!');
-            break;
-          default:
-            toast.error('Oops, something went wrong!');
-        }
+        handleAuthError(res.status);
       }
     } catch (error) {
-      console.log('error:', error);
+      console.error('error:', error);
       toast.error('An unexpected error occurred');
     } finally {
       setIsLoading(false);
     }
   }
+
+  function handleAuthError(status: number) {
+    const errorMessages: Record<number, string> = {
+      401: 'Invalid Credentials, try again!',
+      400: 'Missing Credentials!',
+      404: 'Account not found!',
+      403: 'Forbidden!',
+    };
+    toast.error(errorMessages[status] || 'Oops, something went wrong!');
+  }
+
+  const handleGoogleSignIn = async () => {
+    setIsGoogleLogin(true);
+    try {
+      const res = await signIn('google', { callbackUrl: '/inbox' });
+      if (!res?.error) {
+        toast.success('Signed In');
+      } else {
+        toast.error('Sign in failed');
+      }
+    } catch (error) {
+      console.error('error:', error);
+      toast.error('An unexpected error occurred');
+    } finally {
+      setIsGoogleLogin(false);
+    }
+  };
 
   const isFormEmpty = form.watch('email') === '' && form.watch('password') === '';
 
@@ -76,7 +87,7 @@ export default function LoginForm() {
       <Link
         href="/"
         className={cn(
-          'absolute flex justify-center items-center align-center gap-2 left-4 top-4 md:left-8 md:top-8 hover:bg-accent hover:text-accent-foreground h-9 px-4 py-2 rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:opacity-50 disabled:pointer-events-none ring-offset-background'
+          'absolute flex justify-center items-center gap-2 left-4 top-4 hover:bg-accent h-9 px-4 py-2 rounded-md text-sm font-medium transition-colors focus-visible:ring-2 ring-offset-background'
         )}
       >
         <Icons.chevronLeft className="w-4 h-4" /> Home
@@ -89,91 +100,60 @@ export default function LoginForm() {
 
         <Form {...form}>
           <form onSubmit={form.handleSubmit(handleSignIn)} className="space-y-5">
-            <div className="flex flex-col gap-4">
-              <div className="flex flex-col gap-2">
-                <FormField
-                  control={form.control}
-                  name="email"
-                  disabled={isLoading || isGoogleLogin}
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormControl>
-                        <Input type="email" placeholder="Email" className="w-full" {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={form.control}
-                  name="password"
-                  disabled={isLoading || isGoogleLogin}
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormControl>
-                        <Input type="password" placeholder="Password" {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-              </div>
-              <div className="text-right text-sm text-gray-500 p-0 m-0">
-                <Link href="/forgot-password" className="hover:underline">
-                  Forgot Password?
-                </Link>
-              </div>
+            <FormField
+              control={form.control}
+              name="email"
+              render={({ field }) => (
+                <FormItem>
+                  <FormControl>
+                    <Input type="email" placeholder="Email" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="password"
+              render={({ field }) => (
+                <FormItem>
+                  <FormControl>
+                    <Input type="password" placeholder="Password" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <Button
+              type="submit"
+              disabled={isLoading || isFormEmpty}
+              className={cn('w-full', { 'opacity-50 cursor-not-allowed': isFormEmpty })}
+            >
+              {isLoading && <Icons.spinner className="animate-spin" />}
+              Sign In
+            </Button>
+            <div className="flex items-center justify-center w-full my-2">
+              <div className="h-px flex-1 bg-gray-700"></div>
+              <span className="px-3 text-sm text-gray-500">OR</span>
+              <div className="h-px flex-1 bg-gray-700"></div>
             </div>
 
-            <div className="flex flex-col gap-2 items-center justify-center">
-              <div className={cn('w-full select-none', { 'cursor-not-allowed': isFormEmpty })}>
-                <Button
-                  className={cn('w-full', { 'pointer-events-none opacity-50': isFormEmpty })}
-                  type="submit"
-                  disabled={isLoading}
-                >
-                  {isLoading && <Icons.spinner className="mr-2 h-4 w-4 animate-spin" />}
-                  Sign In
-                </Button>
-              </div>
-
-              <div className="flex items-center justify-center w-full my-2">
-                <div className="h-px flex-1 bg-gray-700"></div>
-                <span className="px-3 text-sm text-gray-500">OR</span>
-                <div className="h-px flex-1 bg-gray-700"></div>
-              </div>
-              <Button
-                className="w-full"
-                variant={'outline'}
-                disabled={isLoading}
-                type="button"
-                onClick={async () => {
-                  setIsGoogleLogin(true);
-                  try {
-                    const res = await signIn('google', { callbackUrl: '/inbox' });
-                    // Check for !res?.error instead of res?.ok
-                    if (!res?.error) {
-                      toast.success('Signed In');
-                    } else {
-                      toast.error('Sign in failed');
-                    }
-                  } catch (error) {
-                    console.log('error:', error);
-                    toast.error('An unexpected error occurred');
-                  } finally {
-                    setIsGoogleLogin(false);
-                  }
-                }}
-              >
-                {isGoogleLogin && <Icons.spinner className="mr-2 h-4 w-4 animate-spin" />}
-                <Icons.google className="h-12 w-12" /> Login with Google
-              </Button>
-            </div>
+            <Button
+              className="w-full"
+              type="button"
+              variant="outline"
+              onClick={handleGoogleSignIn}
+              disabled={isLoading}
+            >
+              {isGoogleLogin && <Icons.spinner className="animate-spin" />}
+              <Icons.google className="h-12 w-12" /> Login with Google
+            </Button>
           </form>
         </Form>
 
-        <p className="sm:px-8 text-center text-sm text-gray-500">
-          <Link href="/signup" className="hover:text-brand hover:underline underline-offset-4">
+        <p className="text-center text-sm">
+          <Link href="/signup" className="hover:underline">
             Don&apos;t have an account? Sign Up
           </Link>
         </p>

@@ -26,8 +26,9 @@ import { EncryptJWT, jwtDecrypt } from 'jose';
 //     return null;
 //   }
 // }
-
 export const timezoneDateFormatter = (dateString: string) => {
+  if (typeof window === 'undefined') return ''; // Avoid running on the server
+
   const userTimezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
   const dateObject = new Date(dateString);
 
@@ -42,6 +43,8 @@ export const timezoneDateFormatter = (dateString: string) => {
 };
 
 export const timezoneTimeFormatter = (date: Date) => {
+  if (typeof window === 'undefined') return ''; // Avoid running on the server
+
   const userTimezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
 
   const localTime = new Date(date).toLocaleString('en-US', {
@@ -53,13 +56,11 @@ export const timezoneTimeFormatter = (date: Date) => {
   return localTime;
 };
 
-// async function generateSecretKey() {
-//   const key = crypto.getRandomValues(new Uint8Array(32));
-//   return key;
-// }
-
 function setCookie(name: string, value: string, days: number) {
-  const expires = days ? `; expires=${new Date(Date.now() + days * 864e5).toUTCString()}` : '';
+  if (typeof document === 'undefined') return; // Ensure this runs only in the client
+
+  const date = new Date(Date.now() + days * 864e5);
+  const expires = days ? `; expires=${date.toUTCString()}` : '';
   document.cookie = `${name}=${value || ''}${expires}; path=/; Secure; SameSite=Strict`;
 }
 
@@ -73,25 +74,40 @@ export function base64ToUint8Array(base64Key: string): Uint8Array {
 }
 
 export async function encryptAndStoreInCookie(data: Record<string, unknown>) {
-  // const secret = await generateSecretKey();
-  // const base64Key = btoa(String.fromCharCode(...secret));
-  console.log('data ype =', typeof process.env.NEXT_PUBLIC_BASE_KEY, process.env.NEXT_PUBLIC_BASE_KEY);
-  const originalKey = base64ToUint8Array(process.env.NEXT_PUBLIC_BASE_KEY as string);
-  const jwt = await new EncryptJWT(data)
-    .setProtectedHeader({ alg: 'dir', enc: 'A256GCM' })
-    .setIssuedAt()
-    .setExpirationTime('2h')
-    .encrypt(originalKey);
+  if (!process.env.NEXT_PUBLIC_BASE_KEY) {
+    console.error('Base key is not set');
+    return;
+  }
 
-  setCookie('user_data', jwt, 7);
+  const originalKey = base64ToUint8Array(process.env.NEXT_PUBLIC_BASE_KEY as string);
+
+  try {
+    const jwt = await new EncryptJWT(data)
+      .setProtectedHeader({ alg: 'dir', enc: 'A256GCM' })
+      .setIssuedAt()
+      .setExpirationTime('2h')
+      .encrypt(originalKey);
+
+    setCookie('user_data', jwt, 7);
+  } catch (error) {
+    console.error('Encryption failed:', error);
+  }
 }
 
 export async function decryptCookie() {
+  if (typeof document === 'undefined') return null; // Prevent server-side execution
+
   const encryptedCookie = getCookie('user_data');
   if (!encryptedCookie) {
     console.error('Cookie not found');
     return null;
   }
+
+  if (!process.env.NEXT_PUBLIC_BASE_KEY) {
+    console.error('Base key is not set');
+    return null;
+  }
+
   const originalKey = base64ToUint8Array(process.env.NEXT_PUBLIC_BASE_KEY as string);
 
   try {
@@ -105,6 +121,8 @@ export async function decryptCookie() {
 }
 
 export function getCookie(name: string): string | null {
+  if (typeof document === 'undefined') return null; // Prevent server-side execution
+
   const value = `; ${document.cookie}`;
   const parts = value.split(`; ${name}=`);
   if (parts.length === 2) return parts.pop()?.split(';').shift() || null;

@@ -1,6 +1,5 @@
 'use client';
-import { useState } from 'react';
-
+import { useState, useCallback } from 'react';
 import { zodResolver } from '@hookform/resolvers/zod';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
@@ -20,7 +19,6 @@ import OTPForm from './OtpForm';
 
 export default function SignUpForm() {
   const router = useRouter();
-
   const [showOTPPage, setShowOTPPage] = useState<boolean>(false);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [userData, setUserData] = useState<{
@@ -40,7 +38,7 @@ export default function SignUpForm() {
     },
   });
 
-  async function sendOTP(values: z.infer<typeof signUpSchema>) {
+  const sendOTP = useCallback(async (values: z.infer<typeof signUpSchema>) => {
     setIsLoading(true);
     try {
       const res = await fetch('/api/auth/send-otp', {
@@ -55,7 +53,6 @@ export default function SignUpForm() {
       });
 
       const data = await res.json();
-      console.log('data =', data);
       if (res.ok) {
         toast.success(data.message);
         setUserData({
@@ -69,91 +66,76 @@ export default function SignUpForm() {
         toast.error(data.message);
       }
     } catch (error) {
-      console.log(error);
+      console.error(error);
+      toast.error('Failed to send OTP');
     } finally {
       setIsLoading(false);
     }
-  }
+  }, []);
 
-  async function handleVerifyOTP(values: z.infer<typeof optSchema>) {
-    setIsLoading(true);
-    const otp = values.otp;
-    if (!userData) {
-      return toast.error('Please fill in all fields.');
-    }
-    console.log('check the userdata =', userData, otp);
-    const { firstName, lastName, email, password } = await verifySchema.parseAsync({
-      firstName: userData.firstName,
-      lastName: userData.lastName,
-      email: userData.email,
-      password: userData.password,
-      otp,
-    });
-    if (!values.otp) {
-      return toast.error('Please Enter 6 digit OTP');
-    }
+  const handleVerifyOTP = useCallback(
+    async (values: z.infer<typeof optSchema>) => {
+      if (!userData) {
+        toast.error('Please fill in all fields.');
+        return;
+      }
 
-    const body = {
-      firstName,
-      lastName,
-      email,
-      password,
-      otp,
-    };
+      setIsLoading(true);
+      try {
+        const validatedData = await verifySchema.parseAsync({
+          ...userData,
+          otp: values.otp,
+        });
 
-    if (!email || !password) {
-      return toast.error('Account details are not saved.');
-    }
+        const res = await fetch('/api/auth/sign-up', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(validatedData),
+        });
 
+        const data = await res.json();
+
+        if (res.ok) {
+          toast.success(data.message);
+          setShowOTPPage(false);
+          router.push('/login');
+        } else {
+          toast.error(data.message);
+        }
+      } catch (error) {
+        console.error(error);
+        toast.error('Verification failed');
+      } finally {
+        setIsLoading(false);
+      }
+    },
+    [userData, router]
+  );
+
+  const handleGoogleSignIn = useCallback(async () => {
     try {
-      const res = await fetch('/api/auth/sign-up', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-
-        body: JSON.stringify(body),
-      });
-
-      const data = await res.json();
-
-      if (res.ok) {
-        toast.success(data.message);
-        setShowOTPPage(false);
-        router.push('/login');
+      const res = await signIn('google', { redirect: false });
+      if (!res?.error) {
+        toast.success('Signed In');
       } else {
-        toast.error(data.message);
+        toast.error('Something went wrong!');
       }
     } catch (error) {
-      console.log(error);
-    } finally {
-      setIsLoading(false);
+      console.error(error);
+      toast.error('Failed to sign in with Google');
     }
+  }, []);
+
+  if (showOTPPage) {
+    return (
+      <main className="flex h-screen w-screen items-center justify-center sm:p-0">
+        <OTPForm handleVerifyOTP={handleVerifyOTP} isLoading={isLoading} />
+      </main>
+    );
   }
 
-  return (
-    <main className="flex h-screen w-screen items-center justify-center sm:p-0">
-      {showOTPPage ? (
-        <OTPForm handleVerifyOTP={handleVerifyOTP} isLoading={isLoading} />
-      ) : (
-        <FormComponent form={form} isLoading={isLoading} sendOTP={sendOTP} />
-      )}
-    </main>
-  );
-}
-
-interface FormProps {
-  form: UseFormReturn<z.infer<typeof signUpSchema>>;
-  isLoading: boolean;
-  sendOTP: (values: z.infer<typeof signUpSchema>) => void;
-}
-
-function FormComponent({ form, isLoading, sendOTP }: FormProps) {
-  const isFormEmpty =
-    form.watch('email') === '' &&
-    form.watch('firstName') === '' &&
-    form.watch('lastName') === '' &&
-    form.watch('password') === '';
   return (
     <main className="relative flex h-screen w-screen flex-col items-center justify-center px-6">
       <Link
@@ -167,52 +149,20 @@ function FormComponent({ form, isLoading, sendOTP }: FormProps) {
       <div className="lg:p-8">
         <div className="mx-auto flex w-full flex-col justify-center space-y-6 sm:w-[350px]">
           <div className="flex flex-col space-y-2 text-center">
-            {/* <Icons.logo className="mx-auto h-6 w-6" /> */}
             <h1 className="text-2xl font-semibold tracking-tight">Create an account</h1>
             <p className="text-sm text-muted-foreground">Enter your email below to create your account</p>
           </div>
+
           <Form {...form}>
-            <form onSubmit={form.handleSubmit(sendOTP)}>
-              <div className="flex flex-col gap-2 py-2 pb-6">
-                <div className="flex flex-col gap-2 items-start">
-                  <div className="flex items-center gap-2 w-full">
-                    <FormField
-                      control={form.control}
-                      name="firstName"
-                      disabled={isLoading}
-                      render={({ field }) => (
-                        <FormItem className="w-full">
-                          <FormControl>
-                            <Input placeholder="First Name" {...field} />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                    {/* <span className="text-muted-foreground">-</span> */}
-                    <FormField
-                      control={form.control}
-                      name="lastName"
-                      disabled={isLoading}
-                      render={({ field }) => (
-                        <FormItem className="w-full">
-                          <FormControl>
-                            <Input placeholder="Last Name" {...field} />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                  </div>
-                </div>
+            <form onSubmit={form.handleSubmit(sendOTP)} className="space-y-4">
+              <div className="grid grid-cols-2 gap-4">
                 <FormField
                   control={form.control}
-                  name="email"
-                  disabled={isLoading}
+                  name="firstName"
                   render={({ field }) => (
                     <FormItem>
                       <FormControl>
-                        <Input placeholder="Email" {...field} />
+                        <Input placeholder="First Name" {...field} disabled={isLoading} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -220,12 +170,11 @@ function FormComponent({ form, isLoading, sendOTP }: FormProps) {
                 />
                 <FormField
                   control={form.control}
-                  name="password"
-                  disabled={isLoading}
+                  name="lastName"
                   render={({ field }) => (
                     <FormItem>
                       <FormControl>
-                        <Input type="password" placeholder="Password" {...field} />
+                        <Input placeholder="Last Name" {...field} disabled={isLoading} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -233,42 +182,56 @@ function FormComponent({ form, isLoading, sendOTP }: FormProps) {
                 />
               </div>
 
-              <div className="flex flex-col gap-2 items-center justify-center">
-                <div className={cn('w-full select-none', { 'cursor-not-allowed': isFormEmpty })}>
-                  <Button
-                    className={cn('w-full', { 'pointer-events-none opacity-50': isFormEmpty })}
-                    type="submit"
-                    disabled={isLoading}
-                  >
-                    {isLoading && <Icons.spinner className="mr-2 h-4 w-4 animate-spin" />}
-                    Sign-Up with Email
-                  </Button>
-                </div>
+              <FormField
+                control={form.control}
+                name="email"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormControl>
+                      <Input placeholder="Email" {...field} disabled={isLoading} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
 
-                <div className="flex items-center justify-center w-full my-2">
-                  <div className="h-px flex-1 bg-gray-700"></div>
-                  <span className="px-3 text-sm text-gray-500">OR</span>
-                  <div className="h-px flex-1 bg-gray-700"></div>
-                </div>
-                <Button
-                  className="w-full"
-                  variant={'outline'}
-                  type="button"
-                  disabled={isLoading}
-                  onClick={async () => {
-                    const res = await signIn('google', { redirect: false });
+              <FormField
+                control={form.control}
+                name="password"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormControl>
+                      <Input type="password" placeholder="Password" {...field} disabled={isLoading} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
 
-                    if (!res?.error) {
-                      toast.success('Signed In');
-                    } else {
-                      toast.error('oops something went wrong..!');
-                    }
-                  }}
-                >
-                  {/* {isLoading && <Icons.spinner className="mr-2 h-4 w-4 animate-spin" />} */}
-                  <Icons.google className="h-12 w-12" /> Sign up with Google
-                </Button>
+              <Button className="w-full" type="submit" disabled={isLoading || !form.formState.isDirty}>
+                {isLoading && <Icons.spinner className="mr-2 h-4 w-4 animate-spin" />}
+                Sign Up with Email
+              </Button>
+
+              <div className="relative">
+                <div className="absolute inset-0 flex items-center">
+                  <span className="w-full border-t" />
+                </div>
+                <div className="relative flex justify-center text-xs uppercase">
+                  <span className="bg-background px-2 text-muted-foreground">Or</span>
+                </div>
               </div>
+
+              <Button
+                type="button"
+                variant="outline"
+                className="w-full"
+                onClick={handleGoogleSignIn}
+                disabled={isLoading}
+              >
+                <Icons.google className="mr-2 h-4 w-4" />
+                Sign up with Google
+              </Button>
             </form>
           </Form>
 
